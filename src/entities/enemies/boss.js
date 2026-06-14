@@ -8,6 +8,11 @@ export class Boss extends BaseEnemy {
     this._phase = 1;
   }
 
+  // Bosses are immune to freeze
+  freeze(_duration) {}
+
+  get isFrozen() { return false; }
+
   update(dt, camera) {
     // Phase 2 at 50% HP: speed boost
     if (this.hp <= this.maxHp * 0.5 && this._phase === 1) {

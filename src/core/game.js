@@ -44,6 +44,8 @@ export class Game {
     this._moveJoystick = null;
     this._laserJoystick = null;
     this._arcJoystick = null;
+    this._freezeButton = null;
+    this._freezeCharges = 1;
     this._spawner = null;
     this._combat = null;
     this._keys = {};
@@ -94,6 +96,12 @@ export class Game {
       this._laserJoystick.reposition(W - pad - r * 3 - 20, H - pad - r);
       this._arcJoystick.reposition(W - pad - r, H - pad - r);
     }
+    // Freeze button centered above the two right joysticks
+    const btnR = 28;
+    const btnX = (W - pad - r * 3 - 20 + W - pad - r) / 2;
+    const btnY = H - pad - r - r - 24 - btnR;
+    this._freezeButton = { x: btnX, y: btnY, radius: btnR };
+
     if (!this._spawner) {
       this._spawner = new Spawner(this._camera, W, H);
     } else {
@@ -193,6 +201,14 @@ export class Game {
       this._upgradeScreen.handleTap(touch.clientX, touch.clientY, W, H);
       return;
     }
+    // Freeze button (only during active play)
+    if (this._scene === SCENE.PLAYING && this._freezeButton) {
+      const d = Math.hypot(touch.clientX - this._freezeButton.x, touch.clientY - this._freezeButton.y);
+      if (d <= this._freezeButton.radius * 1.5 && this._freezeCharges > 0) {
+        this._activateFreeze();
+        return;
+      }
+    }
     // Game joysticks — activate the one closest to the touch point
     const joysticks = [this._moveJoystick, this._laserJoystick, this._arcJoystick];
     let best = null, bestDist = Infinity;
@@ -223,6 +239,7 @@ export class Game {
 
   _startLevelIntro() {
     this._scene = SCENE.LEVEL_INTRO;
+    this._freezeCharges = 1;
     const config = getLevelConfig(this._levelNumber - 1);
     this._levelIntro.show(this._levelNumber, config.isBoss, () => this._startLevel(), (n) => {
       this._levelNumber = n;
@@ -272,13 +289,22 @@ export class Game {
     this._startLevelIntro();
   }
 
+  _activateFreeze() {
+    if (this._freezeCharges <= 0) return;
+    this._freezeCharges--;
+    for (const enemy of this._enemies) {
+      if (enemy.active) enemy.freeze(5);
+    }
+  }
+
   _onPlayerDied(result) {
     if (result === 'game_over') {
       this._sound.play('gameOver');
       this._scene = SCENE.GAME_OVER;
       this._gameOver.show(this._totalScore, () => this._restartGame());
     } else {
-      // Lost a life — retry the level after brief pause
+      // Lost a life — earn 1 freeze charge, retry the level after brief pause
+      this._freezeCharges++;
       this._scene = SCENE.DIED;
       setTimeout(() => this._startLevel(), 1500);
     }
@@ -301,6 +327,35 @@ export class Game {
       upgrades: this._upgrades,
       totalScore: this._totalScore,
     });
+  }
+
+  _drawFreezeButton(ctx) {
+    const btn = this._freezeButton;
+    if (!btn) return;
+    const available = this._freezeCharges > 0;
+    ctx.save();
+    ctx.globalAlpha = available ? 0.85 : 0.35;
+    ctx.fillStyle = available ? '#1565c0' : '#333';
+    ctx.beginPath();
+    ctx.arc(btn.x, btn.y, btn.radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = available ? '#90caf9' : '#666';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.globalAlpha = available ? 1 : 0.4;
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `${btn.radius}px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('❄', btn.x, btn.y + 1);
+    if (this._freezeCharges > 1) {
+      ctx.font = 'bold 11px monospace';
+      ctx.fillStyle = '#fff';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'top';
+      ctx.fillText(`×${this._freezeCharges}`, btn.x + btn.radius, btn.y - btn.radius + 2);
+    }
+    ctx.restore();
   }
 
   _loop(now) {
@@ -391,11 +446,12 @@ export class Game {
         score: this._score,
         hitFlashTimer: this._hitFlashTimer,
       });
-      // Draw joysticks on top
+      // Draw joysticks and freeze button on top
       const ctx = renderer.ctx;
       this._moveJoystick.draw(ctx);
       this._laserJoystick.draw(ctx);
       this._arcJoystick.draw(ctx);
+      this._drawFreezeButton(ctx);
       return;
     }
 

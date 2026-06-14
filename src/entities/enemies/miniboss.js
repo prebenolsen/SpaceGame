@@ -6,4 +6,8 @@ export class Miniboss extends BaseEnemy {
     this.type = 'miniboss';
     this.color = '#ab47bc';
   }
+
+  _getFreezeSpeedMult() {
+    return 0.5;
+  }
 }

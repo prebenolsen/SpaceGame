@@ -26,6 +26,20 @@ function drawEnemy(ctx, enemy, sx, sy) {
     case 'boss': drawBoss(ctx, enemy, flash); break;
   }
 
+  if (enemy.isFrozen) {
+    ctx.globalAlpha = 0.45;
+    ctx.fillStyle = '#90caf9';
+    ctx.beginPath();
+    ctx.arc(0, 0, enemy.radius + 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `${Math.max(10, Math.min(enemy.radius * 0.9, 18))}px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('❄', 0, 0);
+  }
+
   drawHpBar(ctx, enemy);
   ctx.restore();
 }

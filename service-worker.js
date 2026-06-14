@@ -1,4 +1,4 @@
-const CACHE_NAME = 'space-survivor-v1';
+const CACHE_NAME = 'space-survivor-v2';
 const IS_DEV = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
 
 const ASSETS = [
@@ -42,6 +42,8 @@ const ASSETS = [
   './src/utils/math.js',
   './src/utils/pool.js',
   './src/utils/storage.js',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
 ];
 
 self.addEventListener('install', (event) => {
