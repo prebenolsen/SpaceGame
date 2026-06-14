@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<body>
+<canvas id="c"></canvas>
+<script>
+function makeIcon(size) {
+  const canvas = document.getElementById('c');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  ctx.fillStyle = '#0a0a2e';
+  ctx.fillRect(0, 0, size, size);
+
+  // Stars
+  ctx.fillStyle = '#ffffff';
+  const stars = [[0.2,0.15],[0.8,0.2],[0.1,0.7],[0.85,0.75],[0.5,0.1],[0.3,0.85],[0.7,0.5]];
+  stars.forEach(([x,y]) => {
+    ctx.beginPath();
+    ctx.arc(x*size, y*size, size*0.015, 0, Math.PI*2);
+    ctx.fill();
+  });
+
+  // Ship
+  const cx = size/2, cy = size/2;
+  ctx.fillStyle = '#90caf9';
+  ctx.beginPath();
+  ctx.moveTo(cx, cy - size*0.25);
+  ctx.lineTo(cx + size*0.18, cy + size*0.18);
+  ctx.lineTo(cx, cy + size*0.08);
+  ctx.lineTo(cx - size*0.18, cy + size*0.18);
+  ctx.closePath();
+  ctx.fill();
+
+  // Cockpit
+  ctx.fillStyle = '#e3f2fd';
+  ctx.beginPath();
+  ctx.ellipse(cx, cy - size*0.04, size*0.055, size*0.09, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // Glow
+  const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, size*0.35);
+  grd.addColorStop(0, 'rgba(100,180,255,0.3)');
+  grd.addColorStop(1, 'rgba(100,180,255,0)');
+  ctx.fillStyle = grd;
+  ctx.beginPath();
+  ctx.arc(cx, cy, size*0.35, 0, Math.PI*2);
+  ctx.fill();
+
+  return canvas.toDataURL('image/png');
+}
+
+window.onload = () => {
+  const a192 = document.createElement('a');
+  a192.href = makeIcon(192);
+  a192.download = 'icon-192.png';
+  a192.textContent = 'Download 192x192';
+  document.body.appendChild(a192);
+  document.body.appendChild(document.createElement('br'));
+
+  const a512 = document.createElement('a');
+  a512.href = makeIcon(512);
+  a512.download = 'icon-512.png';
+  a512.textContent = 'Download 512x512';
+  document.body.appendChild(a512);
+};
+</script>
+</body>
+</html>
