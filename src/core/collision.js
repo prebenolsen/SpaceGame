@@ -21,9 +21,10 @@ export function checkLaserHits(laser, enemies) {
 }
 
 function laserHitsEnemy(laser, enemy) {
-  // Laser is a line segment from (ox,oy) to (tx,ty) in world space
-  // Use circle-vs-segment test
-  return distPointToSegment(enemy.wx, enemy.wy, laser.ox, laser.oy, laser.tx, laser.ty) < enemy.radius;
+  // Laser is a line segment from (ox,oy) to (tx,ty) in world space.
+  // Include the beam's half-width so the hitbox matches the drawn lineWidth.
+  return distPointToSegment(enemy.wx, enemy.wy, laser.ox, laser.oy, laser.tx, laser.ty)
+    < enemy.radius + laser.width / 2;
 }
 
 function distPointToSegment(px, py, ax, ay, bx, by) {
