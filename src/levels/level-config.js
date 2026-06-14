@@ -98,7 +98,7 @@ export const LEVELS = [
     waves: [
       ...once('boss', 3, { healthMult: 2.5, speedMult: 1.5 }),
       ...wave('drone',  BOSS_FILL, { startTime: 10, interval: 8,  healthMult: 4.0, speedMult: 1.5 }),
-      ...wave('rusher', BOSS_FILL, { startTime: 00, interval: 12, healthMult: 2.5, speedMult: 1.5 }),
+      ...wave('rusher', BOSS_FILL, { startTime: 0,  interval: 12, healthMult: 2.5, speedMult: 1.5 }),
     ],
   },
 
@@ -123,7 +123,7 @@ export const LEVELS = [
       ...wave('drone',    75, { startTime: 0,  interval: 2,  healthMult: 8.0,  speedMult: 2.0 }),
       ...wave('rusher',   75, { startTime: 4,  interval: 4,  healthMult: 3.5,  speedMult: 2.0 }),
       ...wave('tank',     75, { startTime: 12, interval: 14, healthMult: 3.5,  speedMult: 2.0 }),
-      ...wave('miniboss', 75, { startTime: 00, interval: 30, healthMult: 2.0,  speedMult: 2.0 }),
+      ...wave('miniboss', 75, { startTime: 0,  interval: 30, healthMult: 2.0,  speedMult: 2.0 }),
     ],
   },
 
