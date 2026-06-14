@@ -1,22 +1,22 @@
 export class HUD {
   constructor() {}
 
-  draw(ctx, screenW, screenH, livesSystem, levelTimer, levelNumber, score) {
+  draw(ctx, screenW, screenH, livesSystem, levelTimer, levelNumber, score, safeTop = 0) {
     // HP bar (top left)
-    this._drawHpBar(ctx, livesSystem);
+    this._drawHpBar(ctx, livesSystem, safeTop);
 
     // Lives (top left, below HP)
-    this._drawLives(ctx, livesSystem);
+    this._drawLives(ctx, livesSystem, safeTop);
 
     // Level + timer (top center)
-    this._drawTimer(ctx, screenW, levelTimer, levelNumber);
+    this._drawTimer(ctx, screenW, levelTimer, levelNumber, safeTop);
 
     // Score (top right)
-    this._drawScore(ctx, screenW, score);
+    this._drawScore(ctx, screenW, score, safeTop);
   }
 
-  _drawHpBar(ctx, lives) {
-    const x = 16, y = 16, w = 120, h = 12;
+  _drawHpBar(ctx, lives, safeTop = 0) {
+    const x = 16, y = 16 + safeTop, w = 120, h = 12;
     const hitsMax = lives.hitsPerLife;
     const hitsLeft = hitsMax - lives.hits;
     const fraction = hitsLeft / hitsMax;
@@ -41,7 +41,7 @@ export class HUD {
     ctx.restore();
   }
 
-  _drawLives(ctx, lives) {
+  _drawLives(ctx, lives, safeTop = 0) {
     ctx.save();
     ctx.font = '13px monospace';
     ctx.fillStyle = '#fff';
@@ -49,30 +49,30 @@ export class HUD {
     for (let i = 0; i < lives.maxLives; i++) {
       hearts += i < lives.lives ? '♥ ' : '♡ ';
     }
-    ctx.fillText(hearts.trim(), 16, 46);
+    ctx.fillText(hearts.trim(), 16, 46 + safeTop);
     ctx.restore();
   }
 
-  _drawTimer(ctx, screenW, levelTimer, levelNumber) {
+  _drawTimer(ctx, screenW, levelTimer, levelNumber, safeTop = 0) {
     const remaining = levelTimer.remaining;
     const isBossTimer = remaining === Infinity;
     const label = isBossTimer ? 'BOSS' : `${Math.ceil(remaining)}s`;
     ctx.save();
     ctx.textAlign = 'center';
     ctx.fillStyle = 'rgba(0,0,0,0.4)';
-    ctx.fillRect(screenW / 2 - 60, 10, 120, 30);
+    ctx.fillRect(screenW / 2 - 60, 10 + safeTop, 120, 30);
     ctx.fillStyle = isBossTimer ? '#f44336' : (remaining <= 10 ? '#ff5252' : '#fff');
     ctx.font = 'bold 18px monospace';
-    ctx.fillText(`LVL ${levelNumber}  ${label}`, screenW / 2, 30);
+    ctx.fillText(`LVL ${levelNumber}  ${label}`, screenW / 2, 30 + safeTop);
     ctx.restore();
   }
 
-  _drawScore(ctx, screenW, score) {
+  _drawScore(ctx, screenW, score, safeTop = 0) {
     ctx.save();
     ctx.textAlign = 'right';
     ctx.font = '13px monospace';
     ctx.fillStyle = '#ffd54f';
-    ctx.fillText(`${score}`, screenW - 16, 28);
+    ctx.fillText(`${score}`, screenW - 16, 28 + safeTop);
     ctx.restore();
   }
 

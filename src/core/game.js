@@ -52,6 +52,8 @@ export class Game {
 
     this._lastTime = 0;
     this._raf = null;
+    this._safeTop = 0;
+    this._safeBottom = 0;
   }
 
   init() {
@@ -77,9 +79,16 @@ export class Game {
     this._raf = requestAnimationFrame(this._loop.bind(this));
   }
 
+  _getSafeInset(side) {
+    const val = getComputedStyle(document.documentElement).getPropertyValue(`--sai-${side}`).trim();
+    return parseInt(val) || 0;
+  }
+
   _resize() {
     const W = window.innerWidth;
     const H = window.innerHeight;
+    this._safeTop = this._getSafeInset('top');
+    this._safeBottom = this._getSafeInset('bottom');
     this._renderer.resize(W, H);
     this._layoutJoysticks(W, H);
   }
@@ -87,19 +96,20 @@ export class Game {
   _layoutJoysticks(W, H) {
     const pad = 60;
     const r = 55;
+    const bottomY = H - pad - r - this._safeBottom;
     if (!this._moveJoystick) {
-      this._moveJoystick = new Joystick(pad + r, H - pad - r, r);
-      this._laserJoystick = new Joystick(W - pad - r * 3 - 20, H - pad - r, r);
-      this._arcJoystick = new Joystick(W - pad - r, H - pad - r, r);
+      this._moveJoystick = new Joystick(pad + r, bottomY, r);
+      this._laserJoystick = new Joystick(W - pad - r * 3 - 20, bottomY, r);
+      this._arcJoystick = new Joystick(W - pad - r, bottomY, r);
     } else {
-      this._moveJoystick.reposition(pad + r, H - pad - r);
-      this._laserJoystick.reposition(W - pad - r * 3 - 20, H - pad - r);
-      this._arcJoystick.reposition(W - pad - r, H - pad - r);
+      this._moveJoystick.reposition(pad + r, bottomY);
+      this._laserJoystick.reposition(W - pad - r * 3 - 20, bottomY);
+      this._arcJoystick.reposition(W - pad - r, bottomY);
     }
     // Freeze button centered above the two right joysticks
     const btnR = 28;
     const btnX = (W - pad - r * 3 - 20 + W - pad - r) / 2;
-    const btnY = H - pad - r - r - 24 - btnR;
+    const btnY = bottomY - r - 24 - btnR;
     this._freezeButton = { x: btnX, y: btnY, radius: btnR };
 
     if (!this._spawner) {
@@ -456,6 +466,7 @@ export class Game {
         levelNumber: this._levelNumber,
         score: this._score,
         hitFlashTimer: this._hitFlashTimer,
+        safeTop: this._safeTop,
       });
       renderer.drawUI((ctx) => {
         this._moveJoystick.draw(ctx);
@@ -478,6 +489,7 @@ export class Game {
         levelNumber: this._levelNumber,
         score: this._score,
         hitFlashTimer: 0,
+        safeTop: this._safeTop,
       });
     } else {
       // Black background for intro

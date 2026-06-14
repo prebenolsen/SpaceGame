@@ -46,7 +46,7 @@ export class Renderer {
 
   drawGame(state) {
     const { ctx, _screenW: W, _screenH: H } = this;
-    const { camera, enemies, player, livesSystem, hud, levelTimer, levelNumber, score, hitFlashTimer } = state;
+    const { camera, enemies, player, livesSystem, hud, levelTimer, levelNumber, score, hitFlashTimer, safeTop = 0 } = state;
 
     // Game world — drawn with zoom-out so player sees more of the area
     ctx.save();
@@ -63,7 +63,7 @@ export class Renderer {
     if (hitFlashTimer > 0) {
       hud.drawHitFlash(ctx, W, H);
     }
-    hud.draw(ctx, W, H, livesSystem, levelTimer, levelNumber, score);
+    hud.draw(ctx, W, H, livesSystem, levelTimer, levelNumber, score, safeTop);
     ctx.restore();
   }
 
