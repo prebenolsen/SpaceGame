@@ -251,7 +251,7 @@ export class Game {
   }
 
   _onLevelClearContinue() {
-    const choices = pickUpgradeChoices(this._upgrades);
+    const choices = pickUpgradeChoices(this._upgrades, this._levelNumber);
     if (choices.length === 0) {
       this._advanceLevel();
       return;

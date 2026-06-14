@@ -9,17 +9,10 @@ export const UPGRADE_DEFS = [
     description: '+20% movement speed',
     maxRank: 6,
     baseCost: 15,
+    unlockWhen: (_, level) => level >= 5,
   },
 
   // ── Laser ──────────────────────────────────────────────────────────────────
-  {
-    id: 'laserDamage',
-    category: 'Laser',
-    label: 'Laser Damage',
-    description: '+25 damage per shot',
-    maxRank: 10,
-    baseCost: 10,
-  },
   {
     id: 'laserFireRate',
     category: 'Laser',
@@ -35,17 +28,19 @@ export const UPGRADE_DEFS = [
     description: 'Doubles beam width',
     maxRank: 4,
     baseCost: 10,
+    unlockWhen: (upgrades) => (upgrades.laserFireRate ?? 0) >= 8,
+  },
+  {
+    id: 'laserDamage',
+    category: 'Laser',
+    label: 'Laser Damage',
+    description: '+25 damage per shot',
+    maxRank: 10,
+    baseCost: 10,
+    unlockWhen: (upgrades) => (upgrades.laserFireRate ?? 0) >= 8,
   },
 
   // ── AOE ────────────────────────────────────────────────────────────────────
-  {
-    id: 'arcDamage',
-    category: 'AOE',
-    label: 'AOE Damage',
-    description: '+10 damage per pulse',
-    maxRank: 10,
-    baseCost: 10,
-  },
   {
     id: 'arcFireRate',
     category: 'AOE',
@@ -62,23 +57,46 @@ export const UPGRADE_DEFS = [
     maxRank: 8,
     baseCost: 10,
   },
+  {
+    id: 'arcCone',
+    category: 'AOE',
+    label: 'AOE Cone',
+    description: 'Doubles cone width',
+    maxRank: 3,
+    baseCost: 10,
+    unlockWhen: (upgrades) => (upgrades.arcRange ?? 0) >= 8,
+  },
+  {
+    id: 'arcDamage',
+    category: 'AOE',
+    label: 'AOE Damage',
+    description: '+10 damage per pulse',
+    maxRank: 10,
+    baseCost: 10,
+    unlockWhen: (upgrades) => (upgrades.arcFireRate ?? 0) >= 8,
+  },
 ];
 
 export function getPlayerStats(upgrades) {
   return {
-    laserDamage:   50 + upgrades.laserDamage * 25,
-    laserInterval: 1 / (1 + upgrades.laserFireRate * 0.5),
+    laserDamage:   50 + (upgrades.laserDamage ?? 0) * 25,
+    laserInterval: 1 / (1 + (upgrades.laserFireRate ?? 0) * 0.5),
     laserWidth:    3 * Math.pow(2, upgrades.laserWidth ?? 0),
-    arcDamage:     20 + upgrades.arcDamage * 10,
-    arcInterval:   1 / (1 + upgrades.arcFireRate * 0.5),
-    arcRange:      150 + upgrades.arcRange * 60,
-    moveSpeed:     200 * (1 + upgrades.moveSpeed * 0.2),
+    arcDamage:     20 + (upgrades.arcDamage ?? 0) * 10,
+    arcInterval:   1 / (1 + (upgrades.arcFireRate ?? 0) * 0.5),
+    arcRange:      150 + (upgrades.arcRange ?? 0) * 60,
+    arcHalfAngle:  Math.min(Math.PI, (Math.PI / 5) * Math.pow(2, upgrades.arcCone ?? 0)),
+    moveSpeed:     200 * (1 + (upgrades.moveSpeed ?? 0) * 0.2),
   };
 }
 
-// Pick 3 random distinct upgrades that are not maxed out
-export function pickUpgradeChoices(upgrades) {
-  const available = UPGRADE_DEFS.filter((d) => (upgrades[d.id] ?? 0) < d.maxRank);
+// Pick up to 3 random distinct upgrades that are unlocked and not yet maxed
+export function pickUpgradeChoices(upgrades, level) {
+  const available = UPGRADE_DEFS.filter((d) => {
+    if ((upgrades[d.id] ?? 0) >= d.maxRank) return false;
+    if (d.unlockWhen && !d.unlockWhen(upgrades, level)) return false;
+    return true;
+  });
   const shuffled = available.sort(() => Math.random() - 0.5);
   return shuffled.slice(0, Math.min(3, shuffled.length));
 }

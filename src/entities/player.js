@@ -45,7 +45,7 @@ export class Player {
       this.arcAim.ox        = px;
       this.arcAim.oy        = py;
       this.arcAim.range     = this.stats.arcRange;
-      this.arcAim.halfAngle = this.arc.halfAngle;
+      this.arcAim.halfAngle = this.stats.arcHalfAngle;
     }
 
     // Fire laser if joystick active and cooldown ready
@@ -55,7 +55,7 @@ export class Player {
 
     // Fire arc if joystick active and cooldown ready
     if (arcJoystick.active && this._arcCooldown.ready()) {
-      this.arc.fire(px, py, arcJoystick.angle, this.stats.arcRange, this.stats.arcDamage);
+      this.arc.fire(px, py, arcJoystick.angle, this.stats.arcRange, this.stats.arcDamage, this.stats.arcHalfAngle);
     }
   }
 }

@@ -11,13 +11,14 @@ export class Arc {
     this.DURATION = 0.15;
   }
 
-  fire(ox, oy, angle, range, damage) {
+  fire(ox, oy, angle, range, damage, halfAngle) {
     this.active = true;
     this.ox = ox;
     this.oy = oy;
     this.angle = angle;
     this.range = range;
     this.damage = damage;
+    this.halfAngle = halfAngle;
     this._life = this.DURATION;
   }
 
