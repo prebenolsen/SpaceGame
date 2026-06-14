@@ -42,16 +42,16 @@ Each entry in `LEVELS` has:
 
 | Level | Duration | isBoss | Enemy mix |
 |-------|----------|--------|-----------|
-| 1 | 15 s | — | Drones (interval 8 s) |
-| 2 | 20 s | — | Drones (interval 5 s) |
-| 3 | 30 s | — | Drones + rushers (1.15× speed) |
-| 4 | 30 s | — | Drones + rushers (1.2× speed) + minibosses |
-| 5 | ∞ | Boss | Boss (1.30× speed) + drone support from t=15 |
-| 6 | 60 s | — | Drones (1.2× HP) + rushers |
-| 7 | 60 s | — | Drones (1.5× HP, 1.45× speed) + tanks (1.45× speed) |
-| 8 | 75 s | — | Drones (1.5× HP, 1.2× speed) + rushers + tanks |
-| 9 | 75 s | — | Drones (1.5× HP, 1.6× speed) + rushers (1.6×) + minibosses (1.2× HP, 1.6×) |
-| 10 | ∞ | Boss | Boss (2× HP) + dense drone support from t=12 |
+| 1 | 15 s | — | Drones only (interval 8 s, 1× stats) |
+| 2 | 30 s | — | Drones (interval 4 s, 1.15× HP, 1.25× speed) + rushers from t=10 (interval 15 s) |
+| 3 | 45 s | — | Drones (interval 3 s, 1.3× HP, 1.5× speed) + rushers (interval 8 s) + 1 miniboss at t=20 |
+| 4 | 60 s | — | Drones (interval 2.5 s, 1.4× HP, 1.7×) + rushers (interval 5.5 s, 1.1× HP) + tanks (interval 20 s) |
+| 5 | ∞ | Boss | Boss (1.5× HP, 1.5× speed) + drone/rusher support from t=10/20 |
+| 6 | 60 s | — | Drones (interval 2.5 s, 1.5× HP, 1.8×) + rushers (interval 5 s) + tanks (interval 18 s) |
+| 7 | 75 s | — | Drones (interval 2 s, 1.7× HP, 2.0×) + rushers (interval 4 s) + tanks (1.3× HP, interval 14 s) + minibosses (interval 30 s) |
+| 8 | 75 s | — | Drones (interval 1.8 s, 2.0× HP, 2.2×) + rushers (1.2× HP, interval 3.5 s) + tanks (1.6× HP, interval 12 s) + minibosses (1.5× HP, interval 22 s) |
+| 9 | 90 s | — | Drones (interval 1.5 s, 2.3× HP, 2.5×) + rushers (1.3× HP) + tanks (2.0× HP, interval 10 s) + minibosses (2.0× HP, interval 18 s) |
+| 10 | ∞ | Boss | Boss (3.5× HP, 1.8× speed) + dense drone + rusher support from t=5/8 (interval 6 s each) |
 
 ## Auto-scaling beyond level 10
 
