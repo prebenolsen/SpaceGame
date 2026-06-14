@@ -46,6 +46,7 @@ export class Game {
     this._arcJoystick = null;
     this._spawner = null;
     this._combat = null;
+    this._keys = {};
 
     this._lastTime = 0;
     this._raf = null;
@@ -158,12 +159,24 @@ export class Game {
       const fakeTouch = { identifier: 0, clientX: e.clientX, clientY: e.clientY };
       this._onTouchEnd(fakeTouch);
     });
+
+    // WASD + arrow key movement for desktop
+    const MOVE_KEYS = new Set(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowLeft','ArrowDown','ArrowRight']);
+    window.addEventListener('keydown', (e) => {
+      if (!MOVE_KEYS.has(e.code)) return;
+      this._keys[e.code] = true;
+      this._sound.resume();
+      e.preventDefault();
+    });
+    window.addEventListener('keyup', (e) => {
+      if (MOVE_KEYS.has(e.code)) this._keys[e.code] = false;
+    });
   }
 
   _onTouchStart(touch) {
     // Overlay tap handling
     if (this._scene === SCENE.LEVEL_INTRO) {
-      this._levelIntro.handleTouchStart();
+      this._levelIntro.handleTouchStart(touch.clientX, touch.clientY);
       return;
     }
     if (this._scene === SCENE.LEVEL_CLEAR) {
@@ -195,7 +208,7 @@ export class Game {
 
   _onTouchEnd(touch) {
     if (this._scene === SCENE.LEVEL_INTRO) {
-      this._levelIntro.handleTouchEnd();
+      this._levelIntro.handleTouchEnd(touch.clientX, touch.clientY);
       return;
     }
     this._moveJoystick.onTouchEnd(touch);
@@ -211,7 +224,10 @@ export class Game {
   _startLevelIntro() {
     this._scene = SCENE.LEVEL_INTRO;
     const config = getLevelConfig(this._levelNumber - 1);
-    this._levelIntro.show(this._levelNumber, config.isBoss, () => this._startLevel());
+    this._levelIntro.show(this._levelNumber, config.isBoss, () => this._startLevel(), (n) => {
+      this._levelNumber = n;
+      this._startLevelIntro();
+    });
   }
 
   _startLevel() {
@@ -298,13 +314,23 @@ export class Game {
   _update(dt) {
     if (this._scene !== SCENE.PLAYING) return;
 
-    // Move camera by joystick
+    // Move camera by joystick or WASD/arrow keys
     const stats = this._player.stats;
     if (this._moveJoystick.active) {
       this._camera.move(
         this._moveJoystick.dx * stats.moveSpeed * dt,
         this._moveJoystick.dy * stats.moveSpeed * dt
       );
+    } else {
+      let kx = 0, ky = 0;
+      if (this._keys['KeyW']     || this._keys['ArrowUp'])    ky -= 1;
+      if (this._keys['KeyS']     || this._keys['ArrowDown'])  ky += 1;
+      if (this._keys['KeyA']     || this._keys['ArrowLeft'])  kx -= 1;
+      if (this._keys['KeyD']     || this._keys['ArrowRight']) kx += 1;
+      if (kx !== 0 || ky !== 0) {
+        const len = Math.hypot(kx, ky);
+        this._camera.move((kx / len) * stats.moveSpeed * dt, (ky / len) * stats.moveSpeed * dt);
+      }
     }
 
     this._livesSystem.update(dt);
@@ -318,8 +344,8 @@ export class Game {
     // Remove dead enemies
     this._enemies = this._enemies.filter((e) => e.active);
 
-    // Boss-must-die: clear level when spawner is exhausted and no boss remains
-    if (this._bossLevel && this._spawner.isDone && !this._enemies.some((e) => e.type === 'boss')) {
+    // Boss-must-die: clear level as soon as the boss is dead
+    if (this._bossLevel && !this._enemies.some((e) => e.type === 'boss')) {
       this._onLevelClear();
       return;
     }
