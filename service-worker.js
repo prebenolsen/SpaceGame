@@ -1,4 +1,4 @@
-const CACHE_NAME = 'space-survivor-v2';
+const CACHE_NAME = 'space-survivor-v3';
 const IS_DEV = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
 
 const ASSETS = [

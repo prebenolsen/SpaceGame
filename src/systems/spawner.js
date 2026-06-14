@@ -3,7 +3,6 @@ import { Rusher } from '../entities/enemies/rusher.js';
 import { Tank } from '../entities/enemies/tank.js';
 import { Miniboss } from '../entities/enemies/miniboss.js';
 import { Boss } from '../entities/enemies/boss.js';
-import { randomRange } from '../utils/math.js';
 
 const FACTORY = {
   drone: (opts) => new Drone(opts),
@@ -13,11 +12,27 @@ const FACTORY = {
   boss: (opts) => new Boss(opts),
 };
 
+// North (270°) and South (90°) each get a 15° exclusion zone on both sides.
+// Allowed ranges: [0°,75°) + [105°,255°) + [285°,360°) = 300° total.
+function randomSpawnAngle() {
+  const r = Math.random() * 300;
+  let deg;
+  if (r < 75) {
+    deg = r;
+  } else if (r < 225) {
+    deg = r + 30; // skip south exclusion [75°,105°]
+  } else {
+    deg = r + 60; // skip south [75°-105°] and north [255°-285°]
+  }
+  return deg * (Math.PI / 180);
+}
+
 export class Spawner {
-  constructor(camera, screenW, screenH) {
+  constructor(camera, screenW, screenH, zoom = 1) {
     this.camera = camera;
     this.screenW = screenW;
     this.screenH = screenH;
+    this.zoom = zoom;
     this._waves = [];
     this._elapsed = 0;
   }
@@ -38,7 +53,6 @@ export class Spawner {
 
   update(dt, enemies) {
     this._elapsed += dt;
-    // Spawn anything whose time has come
     while (this._waves.length > 0 && this._waves[0].time <= this._elapsed) {
       const entry = this._waves.shift();
       const enemy = this._createEnemy(entry);
@@ -49,7 +63,7 @@ export class Spawner {
   _createEnemy(entry) {
     const factory = FACTORY[entry.type];
     if (!factory) return null;
-    const spawnPos = this._randomEdgePosition();
+    const spawnPos = this._randomCirclePosition();
     return factory({
       wx: spawnPos.x,
       wy: spawnPos.y,
@@ -58,19 +72,15 @@ export class Spawner {
     });
   }
 
-  // Spawn just outside screen edges in world space
-  _randomEdgePosition() {
-    const { camera, screenW, screenH } = this;
-    const margin = 80;
-    const edge = Math.floor(Math.random() * 4);
-    let sx, sy;
-    switch (edge) {
-      case 0: sx = randomRange(0, screenW); sy = -margin; break;          // top
-      case 1: sx = randomRange(0, screenW); sy = screenH + margin; break;  // bottom
-      case 2: sx = -margin; sy = randomRange(0, screenH); break;           // left
-      case 3: sx = screenW + margin; sy = randomRange(0, screenH); break;  // right
-    }
-    // Convert screen spawn position to world position
+  // Spawn on a circle around the screen center, avoiding 15° zones around
+  // north (top/270°) and south (bottom/90°) since the game is landscape.
+  _randomCirclePosition() {
+    const { camera, screenW, screenH, zoom } = this;
+    // Radius just outside the zoom-expanded visible area plus a small buffer
+    const R = Math.hypot(screenW, screenH) / (2 * zoom) + 80;
+    const angle = randomSpawnAngle();
+    const sx = screenW / 2 + Math.cos(angle) * R;
+    const sy = screenH / 2 + Math.sin(angle) * R;
     return camera.screenToWorld(sx, sy, screenW, screenH);
   }
 }

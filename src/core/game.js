@@ -13,7 +13,7 @@ import { LevelClearScreen } from '../ui/level-clear.js';
 import { UpgradeScreen } from '../ui/upgrade-screen.js';
 import { GameOverScreen } from '../ui/game-over.js';
 import { Joystick } from '../ui/joystick.js';
-import { Renderer } from '../rendering/renderer.js';
+import { Renderer, GAME_ZOOM } from '../rendering/renderer.js';
 import { SoundManager } from '../audio/sound-manager.js';
 import { saveGame, loadGame, defaultSave } from '../utils/storage.js';
 import { clamp } from '../utils/math.js';
@@ -103,7 +103,7 @@ export class Game {
     this._freezeButton = { x: btnX, y: btnY, radius: btnR };
 
     if (!this._spawner) {
-      this._spawner = new Spawner(this._camera, W, H);
+      this._spawner = new Spawner(this._camera, W, H, GAME_ZOOM);
     } else {
       this._spawner.screenW = W;
       this._spawner.screenH = H;
@@ -446,12 +446,12 @@ export class Game {
         score: this._score,
         hitFlashTimer: this._hitFlashTimer,
       });
-      // Draw joysticks and freeze button on top
-      const ctx = renderer.ctx;
-      this._moveJoystick.draw(ctx);
-      this._laserJoystick.draw(ctx);
-      this._arcJoystick.draw(ctx);
-      this._drawFreezeButton(ctx);
+      renderer.drawUI((ctx) => {
+        this._moveJoystick.draw(ctx);
+        this._laserJoystick.draw(ctx);
+        this._arcJoystick.draw(ctx);
+        this._drawFreezeButton(ctx);
+      });
       return;
     }
 
@@ -470,10 +470,10 @@ export class Game {
       });
     } else {
       // Black background for intro
-      const ctx = renderer.ctx;
-      ctx.fillStyle = '#05050f';
-      ctx.fillRect(0, 0, renderer.screenW, renderer.screenH);
-      // Still draw stars
+      renderer.drawUI((ctx, W, H) => {
+        ctx.fillStyle = '#05050f';
+        ctx.fillRect(0, 0, W, H);
+      });
     }
 
     switch (this._scene) {

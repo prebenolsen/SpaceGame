@@ -3,7 +3,7 @@ export function drawEnemies(ctx, enemies, camera, screenW, screenH) {
     if (!enemy.active) continue;
     const screen = camera.worldToScreen(enemy.wx, enemy.wy, screenW, screenH);
     // Only draw if roughly on screen (with margin)
-    const margin = enemy.radius + 20;
+    const margin = enemy.radius + 150;
     if (
       screen.x < -margin || screen.x > screenW + margin ||
       screen.y < -margin || screen.y > screenH + margin
