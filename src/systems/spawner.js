@@ -75,9 +75,9 @@ export class Spawner {
   // Spawn on a circle around the screen center, avoiding 15° zones around
   // north (top/270°) and south (bottom/90°) since the game is landscape.
   _randomCirclePosition() {
-    const { camera, screenW, screenH, zoom } = this;
-    // Radius just outside the zoom-expanded visible area plus a small buffer
-    const R = Math.hypot(screenW, screenH) / (2 * zoom) + 80;
+    const { camera, screenW, screenH } = this;
+    // Radius just outside the visible area (screen half-diagonal + buffer)
+    const R = Math.hypot(screenW, screenH) / 2 + 80;
     const angle = randomSpawnAngle();
     const sx = screenW / 2 + Math.cos(angle) * R;
     const sy = screenH / 2 + Math.sin(angle) * R;

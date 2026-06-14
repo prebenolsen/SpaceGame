@@ -28,7 +28,7 @@ export class UpgradeScreen {
       }
     }
   }
-
+  
   _getCardRects(screenW, screenH) {
     const count = this._choices.length;
     if (count === 0) return [];
