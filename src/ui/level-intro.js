@@ -2,17 +2,22 @@ export class LevelIntroScreen {
   constructor() {
     this._onContinue = null;
     this._onSelectLevel = null;
+    this._onReset = null;
     this._touchStart = null;
     this._levelButtons = [];
     this._continueRect = null;
+    this._resetRect = null;
+    this._resetConfirm = false;
   }
 
-  show(levelNumber, isBoss, onContinue, onSelectLevel = null) {
+  show(levelNumber, isBoss, onContinue, onSelectLevel = null, onReset = null) {
     this._levelNumber = levelNumber;
     this._isBoss = isBoss;
     this._onContinue = onContinue;
     this._onSelectLevel = onSelectLevel;
+    this._onReset = onReset;
     this._touchStart = null;
+    this._resetConfirm = false;
   }
 
   handleTouchStart(x, y) {
@@ -22,6 +27,23 @@ export class LevelIntroScreen {
   handleTouchEnd(x, y) {
     if (!this._touchStart) return;
     this._touchStart = null;
+
+    // Reset button
+    if (this._resetRect) {
+      const r = this._resetRect;
+      if (x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h) {
+        if (this._resetConfirm) {
+          this._resetConfirm = false;
+          if (this._onReset) this._onReset();
+        } else {
+          this._resetConfirm = true;
+        }
+        return;
+      }
+    }
+
+    // Any other tap cancels confirm mode
+    this._resetConfirm = false;
 
     // Check level selector buttons first
     for (const btn of this._levelButtons) {
@@ -80,13 +102,33 @@ export class LevelIntroScreen {
     ctx.fillStyle = '#ffffff';
     ctx.fillText('CONTINUE', screenW / 2, by + 32);
 
+    // ── Reset button ─────────────────────────────────────────────────────────
+    if (this._onReset) {
+      const rw = 160, rh = 36;
+      const rx = screenW / 2 - rw / 2;
+      const ry = by + bh + 18;
+      this._resetRect = { x: rx, y: ry, w: rw, h: rh };
+
+      ctx.fillStyle = this._resetConfirm ? 'rgba(244,67,54,0.5)' : 'rgba(244,67,54,0.18)';
+      ctx.beginPath();
+      ctx.roundRect(rx, ry, rw, rh, 6);
+      ctx.fill();
+      ctx.strokeStyle = this._resetConfirm ? '#f44336' : 'rgba(244,67,54,0.5)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ctx.font = 'bold 13px monospace';
+      ctx.fillStyle = this._resetConfirm ? '#ffffff' : '#ef9a9a';
+      ctx.fillText(this._resetConfirm ? 'TAP AGAIN TO CONFIRM' : 'RESET EVERYTHING', screenW / 2, ry + 24);
+    }
+
     // ── Level selector (dev/testing) ──────────────────────────────────────────
     if (this._onSelectLevel) {
       const TOTAL = 10;
       const btnW = 38, btnH = 32, gap = 5;
       const rowW = TOTAL * btnW + (TOTAL - 1) * gap;
       let lx = screenW / 2 - rowW / 2;
-      const ly = by + bh + 22;
+      const ly = by + bh + (this._onReset ? 70 : 22);
 
       ctx.font = '11px monospace';
       ctx.fillStyle = 'rgba(170,170,200,0.7)';

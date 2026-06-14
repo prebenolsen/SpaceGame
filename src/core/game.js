@@ -15,7 +15,7 @@ import { GameOverScreen } from '../ui/game-over.js';
 import { Joystick } from '../ui/joystick.js';
 import { Renderer, GAME_ZOOM } from '../rendering/renderer.js';
 import { SoundManager } from '../audio/sound-manager.js';
-import { saveGame, loadGame, defaultSave } from '../utils/storage.js';
+import { saveGame, loadGame, clearSave, defaultSave } from '../utils/storage.js';
 import { clamp } from '../utils/math.js';
 
 export class Game {
@@ -244,7 +244,7 @@ export class Game {
     this._levelIntro.show(this._levelNumber, config.isBoss, () => this._startLevel(), (n) => {
       this._levelNumber = n;
       this._startLevelIntro();
-    });
+    }, () => this._resetGame());
   }
 
   _startLevel() {
@@ -317,6 +317,17 @@ export class Game {
     this._totalScore = 0;
     this._applyUpgrades();
     this._save();
+    this._startLevelIntro();
+  }
+
+  _resetGame() {
+    clearSave();
+    this._levelNumber = 1;
+    this._livesSystem.reset();
+    this._upgrades = defaultSave().upgrades;
+    this._totalScore = 0;
+    this._score = 0;
+    this._applyUpgrades();
     this._startLevelIntro();
   }
 

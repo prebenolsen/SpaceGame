@@ -3,7 +3,7 @@ import { UPGRADE_DEFS } from '../systems/upgrade.js';
 const CATEGORY_COLOR = {
   Speed: '#ffd54f',
   Laser: '#e040fb',
-  AOE:   '#b39ddb',
+  AOE:   '#bCrea9ddb',
 };
 
 export class UpgradeScreen {
@@ -31,16 +31,33 @@ export class UpgradeScreen {
 
   _getCardRects(screenW, screenH) {
     const count = this._choices.length;
-    const cardW = 140, cardH = 120, gap = 16;
-    const totalW = count * cardW + (count - 1) * gap;
+    if (count === 0) return [];
+
+    const gap = 12;
+    const padding = 24;
+    const cardH = 110;
+    const rowGap = 10;
+
+    // Use 2 rows when there are more than 4 choices
+    const cols = count > 4 ? Math.ceil(count / 2) : count;
+    const rows = Math.ceil(count / cols);
+
+    const cardW = Math.min(140, (screenW - padding * 2 - gap * (cols - 1)) / cols);
+    const totalW = cols * cardW + (cols - 1) * gap;
+    const totalH = rows * cardH + (rows - 1) * rowGap;
     const startX = (screenW - totalW) / 2;
-    const centerY = screenH / 2;
-    return this._choices.map((_, i) => ({
-      x: startX + i * (cardW + gap),
-      y: centerY - cardH / 2,
-      w: cardW,
-      h: cardH,
-    }));
+    const startY = screenH / 2 - totalH / 2;
+
+    return this._choices.map((_, i) => {
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      return {
+        x: startX + col * (cardW + gap),
+        y: startY + row * (cardH + rowGap),
+        w: cardW,
+        h: cardH,
+      };
+    });
   }
 
   draw(ctx, screenW, screenH) {
@@ -49,16 +66,17 @@ export class UpgradeScreen {
     ctx.fillStyle = 'rgba(0, 0, 20, 0.88)';
     ctx.fillRect(0, 0, screenW, screenH);
 
+    const cards = this._getCardRects(screenW, screenH);
+    const topY = cards.length > 0 ? cards[0].y : screenH / 2;
+
     ctx.textAlign = 'center';
     ctx.font = 'bold 22px monospace';
     ctx.fillStyle = '#ffd54f';
-    ctx.fillText('UPGRADE', screenW / 2, screenH / 2 - 100);
+    ctx.fillText('UPGRADE', screenW / 2, topY - 36);
 
     ctx.font = '13px monospace';
     ctx.fillStyle = '#aaaacc';
-    ctx.fillText('Choose one to enhance', screenW / 2, screenH / 2 - 74);
-
-    const cards = this._getCardRects(screenW, screenH);
+    ctx.fillText('Choose one to enhance', screenW / 2, topY - 16);
     this._choices.forEach((choice, i) => {
       const rank = this._upgrades[choice.id] ?? 0;
       const def = UPGRADE_DEFS.find((d) => d.id === choice.id);

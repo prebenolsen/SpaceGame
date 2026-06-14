@@ -90,15 +90,14 @@ export function getPlayerStats(upgrades) {
   };
 }
 
-// Pick up to 3 random distinct upgrades that are unlocked and not yet maxed
+// Return all upgrades that are unlocked and not yet maxed.
+// No cap on count — every available upgrade is offered.
 export function pickUpgradeChoices(upgrades, level) {
-  const available = UPGRADE_DEFS.filter((d) => {
+  return UPGRADE_DEFS.filter((d) => {
     if ((upgrades[d.id] ?? 0) >= d.maxRank) return false;
     if (d.unlockWhen && !d.unlockWhen(upgrades, level)) return false;
     return true;
   });
-  const shuffled = available.sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, Math.min(3, shuffled.length));
 }
 
 export function applyUpgrade(upgrades, id) {

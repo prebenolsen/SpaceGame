@@ -2,7 +2,9 @@
 
 ## Trigger
 
-Upgrades are offered after each level is cleared. When the level-clear screen is dismissed, `pickUpgradeChoices()` selects up to 3 random unlocked, non-maxed upgrades and the game switches to the upgrade scene. If no upgrades are available (all unlocked ones are maxed), the level advances without showing the screen.
+Upgrades are offered after each level is cleared. When the level-clear screen is dismissed, `pickUpgradeChoices()` returns **all** unlocked, non-maxed upgrades and the game switches to the upgrade scene. If no upgrades are available (all unlocked ones are maxed), the level advances without showing the screen.
+
+Every available upgrade is shown — there is no cap on the number of cards. The upgrade screen uses up to 2 rows when there are more than 4 choices, scaling card width to fit the screen.
 
 ## Unlock progression
 
