@@ -9,10 +9,12 @@ export class Laser {
     this.width = 3;
     this._life = 0;
     this.DURATION = 0.1; // visible for 100ms
+    this.justFired = false; // true only on the frame fire() is called
   }
 
   fire(ox, oy, angle, range, damage, width = 3) {
     this.active = true;
+    this.justFired = true;
     this.ox = ox;
     this.oy = oy;
     this.tx = ox + Math.cos(angle) * range;
@@ -23,6 +25,7 @@ export class Laser {
   }
 
   update(dt) {
+    this.justFired = false; // reset before fire() may be called this frame
     if (!this.active) return;
     this._life -= dt;
     if (this._life <= 0) this.active = false;

@@ -2,7 +2,7 @@ import { circlesOverlap, pointInCone } from '../utils/math.js';
 
 // Check projectile vs enemies, returns list of hit enemies
 export function checkLaserHits(laser, enemies) {
-  if (!laser.active) return [];
+  if (!laser.active || !laser.justFired) return [];
   const hits = [];
   for (const enemy of enemies) {
     if (!enemy.active) continue;
@@ -38,7 +38,7 @@ function distPointToSegment(px, py, ax, ay, bx, by) {
 
 // Check ARC vs enemies — cone collision
 export function checkArcHits(arc, enemies) {
-  if (!arc.active) return [];
+  if (!arc.active || !arc.justFired) return [];
   const hits = [];
   for (const enemy of enemies) {
     if (!enemy.active) continue;

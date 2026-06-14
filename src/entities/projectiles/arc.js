@@ -9,10 +9,12 @@ export class Arc {
     this.damage = 0;
     this._life = 0;
     this.DURATION = 0.15;
+    this.justFired = false; // true only on the frame fire() is called
   }
 
   fire(ox, oy, angle, range, damage, halfAngle) {
     this.active = true;
+    this.justFired = true;
     this.ox = ox;
     this.oy = oy;
     this.angle = angle;
@@ -23,6 +25,7 @@ export class Arc {
   }
 
   update(dt) {
+    this.justFired = false; // reset before fire() may be called this frame
     if (!this.active) return;
     this._life -= dt;
     if (this._life <= 0) this.active = false;
