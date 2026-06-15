@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.1
+- Fixed blank screen on startup for fresh players: Tutorial 1 calls `Player.update` with one joystick set to `null` (only one weapon enabled per phase), but `Player.update` dereferenced `.active` on both joysticks, throwing every frame and leaving the canvas blank. `Player.update` now treats a null joystick as inactive.
+
 ## 3.0
 - Added two-part interactive tutorial that runs before Level 1 on every fresh start
   - Tutorial 1: one stationary drone (laser only) → two close drones (arc only) → 2 s wait → "Tutorial 1 completed!" overlay

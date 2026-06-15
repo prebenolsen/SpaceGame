@@ -30,8 +30,12 @@ export class Player {
     const px = camera.playerWorldX;
     const py = camera.playerWorldY;
 
-    this.laserAim.active = laserJoystick.active;
-    if (laserJoystick.active) {
+    // A joystick may be null during tutorials (only one weapon enabled at a time)
+    const laserActive = !!(laserJoystick && laserJoystick.active);
+    const arcActive   = !!(arcJoystick && arcJoystick.active);
+
+    this.laserAim.active = laserActive;
+    if (laserActive) {
       this.laserAim.angle  = laserJoystick.angle;
       this.laserAim.ox     = px;
       this.laserAim.oy     = py;
@@ -39,8 +43,8 @@ export class Player {
       this.laserAim.width  = this.stats.laserWidth;
     }
 
-    this.arcAim.active = arcJoystick.active;
-    if (arcJoystick.active) {
+    this.arcAim.active = arcActive;
+    if (arcActive) {
       this.arcAim.angle     = arcJoystick.angle;
       this.arcAim.ox        = px;
       this.arcAim.oy        = py;
@@ -49,12 +53,12 @@ export class Player {
     }
 
     // Fire laser if joystick active and cooldown ready
-    if (laserJoystick.active && this._laserCooldown.ready()) {
+    if (laserActive && this._laserCooldown.ready()) {
       this.laser.fire(px, py, laserJoystick.angle, this.LASER_RANGE, this.stats.laserDamage, this.stats.laserWidth);
     }
 
     // Fire arc if joystick active and cooldown ready
-    if (arcJoystick.active && this._arcCooldown.ready()) {
+    if (arcActive && this._arcCooldown.ready()) {
       this.arc.fire(px, py, arcJoystick.angle, this.stats.arcRange, this.stats.arcDamage, this.stats.arcHalfAngle);
     }
   }
