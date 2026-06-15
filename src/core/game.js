@@ -396,9 +396,13 @@ export class Game {
     this._levelTimer.reset(20);
 
     // Clear any lingering weapon visuals from Tutorial 1 — the player never fires
-    // in Tutorial 2, so their update() (which decays these) won't run.
+    // in Tutorial 2, so their update() (which decays these) won't run. This covers
+    // both the fired projectiles AND the aim cones/lines (arcAim/laserAim), which
+    // stay drawn while their `.active` flag is true.
     this._player.arc.active = false;
     this._player.laser.active = false;
+    this._player.arcAim.active = false;
+    this._player.laserAim.active = false;
 
     this._sound.resume();
   }
@@ -683,16 +687,14 @@ export class Game {
     for (const line of lines) textW = Math.max(textW, ctx.measureText(line).width);
 
     const boxH = lines.length * lineH + padY * 2;
-    // Keep the box within the horizontal gap between the steer (left) and laser (right)
-    // joysticks so it sits cleanly in the middle of the bottom of the screen.
-    const steer = this._moveJoystick;
-    const laser = this._laserJoystick;
-    const gap = (laser.baseX - laser.radius) - (steer.baseX + steer.radius);
-    const boxW = Math.min(textW + padX * 2, Math.max(gap, 160), W - 24);
+    // Hug the text (never narrower than it — that would clip), centered on screen.
+    const boxW = Math.min(textW + padX * 2, W - 24);
     const boxX = (W - boxW) / 2;
-    // Drop it just above the joystick row.
-    const joystickTop = steer.baseY - steer.radius;
-    const boxY = joystickTop - 12 - boxH;
+    // Sit low, down in the joystick band: anchor the box bottom a short way into the
+    // top of the joystick circles so it reads as the bottom of the screen, not mid-screen.
+    const steer = this._moveJoystick;
+    const boxBottom = (steer.baseY - steer.radius) + steer.radius * 0.75;
+    const boxY = boxBottom - boxH;
 
     ctx.fillStyle = 'rgba(0,0,0,0.7)';
     ctx.beginPath();

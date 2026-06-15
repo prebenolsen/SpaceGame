@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.4
+- Tutorial 1 bottom tooltip now sits much lower — anchored down into the top of the joystick band (bottom-center of the screen) instead of floating above it where it read as mid-screen. Also fixed a width bug where the box could be capped narrower than its own text and clip it.
+- Actually fixed the lingering Arc in Tutorial 2: the leftover was the **aim cone** (`arcAim`), not just the fired projectile. Tutorial 2 never calls `Player.update`, so `arcAim.active`/`laserAim.active` kept their Tutorial 1 values and stayed drawn. Both aim flags are now cleared (alongside the projectiles) when Tutorial 2 starts.
+
 ## 3.3
 - Added a landing page (`src/ui/landing.js`, new `SCENE.LANDING`) shown on a fresh start instead of auto-launching the tutorial. Two tappable cards: **Tutorial** (left) starts Tutorial 1; **Start** (right) skips the tutorial and jumps straight into Level 1 (sets `level = 1`, saves, shows the Level 1 intro).
 - Game Over "restart" and the level-intro "reset everything" now return to the landing page instead of forcing the tutorial.
