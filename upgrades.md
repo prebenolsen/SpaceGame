@@ -12,14 +12,14 @@ Upgrades are gated — not all are available from the start.
 
 | ID | Unlocks when |
 |----|-------------|
-| `laserFireRate` | Always available |
-| `arcFireRate` | Always available |
-| `arcRange` | Always available |
+| `laserFireRate` | Level 1 (always available) |
+| `arcFireRate` | Level 1 (always available) |
+| `laserDamage` | Level 2 cleared |
+| `arcDamage` | Level 2 cleared |
+| `laserWidth` | Level 3 cleared |
+| `arcRange` | Level 3 cleared |
 | `moveSpeed` | Level 5 cleared |
-| `laserWidth` | Always available |
-| `laserDamage` | Level 5 cleared |
 | `arcCone` | `arcRange` maxed (rank 8) |
-| `arcDamage` | Level 5 cleared |
 
 ## Available upgrades
 

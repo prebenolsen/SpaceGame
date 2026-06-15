@@ -212,8 +212,8 @@ export class Game {
       this._upgradeScreen.handleTap(touch.clientX, touch.clientY, W, H);
       return;
     }
-    // Freeze button (only during active play)
-    if (this._scene === SCENE.PLAYING && this._freezeButton) {
+    // Freeze button (only during active play at level 4+)
+    if (this._scene === SCENE.PLAYING && this._freezeButton && this._levelNumber >= 4) {
       const d = Math.hypot(touch.clientX - this._freezeButton.x, touch.clientY - this._freezeButton.y);
       if (d <= this._freezeButton.radius * 1.5 && this._freezeCharges > 0) {
         this._activateFreeze();
@@ -353,7 +353,7 @@ export class Game {
 
   _drawFreezeButton(ctx) {
     const btn = this._freezeButton;
-    if (!btn) return;
+    if (!btn || this._levelNumber < 4) return;
     const available = this._freezeCharges > 0;
     ctx.save();
     ctx.globalAlpha = available ? 0.85 : 0.35;
@@ -377,6 +377,13 @@ export class Game {
       ctx.textBaseline = 'top';
       ctx.fillText(`×${this._freezeCharges}`, btn.x + btn.radius, btn.y - btn.radius + 2);
     }
+    // Label above the button
+    ctx.globalAlpha = available ? 0.85 : 0.4;
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillStyle = available ? '#90caf9' : '#888';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText('Emergency button!', btn.x, btn.y - btn.radius - 4);
     ctx.restore();
   }
 
@@ -407,9 +414,9 @@ export class Game {
       ctx.restore();
     };
 
-    drawLabel(this._moveJoystick, '#ffffff', ['Steer ship']);
-    drawLabel(this._laserJoystick, '#42a5f5', ['Laser', 'More damage · narrow beam']);
-    drawLabel(this._arcJoystick, '#ce93d8', ['Arc blast', 'Wide cone Arc · less damage than Laser']);
+    drawLabel(this._moveJoystick, '#ffffff', ['Move']);
+    drawLabel(this._laserJoystick, '#42a5f5', ['Laser', 'High dmg']);
+    drawLabel(this._arcJoystick, '#ce93d8', ['Arc', 'Wide cone']);
   }
 
   _loop(now) {

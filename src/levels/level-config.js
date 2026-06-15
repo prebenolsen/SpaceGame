@@ -48,10 +48,10 @@ export const LEVELS = [
   // ── Level 1 — Tutorial ──────────────────────────────────────────────────────
   // Drone base HP 40 < laser 50 dmg → one-shot kills
   {
-    duration: 20,
+    duration: 25,
     isBoss: false,
     waves: [
-      ...wave('drone', 15, { startTime: 0, interval: 8, speedMult: 1.0 }),
+      ...wave('drone', 15, { startTime: 0, interval: 4, speedMult: 1.0 }),
     ],
   },
 
@@ -62,7 +62,7 @@ export const LEVELS = [
     isBoss: false,
     waves: [
       ...wave('drone',  30, { startTime: 0,  interval: 4,  healthMult: 1.8, speedMult: 1.25 }),
-      ...wave('rusher', 30, { startTime: 10, interval: 15, speedMult: 1.25 }),
+      ...wave('rusher', 30, { startTime: 5, interval: 15, speedMult: 1.25 }),
     ],
   },
 

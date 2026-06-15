@@ -28,6 +28,7 @@ export const UPGRADE_DEFS = [
     description: 'Doubles beam width',
     maxRank: 4,
     baseCost: 10,
+    unlockWhen: (_, level) => level >= 3,
   },
   {
     id: 'laserDamage',
@@ -36,7 +37,7 @@ export const UPGRADE_DEFS = [
     description: '+25 damage per shot',
     maxRank: 10,
     baseCost: 10,
-    unlockWhen: (_, level) => level >= 5,
+    unlockWhen: (_, level) => level >= 2,
   },
 
   // ── Arc ────────────────────────────────────────────────────────────────────
@@ -55,6 +56,7 @@ export const UPGRADE_DEFS = [
     description: '+60px range',
     maxRank: 8,
     baseCost: 10,
+    unlockWhen: (_, level) => level >= 3,
   },
   {
     id: 'arcCone',
@@ -72,7 +74,7 @@ export const UPGRADE_DEFS = [
     description: '+15 damage per pulse',
     maxRank: 10,
     baseCost: 10,
-    unlockWhen: (_, level) => level >= 5,
+    unlockWhen: (_, level) => level >= 2,
   },
 ];
 
