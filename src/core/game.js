@@ -49,6 +49,7 @@ export class Game {
     this._spawner = null;
     this._combat = null;
     this._keys = {};
+    this._shipAngle = -Math.PI / 2; // starts pointing up
 
     this._lastTime = 0;
     this._raf = null;
@@ -94,7 +95,7 @@ export class Game {
   }
 
   _layoutJoysticks(W, H) {
-    const pad = 60;
+    const pad = 16;
     const r = 55;
     const bottomY = H - pad - r - this._safeBottom;
     if (!this._moveJoystick) {
@@ -251,10 +252,7 @@ export class Game {
     this._scene = SCENE.LEVEL_INTRO;
     this._freezeCharges = 1;
     const config = getLevelConfig(this._levelNumber - 1);
-    this._levelIntro.show(this._levelNumber, config.isBoss, () => this._startLevel(), (n) => {
-      this._levelNumber = n;
-      this._startLevelIntro();
-    }, () => this._resetGame());
+    this._levelIntro.show(this._levelNumber, config.isBoss, () => this._startLevel(), null, null);
   }
 
   _startLevel() {
@@ -406,6 +404,7 @@ export class Game {
       if (kx !== 0 || ky !== 0) {
         const len = Math.hypot(kx, ky);
         this._camera.move((kx / len) * stats.moveSpeed * dt, (ky / len) * stats.moveSpeed * dt);
+        this._shipAngle = Math.atan2(ky, kx);
       }
     }
 
@@ -424,6 +423,15 @@ export class Game {
     if (this._bossLevel && !this._enemies.some((e) => e.type === 'boss')) {
       this._onLevelClear();
       return;
+    }
+
+    // Update ship rotation — weapon aim takes priority over movement direction
+    if (this._laserJoystick.active) {
+      this._shipAngle = this._laserJoystick.angle;
+    } else if (this._arcJoystick.active) {
+      this._shipAngle = this._arcJoystick.angle;
+    } else if (this._moveJoystick.active) {
+      this._shipAngle = this._moveJoystick.angle;
     }
 
     // Update player weapons
@@ -467,6 +475,7 @@ export class Game {
         score: this._score,
         hitFlashTimer: this._hitFlashTimer,
         safeTop: this._safeTop,
+        shipAngle: this._shipAngle,
       });
       renderer.drawUI((ctx) => {
         this._moveJoystick.draw(ctx, '#ffffff');
@@ -490,6 +499,7 @@ export class Game {
         score: this._score,
         hitFlashTimer: 0,
         safeTop: this._safeTop,
+        shipAngle: this._shipAngle,
       });
     } else {
       // Black background for intro

@@ -1,4 +1,4 @@
-export function drawPlayer(ctx, screenW, screenH, livesSystem) {
+export function drawPlayer(ctx, screenW, screenH, livesSystem, aimAngle = -Math.PI / 2) {
   const cx = screenW / 2;
   const cy = screenH / 2;
 
@@ -13,8 +13,10 @@ export function drawPlayer(ctx, screenW, screenH, livesSystem) {
     }
   }
 
-  // Ship body — simple triangle pointing up
+  // Ship body — triangle rotated to face aim direction
   ctx.translate(cx, cy);
+  // Default triangle points up (-π/2); offset so aimAngle=0 (right) → tip points right
+  ctx.rotate(aimAngle + Math.PI / 2);
 
   // Glow
   const grd = ctx.createRadialGradient(0, 0, 4, 0, 0, 28);

@@ -46,15 +46,20 @@ export class Renderer {
 
   drawGame(state) {
     const { ctx, _screenW: W, _screenH: H } = this;
-    const { camera, enemies, player, livesSystem, hud, levelTimer, levelNumber, score, hitFlashTimer, safeTop = 0 } = state;
+    const { camera, enemies, player, livesSystem, hud, levelTimer, levelNumber, score, hitFlashTimer, safeTop = 0, shipAngle = -Math.PI / 2 } = state;
+
+    // Background — drawn at full 1x scale so it fills the entire screen
+    ctx.save();
+    this._applyTransform(1);
+    this._bg.draw(ctx, W, H, camera);
+    ctx.restore();
 
     // Game world — drawn with zoom-out so player sees more of the area
     ctx.save();
     this._applyTransform(GAME_ZOOM);
-    this._bg.draw(ctx, W, H, camera);
     drawEnemies(ctx, enemies, camera, W, H);
     drawProjectiles(ctx, player.laser, player.arc, player.laserAim, player.arcAim, camera, W, H);
-    drawPlayer(ctx, W, H, livesSystem);
+    drawPlayer(ctx, W, H, livesSystem, shipAngle);
     ctx.restore();
 
     // HUD and hit flash at full scale — not zoomed so text stays crisp and flash fills screen
