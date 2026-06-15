@@ -1,3 +1,5 @@
+import { VERSION } from '../version.js';
+
 export class LevelIntroScreen {
   constructor() {
     this._onContinue = null;
@@ -153,6 +155,13 @@ export class LevelIntroScreen {
         lx += btnW + gap;
       }
     }
+
+    // Version watermark
+    ctx.font = '11px monospace';
+    ctx.fillStyle = 'rgba(170,170,200,0.45)';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(`v${VERSION}`, screenW - 10, screenH - 10);
 
     ctx.restore();
   }
