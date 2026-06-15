@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.6
+- From level 8 onward, players choose 2 upgrades per level (shown as "Pick 1 of 2" / "Pick 2 of 2")
+
+## 2.5
+- `laserDamage` and `arcDamage` now unlock at level 5 instead of requiring maxed fire rate
+
 ## 2.4
 - `rusherCluster` introduced at level 6 (replaces rushers), also appears in levels 8, 10, and all even auto-scale levels
 

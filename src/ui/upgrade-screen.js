@@ -19,9 +19,11 @@ export class UpgradeScreen {
     this._onPick = null;
   }
 
-  show(choices, upgrades, onPick) {
+  show(choices, upgrades, picksRemaining, totalPicks, onPick) {
     this._choices = choices;
     this._upgrades = upgrades;
+    this._picksRemaining = picksRemaining;
+    this._totalPicks = totalPicks;
     this._onPick = onPick;
   }
 
@@ -83,7 +85,11 @@ export class UpgradeScreen {
 
     ctx.font = '13px monospace';
     ctx.fillStyle = '#aaaacc';
-    ctx.fillText('Choose one to enhance', screenW / 2, topY - 16);
+    const pickNum = this._totalPicks - this._picksRemaining + 1;
+    const subtitle = this._totalPicks > 1
+      ? `Pick ${pickNum} of ${this._totalPicks}`
+      : 'Choose one to enhance';
+    ctx.fillText(subtitle, screenW / 2, topY - 16);
     this._choices.forEach((choice, i) => {
       const rank = this._upgrades[choice.id] ?? 0;
       const def = UPGRADE_DEFS.find((d) => d.id === choice.id);

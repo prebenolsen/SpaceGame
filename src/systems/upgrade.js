@@ -36,7 +36,7 @@ export const UPGRADE_DEFS = [
     description: '+25 damage per shot',
     maxRank: 10,
     baseCost: 10,
-    unlockWhen: (upgrades) => (upgrades.laserFireRate ?? 0) >= 8,
+    unlockWhen: (_, level) => level >= 5,
   },
 
   // ── Arc ────────────────────────────────────────────────────────────────────
@@ -72,7 +72,7 @@ export const UPGRADE_DEFS = [
     description: '+10 damage per pulse',
     maxRank: 10,
     baseCost: 10,
-    unlockWhen: (upgrades) => (upgrades.arcFireRate ?? 0) >= 8,
+    unlockWhen: (_, level) => level >= 5,
   },
 ];
 

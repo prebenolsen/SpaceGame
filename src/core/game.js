@@ -276,19 +276,22 @@ export class Game {
   }
 
   _onLevelClearContinue() {
+    const totalPicks = this._levelNumber >= 8 ? 2 : 1;
+    this._startUpgradePhase(totalPicks, totalPicks);
+  }
+
+  _startUpgradePhase(picksRemaining, totalPicks) {
     const choices = pickUpgradeChoices(this._upgrades, this._levelNumber);
-    if (choices.length === 0) {
+    if (choices.length === 0 || picksRemaining === 0) {
       this._advanceLevel();
       return;
     }
     this._scene = SCENE.UPGRADE;
-    this._upgradeScreen.show(choices, this._upgrades, (id) => this._onUpgradePick(id));
-  }
-
-  _onUpgradePick(id) {
-    this._upgrades = applyUpgrade(this._upgrades, id);
-    this._applyUpgrades();
-    this._advanceLevel();
+    this._upgradeScreen.show(choices, this._upgrades, picksRemaining, totalPicks, (id) => {
+      this._upgrades = applyUpgrade(this._upgrades, id);
+      this._applyUpgrades();
+      this._startUpgradePhase(picksRemaining - 1, totalPicks);
+    });
   }
 
   _advanceLevel() {
