@@ -26,7 +26,9 @@ Single spawn entry — used for bosses and surprise minibosses. Takes the same `
 
 ## Enemy types
 
-`'drone'` | `'rusher'` | `'tank'` | `'miniboss'` | `'boss'`
+`'drone'` | `'rusher'` | `'rusherCluster'` | `'tank'` | `'miniboss'` | `'boss'`
+
+**`rusherCluster`** spawns three enemies at once: one lead and two wings that maintain a V-formation behind the lead. Wings share the lead's speed and health multipliers. Each member scores independently.
 
 ## Level structure
 
@@ -43,6 +45,7 @@ Each entry in `LEVELS` has:
 | Enemy | Base HP | Notes |
 |-------|---------|-------|
 | Drone | 40 | Below baseline laser (50 dmg) → one-shot in level 1 |
+| RusherCluster | 40 | Drone HP and speed; rusher shape and size; spawns as a trio (lead + 2 wings) |
 | Rusher | 30 | Fast; low HP is intentional |
 | Tank | 150 | Scaled down from 300; heavy healthMult compensates |
 | Miniboss | 300 | Scaled down from 500; heavily multiplied in late levels |
@@ -59,11 +62,11 @@ HealthMult curve is roughly exponential so each level feels meaningfully harder 
 | 3 | 45 s | — | Drones (interval 3 s, **3.0× HP**, 1.5× speed) + rushers (interval 8 s) + 1 miniboss at t=20 |
 | 4 | 60 s | — | Drones (interval 2.5 s, **4.5× HP**, 1.7×) + rushers (**1.8× HP**, interval 5.5 s) + tanks (interval 20 s) |
 | 5 | ∞ | Boss | Boss (**2.5× HP**, 1.5× speed) + drone support (**4.0× HP**) + rusher support (**2.5× HP**) from t=10/20 |
-| 6 | 60 s | — | Drones (interval 2.5 s, **6.0× HP**, 1.8×) + rushers (**2.5× HP**, interval 5 s) + tanks (**2.0× HP**, interval 18 s) |
+| 6 | 30 s | — | Level 4 mix with **rusherCluster** replacing rushers — drones (**4.5× HP**, 1.7×) + rusherClusters (**1.8× HP**, interval 5.5 s) + tanks (interval 20 s) |
 | 7 | 75 s | — | Drones (interval 2 s, **8.0× HP**, 2.0×) + rushers (**3.5× HP**, interval 4 s) + tanks (**3.5× HP**, interval 14 s) + minibosses (**2.0× HP**, interval 30 s) |
-| 8 | 75 s | — | Drones (interval 1.8 s, **10.5× HP**, 2.2×) + rushers (**5.0× HP**, interval 3.5 s) + tanks (**5.5× HP**, interval 12 s) + minibosses (**3.5× HP**, interval 22 s) |
+| 8 | 75 s | — | Drones (interval 1.8 s, **10.5× HP**, 2.2×) + rushers (**5.0× HP**, interval 3.5 s) + **rusherClusters** (**4.0× HP**, interval 12 s, from t=18) + tanks (**5.5× HP**, interval 12 s) + minibosses (**3.5× HP**, interval 22 s) |
 | 9 | 90 s | — | Drones (interval 1.5 s, **13.0× HP**, 2.5×) + rushers (**7.0× HP**) + tanks (**8.0× HP**, interval 10 s) + minibosses (**5.0× HP**, interval 18 s) |
-| 10 | ∞ | Boss | Boss (**5.0× HP**, 1.8× speed) + drone support (**10.0× HP**) + rusher support (**6.0× HP**) from t=5/8 (interval 6 s each) |
+| 10 | ∞ | Boss | Boss (**5.0× HP**, 1.8× speed) + drone support (**10.0× HP**) + rusher support (**6.0× HP**) + **rusherCluster** support (**6.0× HP**, interval 14 s, from t=12) |
 
 ## Auto-scaling beyond level 10
 
@@ -75,6 +78,7 @@ HealthMult curve is roughly exponential so each level feels meaningfully harder 
 - `interval = max(1.5, 5 / (1 + extra * 0.15))` — spawn cadence tightens with level, floor at 1.5 s
 - Boss levels every 5th level (`(levelIndex + 1) % 5 === 0`), using `once('boss')` with `healthMult: bossScale`
 - Normal levels: drones + rushers (interval × 2.5, 50% enemy scale) + tanks (interval × 5, 60% enemy scale)
+- Even-numbered normal levels also add **rusherClusters** (interval × 3, 40% enemy scale, from t=8)
 - Speed is capped at 2.5× to avoid enemies becoming impossible to dodge
 
 `BOSS_FILL = 300` s is used as the companion-wave duration in boss levels; the boss dying ends the level long before this elapses.

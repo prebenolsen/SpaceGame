@@ -3,13 +3,15 @@ import { Rusher } from '../entities/enemies/rusher.js';
 import { Tank } from '../entities/enemies/tank.js';
 import { Miniboss } from '../entities/enemies/miniboss.js';
 import { Boss } from '../entities/enemies/boss.js';
+import { createRusherCluster } from '../entities/enemies/rusher-cluster.js';
 
 const FACTORY = {
-  drone: (opts) => new Drone(opts),
-  rusher: (opts) => new Rusher(opts),
-  tank: (opts) => new Tank(opts),
-  miniboss: (opts) => new Miniboss(opts),
-  boss: (opts) => new Boss(opts),
+  drone:         (opts) => new Drone(opts),
+  rusher:        (opts) => new Rusher(opts),
+  rusherCluster: (opts) => createRusherCluster(opts),
+  tank:          (opts) => new Tank(opts),
+  miniboss:      (opts) => new Miniboss(opts),
+  boss:          (opts) => new Boss(opts),
 };
 
 // North (270°) and South (90°) each get a 15° exclusion zone on both sides.
@@ -57,8 +59,9 @@ export class Spawner {
     this._elapsed += dt;
     while (this._waves.length > 0 && this._waves[0].time <= this._elapsed) {
       const entry = this._waves.shift();
-      const enemy = this._createEnemy(entry);
-      if (enemy) enemies.push(enemy);
+      const result = this._createEnemy(entry);
+      if (Array.isArray(result)) enemies.push(...result);
+      else if (result) enemies.push(result);
     }
   }
 

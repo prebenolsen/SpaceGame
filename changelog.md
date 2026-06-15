@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.4
+- `rusherCluster` introduced at level 6 (replaces rushers), also appears in levels 8, 10, and all even auto-scale levels
+
+## 2.3
+- Added `rusherCluster` enemy: spawns as a trio (lead + 2 wings in V-formation), drone speed/HP/color, rusher shape
+
 ## 2.2
 - Laser now pierces through all enemies in its path instead of stopping at the first hit
 

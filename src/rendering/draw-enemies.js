@@ -21,6 +21,7 @@ function drawEnemy(ctx, enemy, sx, sy) {
   switch (enemy.type) {
     case 'drone': drawDrone(ctx, enemy, flash); break;
     case 'rusher': drawRusher(ctx, enemy, flash); break;
+    case 'rusherCluster': drawRusherCluster(ctx, enemy, flash); break;
     case 'tank': drawTank(ctx, enemy, flash); break;
     case 'miniboss': drawMiniboss(ctx, enemy, flash); break;
     case 'boss': drawBoss(ctx, enemy, flash); break;
@@ -76,6 +77,19 @@ function drawRusher(ctx, enemy, flash) {
   ctx.strokeStyle = '#ffccbc';
   ctx.lineWidth = 1.5;
   // Pointy triangle
+  ctx.beginPath();
+  ctx.moveTo(0, -enemy.radius);
+  ctx.lineTo(enemy.radius * 0.8, enemy.radius * 0.7);
+  ctx.lineTo(-enemy.radius * 0.8, enemy.radius * 0.7);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+}
+
+function drawRusherCluster(ctx, enemy, flash) {
+  ctx.fillStyle = flash ? '#ffffff' : enemy.color;
+  ctx.strokeStyle = '#b3e5fc'; // drone-toned outline
+  ctx.lineWidth = 1.5;
   ctx.beginPath();
   ctx.moveTo(0, -enemy.radius);
   ctx.lineTo(enemy.radius * 0.8, enemy.radius * 0.7);
