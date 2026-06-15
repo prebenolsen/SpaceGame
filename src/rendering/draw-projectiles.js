@@ -21,8 +21,8 @@ function drawLaserAim(ctx, aim, camera, screenW, screenH) {
   const target = camera.worldToScreen(tx, ty, screenW, screenH);
 
   ctx.save();
-  ctx.globalAlpha = 0.5;
-  ctx.strokeStyle = '#888888';
+  ctx.globalAlpha = 0.45;
+  ctx.strokeStyle = '#42a5f5';
   ctx.lineWidth = aim.width;
   ctx.beginPath();
   ctx.moveTo(origin.x, origin.y);
@@ -37,9 +37,9 @@ function drawLaser(ctx, laser, camera, screenW, screenH) {
 
   ctx.save();
   ctx.globalAlpha = laser.alpha;
-  ctx.strokeStyle = '#e040fb';
+  ctx.strokeStyle = '#42a5f5';
   ctx.lineWidth = laser.width;
-  ctx.shadowColor = '#e040fb';
+  ctx.shadowColor = '#42a5f5';
   ctx.shadowBlur = 14;
   ctx.beginPath();
   ctx.moveTo(origin.x, origin.y);
@@ -54,9 +54,9 @@ function drawArcAim(ctx, aim, camera, screenW, screenH) {
   const endAngle   = aim.angle + aim.halfAngle;
 
   ctx.save();
-  ctx.globalAlpha = 0.5;
-  ctx.strokeStyle = '#888888';
-  ctx.fillStyle = 'rgba(136, 136, 136, 0.15)';
+  ctx.globalAlpha = 0.45;
+  ctx.strokeStyle = '#ce93d8';
+  ctx.fillStyle = 'rgba(206, 147, 216, 0.15)';
   ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.moveTo(origin.x, origin.y);
@@ -72,10 +72,10 @@ function drawArc(ctx, arc, camera, screenW, screenH) {
 
   ctx.save();
   ctx.globalAlpha = arc.alpha * 0.8;
-  ctx.strokeStyle = '#e040fb';
-  ctx.fillStyle = 'rgba(224, 64, 251, 0.15)';
+  ctx.strokeStyle = '#ce93d8';
+  ctx.fillStyle = 'rgba(206, 147, 216, 0.18)';
   ctx.lineWidth = 2;
-  ctx.shadowColor = '#e040fb';
+  ctx.shadowColor = '#ce93d8';
   ctx.shadowBlur = 16;
 
   const startAngle = arc.angle - arc.halfAngle;

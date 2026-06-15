@@ -78,3 +78,16 @@ HealthMult curve is roughly exponential so each level feels meaningfully harder 
 - Speed is capped at 2.5× to avoid enemies becoming impossible to dodge
 
 `BOSS_FILL = 300` s is used as the companion-wave duration in boss levels; the boss dying ends the level long before this elapses.
+
+## Progressive speed scaling (levels 6+)
+
+Implemented in `src/systems/spawner.js`, not in level-config.js. For every level beyond 5 the spawner multiplies all `speedMult` values by `1.1^(levelNumber − 5)` before passing them to enemy constructors. This stacks on top of the per-wave `speedMult` already present in each level's config:
+
+| Level | Boost factor (applied on top of wave speedMult) |
+|-------|--------------------------------------------------|
+| 6 | × 1.10 |
+| 7 | × 1.21 |
+| 8 | × 1.33 |
+| 9 | × 1.46 |
+| 10 | × 1.61 |
+| 11+ | × 1.1^(level − 5) |

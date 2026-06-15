@@ -3,7 +3,7 @@ import { drawPlayer } from './draw-player.js';
 import { drawEnemies } from './draw-enemies.js';
 import { drawProjectiles } from './draw-projectiles.js';
 
-export const GAME_ZOOM = 0.85;
+export const GAME_ZOOM = 0.68; // 25 % extra visible area in each direction
 
 export class Renderer {
   constructor(canvas) {

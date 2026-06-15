@@ -265,7 +265,7 @@ export class Game {
     this._enemies = [];
     this._score = 0;
     this._livesSystem.resetHits();
-    this._spawner.loadLevel(config);
+    this._spawner.loadLevel(config, this._levelNumber);
     this._sound.resume();
   }
 
@@ -469,9 +469,9 @@ export class Game {
         safeTop: this._safeTop,
       });
       renderer.drawUI((ctx) => {
-        this._moveJoystick.draw(ctx);
-        this._laserJoystick.draw(ctx);
-        this._arcJoystick.draw(ctx);
+        this._moveJoystick.draw(ctx, '#ffffff');
+        this._laserJoystick.draw(ctx, '#42a5f5');
+        this._arcJoystick.draw(ctx, '#ce93d8');
         this._drawFreezeButton(ctx);
       });
       return;

@@ -35,11 +35,13 @@ export class Spawner {
     this.zoom = zoom;
     this._waves = [];
     this._elapsed = 0;
+    this._levelNumber = 1;
   }
 
-  loadLevel(levelConfig) {
+  loadLevel(levelConfig, levelNumber = 1) {
     this._waves = [...levelConfig.waves].sort((a, b) => a.time - b.time);
     this._elapsed = 0;
+    this._levelNumber = levelNumber;
   }
 
   reset() {
@@ -64,11 +66,13 @@ export class Spawner {
     const factory = FACTORY[entry.type];
     if (!factory) return null;
     const spawnPos = this._randomCirclePosition();
+    // +10 % speed per level beyond level 5 (compounding)
+    const levelSpeedBoost = this._levelNumber > 5 ? Math.pow(1.1, this._levelNumber - 5) : 1;
     return factory({
       wx: spawnPos.x,
       wy: spawnPos.y,
       healthMult: entry.healthMult ?? 1,
-      speedMult: entry.speedMult ?? 1,
+      speedMult: (entry.speedMult ?? 1) * levelSpeedBoost,
     });
   }
 

@@ -66,19 +66,17 @@ export class Joystick {
     return Math.atan2(this.dy, this.dx);
   }
 
-  draw(ctx) {
-    // Base ring
+  draw(ctx, color = '#ffffff') {
     ctx.save();
-    ctx.globalAlpha = 0.25;
-    ctx.strokeStyle = '#ffffff';
+    ctx.globalAlpha = 0.3;
+    ctx.strokeStyle = color;
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.arc(this.baseX, this.baseY, this.radius, 0, Math.PI * 2);
     ctx.stroke();
 
-    // Knob
-    ctx.globalAlpha = this.active ? 0.6 : 0.3;
-    ctx.fillStyle = '#ffffff';
+    ctx.globalAlpha = this.active ? 0.65 : 0.32;
+    ctx.fillStyle = color;
     ctx.beginPath();
     ctx.arc(this.knobX, this.knobY, 22, 0, Math.PI * 2);
     ctx.fill();

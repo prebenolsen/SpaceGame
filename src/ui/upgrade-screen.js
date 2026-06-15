@@ -1,9 +1,16 @@
 import { UPGRADE_DEFS } from '../systems/upgrade.js';
 
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `${r},${g},${b}`;
+}
+
 const CATEGORY_COLOR = {
   Speed: '#ffd54f',
-  Laser: '#e040fb',
-  AOE:   '#bCrea9ddb',
+  Laser: '#42a5f5',
+  AOE:   '#ce93d8',
 };
 
 export class UpgradeScreen {
@@ -84,9 +91,9 @@ export class UpgradeScreen {
       const catColor = CATEGORY_COLOR[def?.category] ?? '#aaaacc';
 
       // Card bg
-      ctx.fillStyle = 'rgba(255,255,255,0.08)';
-      ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-      ctx.lineWidth = 1.5;
+      ctx.fillStyle = `rgba(${hexToRgb(catColor)},0.12)`;
+      ctx.strokeStyle = catColor;
+      ctx.lineWidth = 2.5;
       ctx.beginPath();
       ctx.roundRect(x, y, w, h, 8);
       ctx.fill();
@@ -108,8 +115,8 @@ export class UpgradeScreen {
       const maxRank = def?.maxRank ?? 10;
       const pipW = Math.min(8, (w - 20) / maxRank - 2);
       for (let p = 0; p < maxRank; p++) {
-        ctx.fillStyle = p < rank ? catColor : 'rgba(255,255,255,0.15)';
-        ctx.fillRect(x + 10 + p * (pipW + 2), y + 34, pipW, 4);
+        ctx.fillStyle = p < rank ? catColor : 'rgba(255,255,255,0.25)';
+        ctx.fillRect(x + 10 + p * (pipW + 2), y + 34, pipW, 6);
       }
 
       ctx.textAlign = 'center';

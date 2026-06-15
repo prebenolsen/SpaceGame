@@ -27,13 +27,13 @@ Defined in `src/systems/upgrade.js`.
 
 | ID | Category | Effect per rank | Max ranks |
 |----|----------|-----------------|-----------|
-| `laserFireRate` | Laser (purple) | +0.5 shots/sec | 8 |
-| `laserWidth` | Laser (purple) | ×2 beam width | 4 |
-| `laserDamage` | Laser (purple) | +25 damage per shot | 10 |
-| `arcFireRate` | AOE (blue) | +0.5 pulses/sec | 8 |
-| `arcRange` | AOE (blue) | +60 px range | 8 |
-| `arcCone` | AOE (blue) | ×2 cone width | 3 |
-| `arcDamage` | AOE (blue) | +10 damage per pulse | 10 |
+| `laserFireRate` | Laser (blue `#42a5f5`) | +0.5 shots/sec | 8 |
+| `laserWidth` | Laser (blue `#42a5f5`) | ×2 beam width | 4 |
+| `laserDamage` | Laser (blue `#42a5f5`) | +25 damage per shot | 10 |
+| `arcFireRate` | AOE (purple `#ce93d8`) | +0.5 pulses/sec | 8 |
+| `arcRange` | AOE (purple `#ce93d8`) | +60 px range | 8 |
+| `arcCone` | AOE (purple `#ce93d8`) | ×2 cone width | 3 |
+| `arcDamage` | AOE (purple `#ce93d8`) | +10 damage per pulse | 10 |
 | `moveSpeed` | Speed (yellow) | +20% movement speed | 6 |
 
 ## Stat formulas
