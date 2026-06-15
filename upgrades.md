@@ -12,8 +12,8 @@ Upgrades are gated — not all are available from the start.
 
 | ID | Unlocks when |
 |----|-------------|
-| `laserFireRate` | Level 1 (always available) |
-| `arcFireRate` | Level 1 (always available) |
+| `laserFireRate` | Always available |
+| `arcFireRate` | Always available |
 | `laserDamage` | Level 2 cleared |
 | `arcDamage` | Level 2 cleared |
 | `laserWidth` | Level 3 cleared |

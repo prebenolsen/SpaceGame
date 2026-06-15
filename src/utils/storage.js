@@ -20,7 +20,7 @@ export function clearSave() {
 }
 
 export const defaultSave = () => ({
-  level: 1,
+  level: 0,
   lives: 5,
   upgrades: {
     laserFireRate: 0,

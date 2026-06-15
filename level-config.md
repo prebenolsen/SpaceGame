@@ -51,14 +51,33 @@ Each entry in `LEVELS` has:
 | Miniboss | 300 | Scaled down from 500; heavily multiplied in late levels |
 | Boss | 1500 | Unchanged |
 
+## Level structure fields
+
+| Field | Description |
+|-------|-------------|
+| `duration` | Seconds the level runs. `null` = no timer; boss must die to advance. |
+| `isBoss` | `true` shows "BOSS" on the intro screen and hides the HUD timer. |
+| `waves` | Array of spawn entries produced by `wave()` and `once()` calls. |
+
+## Tutorials (separate from LEVELS)
+
+Tutorials run before Level 1 on every fresh start (`defaultSave().level === 0`). They bypass the normal level-intro/clear/upgrade flow entirely and are managed by `_tutorialPhase` + `_tut1Step` / `_tut2Step` in `game.js`.
+
+| Tutorial | What happens |
+|----------|-------------|
+| Tutorial 1 | Phase 1: one stationary drone far right, laser joystick only, bottom tooltip. Phase 2 (drone dead): two close drones, arc joystick only, arc tooltip. Phase 3 (both dead): 2 s wait. Phase 4: "Tutorial 1 completed!" overlay, tap to continue. |
+| Tutorial 2 | Move joystick only. Top tooltip (7 s) explaining outrunning. Then one chasing drone spawns; player survives 20 s to finish. |
+
+After Tutorial 2 completes, `_levelNumber` is set to 1 and a normal level intro starts.
+
 ## Handcrafted levels (1–10)
 
 HealthMult curve is roughly exponential so each level feels meaningfully harder at baseline laser damage (50 dmg/shot). Expected shots-to-kill a drone: L1 1, L2 2, L3 3, L4 4, L6 5, L7 7, L8 9, L9 ~11.
 
 | Level | Duration | isBoss | Enemy mix |
 |-------|----------|--------|-----------|
-| 1 | 15 s | — | Drones only (interval 8 s, 1× stats) — one-shot kills |
-| 2 | 30 s | — | Drones (interval 4 s, **1.8× HP**, 1.25× speed) + rushers from t=10 (interval 15 s) |
+| 1 | 25 s | — | Drones only (interval 4 s, 1× stats) — one-shot kills |
+| 2 | 30 s | — | Drones (interval 4 s, **1.8× HP**, 1.25× speed) + rushers from t=5 (interval 15 s) |
 | 3 | 45 s | — | Drones (interval 3 s, **3.0× HP**, 1.5× speed) + rushers (interval 8 s) + 1 miniboss at t=20 |
 | 4 | 60 s | — | Drones (interval 2.5 s, **4.5× HP**, 1.7×) + rushers (**1.8× HP**, interval 5.5 s) + tanks (interval 20 s) |
 | 5 | ∞ | Boss | Boss (**2.5× HP**, 1.5× speed) + drone support (**4.0× HP**) + rusher support (**2.5× HP**) from t=10/20 |
@@ -72,11 +91,11 @@ HealthMult curve is roughly exponential so each level feels meaningfully harder 
 
 `getLevelConfig(levelIndex)` handles all levels past the handcrafted 10. The logic:
 
-- `extra = levelIndex - 10` (how many levels past the hand-authored set)
+- `extra = levelIndex - LEVELS.length` (how many levels past the hand-authored set of 10)
 - `enemyScale = 13 + extra * 2` — continues from level-9 territory, grows +2 per level
 - `bossScale  = 5 + extra * 0.5` — continues from level-10 boss, grows more gently
 - `interval = max(1.5, 5 / (1 + extra * 0.15))` — spawn cadence tightens with level, floor at 1.5 s
-- Boss levels every 5th level (`(levelIndex + 1) % 5 === 0`), using `once('boss')` with `healthMult: bossScale`
+- Boss levels every 5th level (`(levelIndex + 1) % 5 === 0`), using `once('boss')` with `healthMult: bossScale` — aligns with predefined bosses at levels 5 and 10
 - Normal levels: drones + rushers (interval × 2.5, 50% enemy scale) + tanks (interval × 5, 60% enemy scale)
 - Even-numbered normal levels also add **rusherClusters** (interval × 3, 40% enemy scale, from t=8)
 - Speed is capped at 2.5× to avoid enemies becoming impossible to dodge

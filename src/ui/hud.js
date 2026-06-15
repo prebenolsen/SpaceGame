@@ -1,17 +1,10 @@
 export class HUD {
   constructor() {}
 
-  draw(ctx, screenW, screenH, livesSystem, levelTimer, levelNumber, score, safeTop = 0) {
-    // HP bar (top left)
+  draw(ctx, screenW, screenH, livesSystem, levelTimer, levelNumber, score, safeTop = 0, hudTitle = null) {
     this._drawHpBar(ctx, livesSystem, safeTop);
-
-    // Lives (top left, below HP)
     this._drawLives(ctx, livesSystem, safeTop);
-
-    // Level + timer (top center)
-    this._drawTimer(ctx, screenW, levelTimer, levelNumber, safeTop);
-
-    // Score (top right)
+    this._drawTimer(ctx, screenW, levelTimer, levelNumber, safeTop, hudTitle);
     this._drawScore(ctx, screenW, score, safeTop);
   }
 
@@ -53,17 +46,23 @@ export class HUD {
     ctx.restore();
   }
 
-  _drawTimer(ctx, screenW, levelTimer, levelNumber, safeTop = 0) {
+  _drawTimer(ctx, screenW, levelTimer, levelNumber, safeTop = 0, hudTitle = null) {
     const remaining = levelTimer.remaining;
-    const isBossTimer = remaining === Infinity;
-    const label = isBossTimer ? 'BOSS' : `${Math.ceil(remaining)}s`;
+    const isBoss = !hudTitle && remaining === Infinity;
+    let line;
+    if (hudTitle) {
+      line = remaining === Infinity ? hudTitle : `${hudTitle}  ${Math.ceil(remaining)}s`;
+    } else {
+      line = isBoss ? `BOSS  LVL ${levelNumber}` : `LVL ${levelNumber}  ${Math.ceil(remaining)}s`;
+    }
     ctx.save();
-    ctx.textAlign = 'center';
-    ctx.fillStyle = 'rgba(0,0,0,0.4)';
-    ctx.fillRect(screenW / 2 - 60, 10 + safeTop, 120, 30);
-    ctx.fillStyle = isBossTimer ? '#f44336' : (remaining <= 10 ? '#ff5252' : '#fff');
     ctx.font = 'bold 18px monospace';
-    ctx.fillText(`LVL ${levelNumber}  ${label}`, screenW / 2, 30 + safeTop);
+    ctx.textAlign = 'center';
+    const bw = Math.max(120, ctx.measureText(line).width + 24);
+    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    ctx.fillRect(screenW / 2 - bw / 2, 10 + safeTop, bw, 30);
+    ctx.fillStyle = isBoss ? '#f44336' : (remaining <= 10 && remaining !== Infinity ? '#ff5252' : '#fff');
+    ctx.fillText(line, screenW / 2, 30 + safeTop);
     ctx.restore();
   }
 

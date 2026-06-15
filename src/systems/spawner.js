@@ -51,6 +51,16 @@ export class Spawner {
     this._elapsed = 0;
   }
 
+  spawnPreset(presetEnemies, wx, wy, enemies) {
+    for (const p of presetEnemies) {
+      const factory = FACTORY[p.type];
+      if (!factory) continue;
+      const result = factory({ wx: wx + p.dx, wy: wy + p.dy, speedMult: 0 });
+      if (Array.isArray(result)) enemies.push(...result);
+      else if (result) enemies.push(result);
+    }
+  }
+
   get isDone() {
     return this._waves.length === 0;
   }

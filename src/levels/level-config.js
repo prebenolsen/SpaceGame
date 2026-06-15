@@ -45,7 +45,7 @@ const BOSS_FILL = 300;
 // waves     — mix of once() and wave() entries; enemies spawn for the full
 //             level duration so the player always has targets to fight
 export const LEVELS = [
-  // ── Level 1 — Tutorial ──────────────────────────────────────────────────────
+  // ── Level 1 ─────────────────────────────────────────────────────────────────
   // Drone base HP 40 < laser 50 dmg → one-shot kills
   {
     duration: 25,

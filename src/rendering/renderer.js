@@ -46,7 +46,7 @@ export class Renderer {
 
   drawGame(state) {
     const { ctx, _screenW: W, _screenH: H } = this;
-    const { camera, enemies, player, livesSystem, hud, levelTimer, levelNumber, score, hitFlashTimer, safeTop = 0, shipAngle = -Math.PI / 2 } = state;
+    const { camera, enemies, player, livesSystem, hud, levelTimer, levelNumber, score, hitFlashTimer, safeTop = 0, shipAngle = -Math.PI / 2, hudTitle = null } = state;
 
     // Background — drawn at full 1x scale so it fills the entire screen
     ctx.save();
@@ -68,7 +68,7 @@ export class Renderer {
     if (hitFlashTimer > 0) {
       hud.drawHitFlash(ctx, W, H);
     }
-    hud.draw(ctx, W, H, livesSystem, levelTimer, levelNumber, score, safeTop);
+    hud.draw(ctx, W, H, livesSystem, levelTimer, levelNumber, score, safeTop, hudTitle);
     ctx.restore();
   }
 

@@ -88,7 +88,7 @@ export class LevelIntroScreen {
     // Sub-label
     ctx.font = '16px monospace';
     ctx.fillStyle = '#aaaacc';
-    ctx.fillText('Survive 60 seconds', screenW / 2, cy + 20);
+    ctx.fillText('Survive the wave', screenW / 2, cy + 20);
 
     // Continue button
     const bw = 200, bh = 50;
