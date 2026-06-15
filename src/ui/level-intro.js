@@ -76,7 +76,11 @@ export class LevelIntroScreen {
       ctx.fillText('⚠  BOSS LEVEL  ⚠', screenW / 2, cy - 70);
     }
 
-    // Level number
+    // Version + level number
+    ctx.font = '11px monospace';
+    ctx.fillStyle = 'rgba(170,170,200,0.55)';
+    ctx.fillText(`v${VERSION}`, screenW / 2, cy - 48);
+
     ctx.font = 'bold 40px monospace';
     ctx.fillStyle = '#ffffff';
     ctx.fillText(`LEVEL ${this._levelNumber}`, screenW / 2, cy - 20);
@@ -155,13 +159,6 @@ export class LevelIntroScreen {
         lx += btnW + gap;
       }
     }
-
-    // Version watermark
-    ctx.font = '11px monospace';
-    ctx.fillStyle = 'rgba(170,170,200,0.45)';
-    ctx.textAlign = 'right';
-    ctx.textBaseline = 'bottom';
-    ctx.fillText(`v${VERSION}`, screenW - 10, screenH - 10);
 
     ctx.restore();
   }
