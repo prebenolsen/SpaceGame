@@ -1,5 +1,24 @@
 # Changelog
 
+## 3.0
+- Added two-part interactive tutorial that runs before Level 1 on every fresh start
+  - Tutorial 1: one stationary drone (laser only) → two close drones (arc only) → 2 s wait → "Tutorial 1 completed!" overlay
+  - Tutorial 2: move-joystick only, top tooltip for 7 s explaining outrunning, then a chasing drone pursues the player for 20 s
+- Tutorials bypass the normal level-intro/clear/upgrade flow; returning players (save.level ≥ 1) skip them
+- Only the relevant joystick is drawn and interactive during each tutorial phase
+- HUD timer area shows "TUTORIAL 1" / "TUTORIAL 2" instead of "LVL X" during tutorials
+- Freeze button hidden during tutorials (level < 4 guard unchanged)
+- Upgrade unlock thresholds restored to 1-indexed levels: damage at level 2, width/range at level 3
+
+## 2.9
+- Level 0 (static triangle tutorial) removed; replaced by the new tutorial system in 3.0
+- `defaultSave().level` set to 0 so fresh starts enter the tutorial
+
+## 2.8
+- Freeze button now only visible and interactive from Level 4 onward
+- Freeze button displays "Emergency button!" label above it; grays out when no charges remain
+- Upgrade visibility gated by level: Level 1 shows only Laser Speed + Arc Speed; Level 2 adds Laser Damage + Arc Damage; Level 3 adds Laser Width + Arc Range
+
 ## 2.7
 - `arcDamage` upgrade increased from +10 to +15 damage per pulse
 
