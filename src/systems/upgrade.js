@@ -28,7 +28,6 @@ export const UPGRADE_DEFS = [
     description: 'Doubles beam width',
     maxRank: 4,
     baseCost: 10,
-    unlockWhen: (upgrades) => (upgrades.laserFireRate ?? 0) >= 8,
   },
   {
     id: 'laserDamage',

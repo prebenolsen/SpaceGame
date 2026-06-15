@@ -16,7 +16,7 @@ Upgrades are gated — not all are available from the start.
 | `arcFireRate` | Always available |
 | `arcRange` | Always available |
 | `moveSpeed` | Level 5 cleared |
-| `laserWidth` | `laserFireRate` maxed (rank 8) |
+| `laserWidth` | Always available |
 | `laserDamage` | `laserFireRate` maxed (rank 8) |
 | `arcCone` | `arcRange` maxed (rank 8) |
 | `arcDamage` | `arcFireRate` maxed (rank 8) |
