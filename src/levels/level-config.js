@@ -58,7 +58,7 @@ export const LEVELS = [
   // ── Level 2 ─────────────────────────────────────────────────────────────────
   // Drone 1.8× → 72 HP → ~2 shots
   {
-    duration: 30,
+    duration: 25,
     isBoss: false,
     waves: [
       ...wave('drone',  30, { startTime: 0,  interval: 4,  healthMult: 1.8, speedMult: 1.25 }),
@@ -69,7 +69,7 @@ export const LEVELS = [
   // ── Level 3 ─────────────────────────────────────────────────────────────────
   // Drone 3.0× → 120 HP → ~3 shots
   {
-    duration: 45,
+    duration: 30,
     isBoss: false,
     waves: [
       ...wave('drone',  45, { startTime: 0, interval: 3,  healthMult: 3.0, speedMult: 1.5 }),
@@ -81,7 +81,7 @@ export const LEVELS = [
   // ── Level 4 ─────────────────────────────────────────────────────────────────
   // Drone 4.5× → 180 HP → ~4 shots
   {
-    duration: 60,
+    duration: 30,
     isBoss: false,
     waves: [
       ...wave('drone',  60, { startTime: 0,  interval: 2.5, healthMult: 4.5, speedMult: 1.7 }),
@@ -105,7 +105,7 @@ export const LEVELS = [
   // ── Level 6 ─────────────────────────────────────────────────────────────────
   // Drone 6.0× → 240 HP → ~5 shots
   {
-    duration: 60,
+    duration: 45,
     isBoss: false,
     waves: [
       ...wave('drone',  60, { startTime: 0,  interval: 2.5, healthMult: 6.0,  speedMult: 1.8 }),
@@ -117,7 +117,7 @@ export const LEVELS = [
   // ── Level 7 ─────────────────────────────────────────────────────────────────
   // Drone 8.0× → 320 HP → ~7 shots
   {
-    duration: 75,
+    duration: 45,
     isBoss: false,
     waves: [
       ...wave('drone',    75, { startTime: 0,  interval: 2,  healthMult: 8.0,  speedMult: 2.0 }),
@@ -130,7 +130,7 @@ export const LEVELS = [
   // ── Level 8 ─────────────────────────────────────────────────────────────────
   // Drone 10.5× → 420 HP → ~9 shots
   {
-    duration: 75,
+    duration: 45,
     isBoss: false,
     waves: [
       ...wave('drone',    75, { startTime: 0,  interval: 1.8, healthMult: 10.5, speedMult: 2.2 }),
@@ -143,7 +143,7 @@ export const LEVELS = [
   // ── Level 9 ─────────────────────────────────────────────────────────────────
   // Drone 13.0× → 520 HP → ~11 shots at baseline; manageable with weapon upgrades
   {
-    duration: 90,
+    duration: 45,
     isBoss: false,
     waves: [
       ...wave('drone',    90, { startTime: 0,  interval: 1.5, healthMult: 13.0, speedMult: 2.5 }),
@@ -179,7 +179,7 @@ export function getLevelConfig(levelIndex) {
   const enemyScale = 13 + extra * 2;
   const bossScale  = 5  + extra * 0.5;
   const isBoss     = (levelIndex + 1) % 5 === 0;
-  const dur        = 60;
+  const dur        = 45;
   const interval   = Math.max(1.5, 5 / (1 + extra * 0.15));
 
   if (isBoss) {

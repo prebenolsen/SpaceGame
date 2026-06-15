@@ -377,6 +377,38 @@ export class Game {
     ctx.restore();
   }
 
+  _drawJoystickTooltips(ctx) {
+    const r = this._moveJoystick.radius;
+    const gap = 10;
+
+    const drawLabel = (joy, color, lines) => {
+      const x = joy.baseX;
+      const y = joy.baseY - r - gap;
+      ctx.save();
+      ctx.globalAlpha = 0.85;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      if (lines.length === 1) {
+        ctx.font = 'bold 13px sans-serif';
+        ctx.fillStyle = color;
+        ctx.fillText(lines[0], x, y);
+      } else {
+        ctx.font = '11px sans-serif';
+        ctx.fillStyle = color;
+        ctx.globalAlpha = 0.65;
+        ctx.fillText(lines[1], x, y);
+        ctx.globalAlpha = 0.85;
+        ctx.font = 'bold 13px sans-serif';
+        ctx.fillText(lines[0], x, y - 14);
+      }
+      ctx.restore();
+    };
+
+    drawLabel(this._moveJoystick, '#ffffff', ['Steer ship']);
+    drawLabel(this._laserJoystick, '#42a5f5', ['Laser', 'More damage · narrow beam']);
+    drawLabel(this._arcJoystick, '#ce93d8', ['Arc blast', 'Wide cone Arc · less damage than Laser']);
+  }
+
   _loop(now) {
     const dt = clamp((now - this._lastTime) / 1000, 0, 0.1); // cap at 100ms
     this._lastTime = now;
@@ -482,6 +514,7 @@ export class Game {
         this._laserJoystick.draw(ctx, '#42a5f5');
         this._arcJoystick.draw(ctx, '#ce93d8');
         this._drawFreezeButton(ctx);
+        if (this._levelNumber === 1) this._drawJoystickTooltips(ctx);
       });
       return;
     }

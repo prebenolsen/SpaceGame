@@ -10,7 +10,7 @@ function hexToRgb(hex) {
 const CATEGORY_COLOR = {
   Speed: '#ffd54f',
   Laser: '#42a5f5',
-  AOE:   '#ce93d8',
+  Arc:   '#ce93d8',
 };
 
 export class UpgradeScreen {

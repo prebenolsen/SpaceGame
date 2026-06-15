@@ -39,27 +39,27 @@ export const UPGRADE_DEFS = [
     unlockWhen: (upgrades) => (upgrades.laserFireRate ?? 0) >= 8,
   },
 
-  // ── AOE ────────────────────────────────────────────────────────────────────
+  // ── Arc ────────────────────────────────────────────────────────────────────
   {
     id: 'arcFireRate',
-    category: 'AOE',
-    label: 'AOE Speed',
+    category: 'Arc',
+    label: 'Arc Speed',
     description: '+0.5 pulses/sec',
     maxRank: 8,
     baseCost: 12,
   },
   {
     id: 'arcRange',
-    category: 'AOE',
-    label: 'AOE Range',
+    category: 'Arc',
+    label: 'Arc Range',
     description: '+60px range',
     maxRank: 8,
     baseCost: 10,
   },
   {
     id: 'arcCone',
-    category: 'AOE',
-    label: 'AOE Cone',
+    category: 'Arc',
+    label: 'Arc Cone',
     description: 'Doubles cone width',
     maxRank: 3,
     baseCost: 10,
@@ -67,8 +67,8 @@ export const UPGRADE_DEFS = [
   },
   {
     id: 'arcDamage',
-    category: 'AOE',
-    label: 'AOE Damage',
+    category: 'Arc',
+    label: 'Arc Damage',
     description: '+10 damage per pulse',
     maxRank: 10,
     baseCost: 10,
