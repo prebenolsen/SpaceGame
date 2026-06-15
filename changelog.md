@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.7
+- `arcDamage` upgrade increased from +10 to +15 damage per pulse
+
 ## 2.6
 - From level 8 onward, players choose 2 upgrades per level (shown as "Pick 1 of 2" / "Pick 2 of 2")
 

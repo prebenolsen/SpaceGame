@@ -33,7 +33,7 @@ Defined in `src/systems/upgrade.js`.
 | `arcFireRate` | Arc (purple `#ce93d8`) | +0.5 pulses/sec | 8 |
 | `arcRange` | Arc (purple `#ce93d8`) | +60 px range | 8 |
 | `arcCone` | Arc (purple `#ce93d8`) | ×2 cone width | 3 |
-| `arcDamage` | Arc (purple `#ce93d8`) | +10 damage per pulse | 10 |
+| `arcDamage` | Arc (purple `#ce93d8`) | +15 damage per pulse | 10 |
 | `moveSpeed` | Speed (yellow) | +20% movement speed | 6 |
 
 ## Stat formulas
@@ -45,7 +45,7 @@ laserDamage   = 50  + rank * 25
 laserInterval = 1 / (1 + rank * 0.5) seconds between shots
 laserWidth    = 3 * 2^rank  px  (3 → 6 → 12 → 24 → 48)
 
-arcDamage     = 20  + rank * 10
+arcDamage     = 40  + rank * 15
 arcInterval   = 1 / (1 + rank * 0.5) seconds between pulses
 arcRange      = 150 + rank * 60  px
 arcHalfAngle  = min(π, π/5 * 2^rank)  radians
