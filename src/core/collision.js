@@ -10,14 +10,7 @@ export function checkLaserHits(laser, enemies) {
       hits.push(enemy);
     }
   }
-  // Laser only hits the closest enemy in its path
-  if (hits.length === 0) return [];
-  hits.sort((a, b) => {
-    const da = Math.hypot(a.wx - laser.ox, a.wy - laser.oy);
-    const db = Math.hypot(b.wx - laser.ox, b.wy - laser.oy);
-    return da - db;
-  });
-  return [hits[0]];
+  return hits;
 }
 
 function laserHitsEnemy(laser, enemy) {
