@@ -9,6 +9,7 @@ import { getLevelConfig } from '../levels/level-config.js';
 import { Player } from '../entities/player.js';
 import { Drone } from '../entities/enemies/drone.js';
 import { HUD } from '../ui/hud.js';
+import { LandingScreen } from '../ui/landing.js';
 import { LevelIntroScreen } from '../ui/level-intro.js';
 import { LevelClearScreen } from '../ui/level-clear.js';
 import { UpgradeScreen } from '../ui/upgrade-screen.js';
@@ -27,6 +28,7 @@ export class Game {
     this._livesSystem = new LivesSystem(5, 3);
     this._player = new Player();
     this._hud = new HUD();
+    this._landing = new LandingScreen();
     this._levelIntro = new LevelIntroScreen();
     this._levelClear = new LevelClearScreen();
     this._upgradeScreen = new UpgradeScreen();
@@ -82,7 +84,7 @@ export class Game {
     this._applyUpgrades();
 
     if (this._levelNumber === 0) {
-      this._startTutorial1();
+      this._showLanding();
     } else {
       this._startLevelIntro();
     }
@@ -217,6 +219,10 @@ export class Game {
     }
 
     // Overlay scene handlers
+    if (this._scene === SCENE.LANDING) {
+      this._landing.handleTouchStart(touch.clientX, touch.clientY);
+      return;
+    }
     if (this._scene === SCENE.LEVEL_INTRO) {
       this._levelIntro.handleTouchStart(touch.clientX, touch.clientY);
       return;
@@ -268,6 +274,10 @@ export class Game {
   }
 
   _onTouchEnd(touch) {
+    if (this._scene === SCENE.LANDING) {
+      this._landing.handleTouchEnd(touch.clientX, touch.clientY);
+      return;
+    }
     if (this._scene === SCENE.LEVEL_INTRO) {
       this._levelIntro.handleTouchEnd(touch.clientX, touch.clientY);
       return;
@@ -280,6 +290,25 @@ export class Game {
   _applyUpgrades() {
     const stats = getPlayerStats(this._upgrades);
     this._player.applyStats(stats);
+  }
+
+  // ── Landing page ─────────────────────────────────────────────────────────────
+
+  _showLanding() {
+    this._tutorialPhase = 0;
+    this._scene = SCENE.LANDING;
+    this._enemies = [];
+    this._landing.show(
+      () => this._startTutorial1(),
+      () => this._startAtLevel1(),
+    );
+  }
+
+  // "Start Level 1" — skip the tutorial and jump straight into Level 1
+  _startAtLevel1() {
+    this._levelNumber = 1;
+    this._save();
+    this._startLevelIntro();
   }
 
   // ── Tutorial 1 ─────────────────────────────────────────────────────────────
@@ -366,6 +395,11 @@ export class Game {
     this._spawner.reset();
     this._levelTimer.reset(20);
 
+    // Clear any lingering weapon visuals from Tutorial 1 — the player never fires
+    // in Tutorial 2, so their update() (which decays these) won't run.
+    this._player.arc.active = false;
+    this._player.laser.active = false;
+
     this._sound.resume();
   }
 
@@ -398,11 +432,18 @@ export class Game {
       this._tut2TooltipTimer -= dt;
       if (this._tut2TooltipTimer <= 0) {
         this._tut2Step = 2;
-        this._enemies.push(new Drone({
-          wx: this._camera.playerWorldX + 420,
-          wy: this._camera.playerWorldY,
-          speedMult: 1.1,
-        }));
+        this._enemies.push(
+          new Drone({
+            wx: this._camera.playerWorldX + 420,
+            wy: this._camera.playerWorldY - 80,
+            speedMult: 1.1,
+          }),
+          new Drone({
+            wx: this._camera.playerWorldX + 420,
+            wy: this._camera.playerWorldY + 80,
+            speedMult: 1.1,
+          }),
+        );
       }
     }
 
@@ -511,7 +552,7 @@ export class Game {
     this._totalScore = 0;
     this._applyUpgrades();
     this._save();
-    this._startTutorial1();
+    this._showLanding();
   }
 
   _resetGame() {
@@ -523,7 +564,7 @@ export class Game {
     this._totalScore = 0;
     this._score = 0;
     this._applyUpgrades();
-    this._startTutorial1();
+    this._showLanding();
   }
 
   _save() {
@@ -629,17 +670,30 @@ export class Game {
     }
   }
 
-  // Yellow info box at the bottom of the screen
+  // Yellow info box centered at the bottom, nested between the steer and laser joysticks
   _drawTutBottomTooltip(ctx, W, H, lines) {
     const lineH = 22;
-    const padX = 20, padY = 10;
-    const boxH = lines.length * lineH + padY * 2;
-    const boxW = Math.min(W * 0.88, 480);
-    const boxX = (W - boxW) / 2;
-    // Sit above the joystick area
-    const boxY = H - this._safeBottom - 150 - boxH;
+    const padX = 16, padY = 10;
+    const font = '14px sans-serif';
 
     ctx.save();
+    ctx.font = font;
+    // Hug the widest line so the box never grows wider than its text needs.
+    let textW = 0;
+    for (const line of lines) textW = Math.max(textW, ctx.measureText(line).width);
+
+    const boxH = lines.length * lineH + padY * 2;
+    // Keep the box within the horizontal gap between the steer (left) and laser (right)
+    // joysticks so it sits cleanly in the middle of the bottom of the screen.
+    const steer = this._moveJoystick;
+    const laser = this._laserJoystick;
+    const gap = (laser.baseX - laser.radius) - (steer.baseX + steer.radius);
+    const boxW = Math.min(textW + padX * 2, Math.max(gap, 160), W - 24);
+    const boxX = (W - boxW) / 2;
+    // Drop it just above the joystick row.
+    const joystickTop = steer.baseY - steer.radius;
+    const boxY = joystickTop - 12 - boxH;
+
     ctx.fillStyle = 'rgba(0,0,0,0.7)';
     ctx.beginPath();
     ctx.roundRect(boxX, boxY, boxW, boxH, 8);
@@ -649,7 +703,6 @@ export class Game {
     ctx.stroke();
 
     ctx.fillStyle = '#ffe082';
-    ctx.font = '14px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
     for (let i = 0; i < lines.length; i++) {
@@ -834,6 +887,12 @@ export class Game {
       if (this._tutorialPhase === 1 && this._tut1Step === 4) {
         renderer.drawOverlay((ctx, W, H) => this._drawTut1CompleteScreen(ctx, W, H));
       }
+      return;
+    }
+
+    // ── Landing page ────────────────────────────────────────────────────────
+    if (this._scene === SCENE.LANDING) {
+      renderer.drawOverlay((ctx, W, H) => this._landing.draw(ctx, W, H));
       return;
     }
 

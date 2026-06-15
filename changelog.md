@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.3
+- Added a landing page (`src/ui/landing.js`, new `SCENE.LANDING`) shown on a fresh start instead of auto-launching the tutorial. Two tappable cards: **Tutorial** (left) starts Tutorial 1; **Start** (right) skips the tutorial and jumps straight into Level 1 (sets `level = 1`, saves, shows the Level 1 intro).
+- Game Over "restart" and the level-intro "reset everything" now return to the landing page instead of forcing the tutorial.
+
+## 3.2
+- Tutorial 1 bottom tooltip now hugs its text, stays within the gap between the steer and laser joysticks, and sits just above the joystick row (centered at the bottom middle) instead of floating high and spanning up to 480px wide.
+- Fixed the Arc cone visual being stuck on screen at the start of Tutorial 2: Tutorial 2 never calls `Player.update`, so the arc's life-decay never ran and it stayed active. The arc and laser are now explicitly cleared when Tutorial 2 starts.
+- Tutorial 2 now spawns two chasing drones (one above, one below) instead of one.
+
 ## 3.1
 - Fixed blank screen on startup for fresh players: Tutorial 1 calls `Player.update` with one joystick set to `null` (only one weapon enabled per phase), but `Player.update` dereferenced `.active` on both joysticks, throwing every frame and leaving the canvas blank. `Player.update` now treats a null joystick as inactive.
 

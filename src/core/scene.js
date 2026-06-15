@@ -1,5 +1,6 @@
 // Scene/state machine for the game flow
 export const SCENE = {
+  LANDING: 'landing',   // entry menu: choose Tutorial or Start Level 1
   LEVEL_INTRO: 'level_intro',
   PLAYING: 'playing',
   LEVEL_CLEAR: 'level_clear',
