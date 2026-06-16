@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.8
+- Level 3 and 4 last longer
+- Level 5 boss has a greater health pool
+
 ## 3.7
 - Level 1 now spawns more drones (wave fills full 25 s duration, interval tightened from 4 s → 3 s).
 - Level 2 drone healthMult reduced from 1.3× → 1.0× so they die from a single base-damage laser shot.
