@@ -32,5 +32,6 @@ export const defaultSave = () => ({
     arcDamage: 0,
     moveSpeed: 0,
   },
-  totalScore: 0,
+  score: 0,
+  scoreUpgradeMilestones: 0,
 });

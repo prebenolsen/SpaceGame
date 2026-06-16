@@ -43,7 +43,7 @@ export class Game {
     this._levelNumber = 0;
     this._upgrades = defaultSave().upgrades;
     this._score = 0;
-    this._totalScore = 0;
+    this._scoreUpgradeMilestones = 0;
 
     // Tutorial state — _tutorialPhase 0=none, 1=Tutorial1, 2=Tutorial2
     this._tutorialPhase = 0;
@@ -78,7 +78,8 @@ export class Game {
       this._levelNumber = save.level;
       this._livesSystem.lives = save.lives;
       this._upgrades = save.upgrades;
-      this._totalScore = save.totalScore;
+      this._score = save.score ?? save.totalScore ?? 0;
+      this._scoreUpgradeMilestones = save.scoreUpgradeMilestones ?? 0;
     }
 
     this._combat = new CombatSystem(this._livesSystem, this._sound);
@@ -491,7 +492,6 @@ export class Game {
     this._bossHasSpawned = false;
     this._levelTimer.reset(config.duration ?? Infinity);
     this._enemies = [];
-    this._score = 0;
     this._livesSystem.resetHits();
     this._spawner.loadLevel(config, this._levelNumber);
     this._sound.resume();
@@ -499,14 +499,17 @@ export class Game {
 
   _onLevelClear() {
     this._sound.play('levelClear');
-    this._totalScore += this._score;
     this._scene = SCENE.LEVEL_CLEAR;
     this._levelClear.show(this._levelNumber, this._score, () => this._onLevelClearContinue());
     this._save();
   }
 
   _onLevelClearContinue() {
-    const totalPicks = this._levelNumber >= 8 ? 2 : 1;
+    const basePicks = this._levelNumber >= 8 ? 2 : 1;
+    const earned = Math.floor(this._score / 500);
+    const extraPicks = earned - this._scoreUpgradeMilestones;
+    this._scoreUpgradeMilestones = earned;
+    const totalPicks = basePicks + extraPicks;
     this._startUpgradePhase(totalPicks, totalPicks);
   }
 
@@ -542,7 +545,7 @@ export class Game {
     if (result === 'game_over') {
       this._sound.play('gameOver');
       this._scene = SCENE.GAME_OVER;
-      this._gameOver.show(this._totalScore, () => this._restartGame());
+      this._gameOver.show(this._score, () => this._restartGame());
     } else {
       this._freezeCharges++;
       this._scene = SCENE.DIED;
@@ -555,7 +558,8 @@ export class Game {
     this._tutorialPhase = 0;
     this._livesSystem.reset();
     this._upgrades = defaultSave().upgrades;
-    this._totalScore = 0;
+    this._score = 0;
+    this._scoreUpgradeMilestones = 0;
     this._applyUpgrades();
     this._save();
     this._showLanding();
@@ -567,8 +571,8 @@ export class Game {
     this._tutorialPhase = 0;
     this._livesSystem.reset();
     this._upgrades = defaultSave().upgrades;
-    this._totalScore = 0;
     this._score = 0;
+    this._scoreUpgradeMilestones = 0;
     this._applyUpgrades();
     this._showLanding();
   }
@@ -578,7 +582,8 @@ export class Game {
       level: this._levelNumber,
       lives: this._livesSystem.lives,
       upgrades: this._upgrades,
-      totalScore: this._totalScore,
+      score: this._score,
+      scoreUpgradeMilestones: this._scoreUpgradeMilestones,
     });
   }
 

@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.7
+- Level 1 now spawns more drones (wave fills full 25 s duration, interval tightened from 4 s → 3 s).
+- Level 2 drone healthMult reduced from 1.3× → 1.0× so they die from a single base-damage laser shot.
+- Score is now cumulative across rounds — it no longer resets at the start of each level. The "Level Clear" screen shows "Total Score" and the Game Over screen shows the final total.
+- Free bonus upgrade pick awarded for every 500 points accumulated (e.g. at 500, 1000, 1500 …). Extra picks are granted alongside the normal level-clear upgrade phase.
+- Miniboss base HP doubled (300 → 600). Each level now spawns exactly one miniboss (wave→once): L7 at t=10, L8 at t=15, L9 at t=12. L3 was already a single once() spawn.
+- Rushers on level 7 and beyond spawn much less frequently: L7 interval 4 s → 12 s, L8 3.5 s → 12 s, L9 3 s → 12 s, L10 boss 6 s → 18 s.
+
 ## 3.6
 - After completing Tutorial 2 the player is now returned to the landing/home screen instead of being immediately sent into Level 1, so they can choose whether to start or review the intro.
 - Fixed boss levels (level 5, 10, and auto-scaled boss levels) auto-completing immediately on load: the completion check now waits until the boss has actually spawned before watching for its death (`_bossHasSpawned` flag in `game.js`).

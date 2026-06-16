@@ -48,7 +48,7 @@ Each entry in `LEVELS` has:
 | RusherCluster | 40 | Drone HP and speed; rusher shape and size; spawns as a trio (lead + 2 wings) |
 | Rusher | 12 | Fast; low HP is intentional |
 | Tank | 150 | Scaled down from 300; heavy healthMult compensates |
-| Miniboss | 300 | Scaled down from 500; heavily multiplied in late levels |
+| Miniboss | 600 | Doubled from 300; exactly one spawns per level via once() |
 | Boss | 1500 | Unchanged |
 
 ## Level structure fields
@@ -87,16 +87,16 @@ HealthMult curve is roughly exponential so each level feels meaningfully harder 
 
 | Level | Duration | isBoss | Enemy mix |
 |-------|----------|--------|-----------|
-| 1 | 25 s | — | Drones only (interval 4 s, 1× stats) — one-shot kills |
-| 2 | 25 s | — | Drones (interval 4 s, **1.3× HP**, 1.1× speed) + rushers from t=5 (interval 15 s, 1.1× speed) |
+| 1 | 25 s | — | Drones only (interval 3 s, 1× stats, fills full 25 s) — one-shot kills |
+| 2 | 25 s | — | Drones (interval 4 s, **1.0× HP**, 1.1× speed — one-shot kills) + rushers from t=5 (interval 15 s, 1.1× speed) |
 | 3 | 30 s | — | Drones (interval 3 s, **2.0× HP**, 1.2× speed) + rushers (interval 8 s, 1.2× speed) + 1 miniboss at t=20 |
 | 4 | 30 s | — | Drones (interval 2.5 s, **3.0× HP**, 1.4×) + rushers (**1.2× HP**, interval 5.5 s, 1.4×) + tanks (interval 20 s) |
 | 5 | ∞ | Boss | Boss (**1.8× HP**, 1.2× speed) + drone support (**2.5× HP**) + rusher support (**1.5× HP**) |
-| 6 | 30 s | — | Level 4 mix with **rusherCluster** replacing rushers — drones (**3.0× HP**, 1.4×) + rusherClusters (**1.2× HP**, interval 5.5 s) + tanks (interval 20 s) |
-| 7 | 45 s | — | Drones (interval 2 s, **5.5× HP**, 1.6×) + rushers (**2.5× HP**, interval 4 s) + tanks (**2.5× HP**, interval 14 s) + minibosses (**1.5× HP**, interval 30 s) |
-| 8 | 45 s | — | Drones (interval 1.8 s, **7.0× HP**, 1.8×) + rushers (**3.5× HP**, interval 3.5 s) + **rusherClusters** (**2.8× HP**, interval 12 s, from t=18) + tanks (**3.8× HP**, interval 12 s) + minibosses (**2.5× HP**, interval 22 s) |
-| 9 | 45 s | — | Drones (interval 1.5 s, **9.0× HP**, 2.0×) + rushers (**5.0× HP**) + tanks (**5.5× HP**, interval 10 s) + minibosses (**3.5× HP**, interval 18 s) |
-| 10 | ∞ | Boss | Boss (**3.5× HP**, 1.5× speed) + drone support (**7.0× HP**) + rusher support (**4.0× HP**) + **rusherCluster** support (**4.0× HP**, interval 14 s, from t=12) |
+| 6 | 45 s | — | Level 4 mix with **rusherCluster** replacing rushers — drones (**3.0× HP**, 1.4×) + rusherClusters (**1.2× HP**, interval 5.5 s) + tanks (interval 20 s) |
+| 7 | 45 s | — | Drones (interval 2 s, **5.5× HP**, 1.6×) + rushers (**2.5× HP**, interval 12 s) + tanks (**2.5× HP**, interval 14 s) + 1 miniboss at t=10 (**1.5× HP**) |
+| 8 | 45 s | — | Drones (interval 1.8 s, **7.0× HP**, 1.8×) + rushers (**3.5× HP**, interval 12 s) + **rusherClusters** (**2.8× HP**, interval 12 s, from t=18) + tanks (**3.8× HP**, interval 12 s) + 1 miniboss at t=15 (**2.5× HP**) |
+| 9 | 45 s | — | Drones (interval 1.5 s, **9.0× HP**, 2.0×) + rushers (**5.0× HP**, interval 12 s) + tanks (**5.5× HP**, interval 10 s) + 1 miniboss at t=12 (**3.5× HP**) |
+| 10 | ∞ | Boss | Boss (**3.5× HP**, 1.5× speed) + drone support (**7.0× HP**) + rusher support (**4.0× HP**, interval 18 s) + **rusherCluster** support (**4.0× HP**, interval 14 s, from t=12) |
 
 ## Auto-scaling beyond level 10
 

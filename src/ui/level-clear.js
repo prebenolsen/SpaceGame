@@ -25,7 +25,7 @@ export class LevelClearScreen {
 
     ctx.font = '16px monospace';
     ctx.fillStyle = '#ffd54f';
-    ctx.fillText(`Score: ${this._score}`, screenW / 2, screenH / 2 + 10);
+    ctx.fillText(`Total Score: ${this._score}`, screenW / 2, screenH / 2 + 10);
 
     // Continue tap hint
     ctx.font = '13px monospace';
