@@ -11,7 +11,7 @@ export class Player {
     this.stats = null; // set externally from upgrade system
     this.LASER_RANGE = 1200;
 
-    this.laserAim = { active: false, angle: 0, ox: 0, oy: 0, range: this.LASER_RANGE, width: 3 };
+    this.laserAim = { active: false, angle: 0, ox: 0, oy: 0, range: this.LASER_RANGE, width: 6 };
     this.arcAim   = { active: false, angle: 0, ox: 0, oy: 0, range: 150, halfAngle: Math.PI / 5 };
   }
 

@@ -82,7 +82,7 @@ export function getPlayerStats(upgrades) {
   return {
     laserDamage:   50 + (upgrades.laserDamage ?? 0) * 25,
     laserInterval: 1 / (1 + (upgrades.laserFireRate ?? 0) * 0.5),
-    laserWidth:    3 * Math.pow(2, upgrades.laserWidth ?? 0),
+    laserWidth:    6 * Math.pow(2, upgrades.laserWidth ?? 0),
     arcDamage:     40 + (upgrades.arcDamage ?? 0) * 15,
     arcInterval:   1 / (1 + (upgrades.arcFireRate ?? 0) * 0.5),
     arcRange:      150 + (upgrades.arcRange ?? 0) * 60,

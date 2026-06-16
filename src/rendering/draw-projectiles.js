@@ -21,8 +21,8 @@ function drawLaserAim(ctx, aim, camera, screenW, screenH) {
   const target = camera.worldToScreen(tx, ty, screenW, screenH);
 
   ctx.save();
-  ctx.globalAlpha = 0.45;
-  ctx.strokeStyle = '#42a5f5';
+  ctx.globalAlpha = 0.40;
+  ctx.strokeStyle = '#888888';
   ctx.lineWidth = aim.width;
   ctx.beginPath();
   ctx.moveTo(origin.x, origin.y);

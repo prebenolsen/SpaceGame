@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.7
+- Laser beam default width doubled (3 → 6px); upgrade formula updated to match (starts at 6, doubles per rank).
+- Aim line (beam when not firing) changed to grey (#888888) at 40% opacity instead of blue at 45%.
+
 ## 4.6
 - Force landscape orientation on mobile: attempts a Screen Orientation API lock (Android Chrome/PWA) and shows a "please rotate your device" overlay on portrait screens ≤1024px wide (works on iOS and all browsers without API support).
 

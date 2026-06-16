@@ -6,13 +6,13 @@ export class Laser {
     this.tx = 0; // target world x (end of beam)
     this.ty = 0;
     this.damage = 0;
-    this.width = 3;
+    this.width = 6;
     this._life = 0;
     this.DURATION = 0.1; // visible for 100ms
     this.justFired = false; // true only on the frame fire() is called
   }
 
-  fire(ox, oy, angle, range, damage, width = 3) {
+  fire(ox, oy, angle, range, damage, width = 6) {
     this.active = true;
     this.justFired = true;
     this.ox = ox;
