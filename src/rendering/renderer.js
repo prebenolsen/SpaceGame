@@ -69,6 +69,8 @@ export class Renderer {
       hud.drawHitFlash(ctx, W, H);
     }
     hud.draw(ctx, W, H, livesSystem, levelTimer, levelNumber, score, safeTop, hudTitle);
+    const boss = enemies.find(e => e.type === 'boss');
+    hud.drawBossArrow(ctx, W, H, boss, camera, GAME_ZOOM);
     ctx.restore();
   }
 

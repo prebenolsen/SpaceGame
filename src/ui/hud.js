@@ -82,4 +82,50 @@ export class HUD {
     ctx.fillRect(0, 0, screenW, screenH);
     ctx.restore();
   }
+
+  // Arrow around the player pointing toward the boss when it's off-screen
+  drawBossArrow(ctx, screenW, screenH, boss, camera, gameZoom) {
+    if (!boss || !boss.active) return;
+
+    const cx = screenW / 2;
+    const cy = screenH / 2;
+    const screen = camera.worldToScreen(boss.wx, boss.wy, screenW, screenH);
+
+    // Visible half-extents in unzoomed screen coordinates (gameZoom shrinks scale → bigger world visible)
+    const halfVW = cx / gameZoom;
+    const halfVH = cy / gameZoom;
+
+    const dx = screen.x - cx;
+    const dy = screen.y - cy;
+
+    // Only show arrow when boss is outside 85% of the visible area
+    if (Math.abs(dx) <= halfVW * 0.85 && Math.abs(dy) <= halfVH * 0.85) return;
+
+    const angle = Math.atan2(dy, dx);
+    const orbitR = 72;
+    const ax = cx + Math.cos(angle) * orbitR;
+    const ay = cy + Math.sin(angle) * orbitR;
+
+    const size = 14;
+    const pulse = 0.65 + 0.35 * Math.sin(Date.now() / 280);
+
+    ctx.save();
+    ctx.translate(ax, ay);
+    ctx.rotate(angle);
+    ctx.globalAlpha = pulse;
+
+    // Arrow triangle pointing toward boss
+    ctx.beginPath();
+    ctx.moveTo(size, 0);
+    ctx.lineTo(-size * 0.55, -size * 0.55);
+    ctx.lineTo(-size * 0.55, size * 0.55);
+    ctx.closePath();
+    ctx.fillStyle = '#f44336';
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    ctx.restore();
+  }
 }

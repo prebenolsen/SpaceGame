@@ -1,5 +1,8 @@
 # Changelog
 
+## 4.8
+- Boss direction indicator: a pulsing red arrow appears around the player pointing toward the boss whenever the boss is off-screen. The arrow disappears once the boss is nearly in view.
+
 ## 4.7
 - Laser beam default width doubled (3 → 6px); upgrade formula updated to match (starts at 6, doubles per rank).
 - Aim line (beam when not firing) changed to grey (#888888) at 40% opacity instead of blue at 45%.
