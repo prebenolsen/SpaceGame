@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.3
+- Rusher speed is now capped at 528 px/s (20% faster than a fully-upgraded player's max move speed of 440 px/s), preventing rushers from becoming impossible to dodge at high levels.
+- Freeze button moved to the bottom-right corner of the screen.
+- "Emergency button!" label on the freeze button is removed after level 4 (the first level it appears on).
+
 ## 4.2
 - Score-based bonus upgrade picks now trigger at fixed milestones (500, 1500, 3000, 5000 points) instead of every 400 points.
 - Level 10 boss speed increased by 30% (speedMult 1.5 → 1.95).

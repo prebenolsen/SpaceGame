@@ -138,8 +138,8 @@ export class Game {
       this._arcJoystick.reposition(W - pad - r * 3, bottomY);
     }
     const btnR = 28;
-    const btnX = (W - pad - r * 5 - 20 + W - pad - r * 3) / 2;
-    const btnY = bottomY - r - 24 - btnR;
+    const btnX = W - pad - btnR;
+    const btnY = H - pad - btnR - this._safeBottom;
     this._freezeButton = { x: btnX, y: btnY, radius: btnR };
 
     if (!this._spawner) {
@@ -762,12 +762,14 @@ export class Game {
       ctx.textBaseline = 'top';
       ctx.fillText(`×${this._freezeCharges}`, btn.x + btn.radius, btn.y - btn.radius + 2);
     }
-    ctx.globalAlpha = available ? 0.85 : 0.4;
-    ctx.font = 'bold 11px sans-serif';
-    ctx.fillStyle = available ? '#90caf9' : '#888';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'bottom';
-    ctx.fillText('Emergency button!', btn.x, btn.y - btn.radius - 4);
+    if (this._levelNumber === 4) {
+      ctx.globalAlpha = available ? 0.85 : 0.4;
+      ctx.font = 'bold 11px sans-serif';
+      ctx.fillStyle = available ? '#90caf9' : '#888';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText('Emergency button!', btn.x, btn.y - btn.radius - 4);
+    }
     ctx.restore();
   }
 
