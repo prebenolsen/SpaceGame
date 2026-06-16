@@ -8,6 +8,7 @@ The following files document live game systems. **Keep them up to date whenever 
 |------|-------------|
 | `upgrades.md` | Any change to `src/systems/upgrade.js` (upgrade definitions, stat formulas, max ranks, choice logic) or to how upgrades are triggered, applied, or persisted in `src/core/game.js` / `src/utils/storage.js` |
 | `level-config.md` | Any change to `src/levels/level-config.js` (new levels, modified durations, enemy mixes, spawn helpers, auto-scale logic, or new enemy types) |
+| `supabase.md` | Any change to `src/utils/supabase.js` (table schema, column additions, query logic, RLS policies) or to how/where scores are submitted. If the table schema changes, add a row to the **Schema migrations** table in `supabase.md` with the migration SQL. |
 | `changelog.md` | **Every code change, no exceptions.** Add a new `## <version>` section at the top describing what changed. Do this in the same edit as the version bump — do not defer it. |
 
 Update the relevant `.md` file in the same commit/change as the code edit — do not defer it.

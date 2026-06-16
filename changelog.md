@@ -1,5 +1,13 @@
 # Changelog
 
+## 5.0
+- Godmode: Start at level 20 with all upgrades maxed. A red progress bar fills along the bottom of the card while holding.
+
+## 4.9
+- Scoreboard now records the game version with each score submission (`version` column in Supabase). The scoreboard defaults to showing the newest version's scores, with ‹ / › arrow buttons to browse older versions.
+- Drone speed is now capped at 528 px/s (20% faster than a fully-upgraded player's max move speed), matching the existing rusher cap.
+- Boss levels now limit companion enemies to `level` on-screen at once (level 5 → 5 companions, level 10 → 10, etc.), preventing the screen from being overwhelmed.
+
 ## 4.8
 - Boss direction indicator: a pulsing red arrow appears around the player pointing toward the boss whenever the boss is off-screen. The arrow disappears once the boss is nearly in view.
 

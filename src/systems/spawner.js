@@ -65,10 +65,14 @@ export class Spawner {
     return this._waves.length === 0;
   }
 
-  update(dt, enemies) {
+  update(dt, enemies, maxCompanions = Infinity) {
     this._elapsed += dt;
     while (this._waves.length > 0 && this._waves[0].time <= this._elapsed) {
       const entry = this._waves.shift();
+      if (entry.type !== 'boss' && maxCompanions !== Infinity) {
+        const companions = enemies.filter(e => e.active && e.type !== 'boss').length;
+        if (companions >= maxCompanions) continue;
+      }
       const result = this._createEnemy(entry);
       if (Array.isArray(result)) enemies.push(...result);
       else if (result) enemies.push(result);

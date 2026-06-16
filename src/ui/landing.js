@@ -21,23 +21,40 @@ export class LandingScreen {
     this._stars = null; // cached starfield, generated once per size
     this._starsSize = null;
     this._topScores = null; // null = loading, [] = none/unavailable
+    this._godmodeHoldStart = null;
+    this._godmodeTimer = null;
+    this._onGodmode = null;
   }
 
-  show(onTutorial, onCampaign, maxClearedLevel, onScoreboard) {
+  show(onTutorial, onCampaign, maxClearedLevel, onScoreboard, onGodmode) {
+    if (this._godmodeTimer) { clearTimeout(this._godmodeTimer); this._godmodeTimer = null; }
     this._onTutorial = onTutorial;
     this._onCampaign = onCampaign;
     this._onScoreboard = onScoreboard;
+    this._onGodmode = onGodmode ?? null;
     this._maxClearedLevel = maxClearedLevel ?? 0;
     this._touchStart = null;
+    this._godmodeHoldStart = null;
     this._topScores = null;
     fetchTopScores(3).then(scores => { this._topScores = scores; });
   }
 
   handleTouchStart(x, y) {
     this._touchStart = { x, y };
+    const inside = (r) => r && x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h;
+    if (inside(this._tutorialRect) && this._onGodmode) {
+      this._godmodeHoldStart = performance.now();
+      this._godmodeTimer = setTimeout(() => {
+        this._godmodeHoldStart = null;
+        this._godmodeTimer = null;
+        if (this._onGodmode) this._onGodmode();
+      }, 5000);
+    }
   }
 
   handleTouchEnd(x, y) {
+    if (this._godmodeTimer) { clearTimeout(this._godmodeTimer); this._godmodeTimer = null; }
+    this._godmodeHoldStart = null;
     if (!this._touchStart) return;
     this._touchStart = null;
 
@@ -150,6 +167,21 @@ export class LandingScreen {
       desc: 'Learn the controls at your own pace',
       badge: { text: 'New players', color: '#aaaacc', solid: false },
     });
+    if (this._godmodeHoldStart !== null) {
+      const progress = Math.min(1, (performance.now() - this._godmodeHoldStart) / 5000);
+      const tr = this._tutorialRect;
+      const barH = Math.max(3, 4 * scale);
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(tr.x, tr.y, tr.w, tr.h, 12 * scale);
+      ctx.clip();
+      ctx.fillStyle = '#ff3333';
+      ctx.shadowColor = '#ff3333';
+      ctx.shadowBlur = 10;
+      ctx.globalAlpha = 0.9;
+      ctx.fillRect(tr.x, tr.y + tr.h - barH, tr.w * progress, barH);
+      ctx.restore();
+    }
     const hasProgress = this._maxClearedLevel > 0;
     this._drawCard(ctx, this._startRect, scale, {
       accent: '#69f0ae',

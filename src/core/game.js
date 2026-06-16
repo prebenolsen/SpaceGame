@@ -4,7 +4,7 @@ import { Timer } from './timer.js';
 import { Spawner } from '../systems/spawner.js';
 import { CombatSystem } from '../systems/combat.js';
 import { LivesSystem } from '../systems/lives.js';
-import { getPlayerStats, pickUpgradeChoices, applyUpgrade } from '../systems/upgrade.js';
+import { UPGRADE_DEFS, getPlayerStats, pickUpgradeChoices, applyUpgrade } from '../systems/upgrade.js';
 import { getLevelConfig } from '../levels/level-config.js';
 import { Player } from '../entities/player.js';
 import { Drone } from '../entities/enemies/drone.js';
@@ -344,7 +344,21 @@ export class Game {
       () => this._onCampaignButton(),
       this._maxClearedLevel,
       () => this._showScoreboard(() => this._showLanding()),
+      () => this._startGodmode(),
     );
+  }
+
+  _startGodmode() {
+    const maxed = {};
+    for (const def of UPGRADE_DEFS) maxed[def.id] = def.maxRank;
+    this._upgrades = maxed;
+    this._levelNumber = 20;
+    this._score = 0;
+    this._scoreUpgradeMilestones = 0;
+    this._replayMode = false;
+    this._applyUpgrades();
+    this._save();
+    this._startLevelIntro();
   }
 
   _showScoreboard(onBack) {
@@ -1002,7 +1016,8 @@ export class Game {
     }
 
     this._livesSystem.update(dt);
-    this._spawner.update(dt, this._enemies);
+    const companionLimit = this._bossLevel ? this._levelNumber : Infinity;
+    this._spawner.update(dt, this._enemies, companionLimit);
 
     for (const enemy of this._enemies) {
       if (enemy.active) enemy.update(dt, this._camera);

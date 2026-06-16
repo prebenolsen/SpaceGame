@@ -12,11 +12,12 @@ Open the **SQL Editor** (left sidebar) and run:
 
 ```sql
 create table highscores (
-  id         bigint generated always as identity primary key,
-  name       text        not null,
-  score      bigint      not null,
-  highest_level integer  not null,
-  created_at timestamptz not null default now()
+  id            bigint generated always as identity primary key,
+  name          text        not null,
+  score         bigint      not null,
+  highest_level integer     not null,
+  version       text,
+  created_at    timestamptz not null default now()
 );
 
 -- Anyone can insert and read scores; no one can update or delete.
@@ -50,6 +51,12 @@ The anon key is safe to expose — the row-level security policies above restric
 
 ## 5. Verify
 
-After the deploy finishes, open the live site, play a game, and submit a score. Then check **Table Editor → highscores** in Supabase to confirm the row arrived.
+After the deploy finishes, open the live site, play a game, and submit a score. Then check **Table Editor → highscores** in Supabase to confirm the row arrived with a `version` value.
 
-Redeploy. 
+## Schema migrations
+
+When the table schema changes, run the migration SQL in the **SQL Editor** and update this file in the same change.
+
+| Version | Migration |
+|---------|-----------|
+| v4.9 | `ALTER TABLE highscores ADD COLUMN version TEXT;` — records the game version string with each score so the scoreboard can filter by version. |
