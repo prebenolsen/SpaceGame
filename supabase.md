@@ -51,3 +51,5 @@ The anon key is safe to expose — the row-level security policies above restric
 ## 5. Verify
 
 After the deploy finishes, open the live site, play a game, and submit a score. Then check **Table Editor → highscores** in Supabase to confirm the row arrived.
+
+Redeploy. 
