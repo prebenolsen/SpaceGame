@@ -12,7 +12,7 @@ export class CombatSystem {
   }
 
   // Returns list of destroyed enemies
-  resolveLaser(laser, enemies) {
+  resolveLaser(laser, enemies, stunChance = 0) {
     const hits = checkLaserHits(laser, enemies);
     const destroyed = [];
     for (const enemy of hits) {
@@ -22,12 +22,14 @@ export class CombatSystem {
         this.score += enemy.scoreValue;
         enemy.active = false;
         destroyed.push(enemy);
+      } else if (stunChance > 0 && enemy.type !== 'boss' && enemy.type !== 'miniboss' && Math.random() < stunChance) {
+        enemy.freeze(2);
       }
     }
     return destroyed;
   }
 
-  resolveArc(arc, enemies) {
+  resolveArc(arc, enemies, stunChance = 0) {
     const hits = checkArcHits(arc, enemies);
     const destroyed = [];
     for (const enemy of hits) {
@@ -37,6 +39,8 @@ export class CombatSystem {
         this.score += enemy.scoreValue;
         enemy.active = false;
         destroyed.push(enemy);
+      } else if (stunChance > 0 && enemy.type !== 'boss' && enemy.type !== 'miniboss' && Math.random() < stunChance) {
+        enemy.freeze(2);
       }
     }
     return destroyed;

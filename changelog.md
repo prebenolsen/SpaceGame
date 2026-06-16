@@ -1,5 +1,12 @@
 # Changelog
 
+## 5.1
+- Arc cone now scales by ×1.25 per rank instead of ×2 (72° → 90° → 112.5° → 140.625°); maxRank stays 3.
+- Arc range now scales by ×1.25 per rank (150 → 187.5 → 234.4 → 293px); maxRank reduced from 8 to 3.
+- `arcCone` unlock condition updated from arcRange ≥ 8 to arcRange ≥ 3.
+- New upgrade **Arc Stun** (Arc category, maxRank 2): unlocks when arcFireRate, arcRange, arcCone, and arcDamage are all maxed. Rank 1 = 2.5% chance, rank 2 = 5% chance to stun non-boss/miniboss enemies for 2s on Arc hit.
+- New upgrade **Laser Stun** (Laser category, maxRank 2): unlocks when laserFireRate and laserDamage are maxed. Both ranks give 5% chance to stun non-boss/miniboss enemies for 2s on Laser hit.
+
 ## 5.0
 - Godmode: Start at level 20 with all upgrades maxed. A red progress bar fills along the bottom of the card while holding.
 

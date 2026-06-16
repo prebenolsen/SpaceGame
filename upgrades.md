@@ -32,7 +32,9 @@ Upgrades are gated — not all are available from the start.
 | `laserWidth` | Level 3 cleared |
 | `arcRange` | Level 3 cleared |
 | `moveSpeed` | Level 5 cleared |
-| `arcCone` | `arcRange` maxed (rank 8) |
+| `arcCone` | `arcRange` maxed (rank 3) |
+| `laserStun` | `laserFireRate` maxed (rank 8) AND `laserDamage` maxed (rank 10) |
+| `arcStun` | `arcFireRate` (rank 8), `arcRange` (rank 3), `arcCone` (rank 3), `arcDamage` (rank 10) all maxed |
 
 ## Available upgrades
 
@@ -43,10 +45,12 @@ Defined in `src/systems/upgrade.js`.
 | `laserFireRate` | Laser (blue `#42a5f5`) | +0.5 shots/sec | 8 |
 | `laserWidth` | Laser (blue `#42a5f5`) | ×2 beam width | 4 |
 | `laserDamage` | Laser (blue `#42a5f5`) | +25 damage per shot | 10 |
+| `laserStun` | Laser (blue `#42a5f5`) | 5% stun chance on hit (both ranks) | 2 |
 | `arcFireRate` | Arc (purple `#ce93d8`) | +0.5 pulses/sec | 8 |
-| `arcRange` | Arc (purple `#ce93d8`) | +60 px range | 8 |
-| `arcCone` | Arc (purple `#ce93d8`) | ×2 cone width | 3 |
+| `arcRange` | Arc (purple `#ce93d8`) | ×1.25 range | 3 |
+| `arcCone` | Arc (purple `#ce93d8`) | ×1.25 cone width | 3 |
 | `arcDamage` | Arc (purple `#ce93d8`) | +15 damage per pulse | 10 |
+| `arcStun` | Arc (purple `#ce93d8`) | +2.5% stun chance on hit | 2 |
 | `moveSpeed` | Speed (yellow) | +20% movement speed | 6 |
 
 ## Stat formulas
@@ -54,18 +58,28 @@ Defined in `src/systems/upgrade.js`.
 `getPlayerStats()` in `src/systems/upgrade.js` derives live values from current ranks:
 
 ```
-laserDamage   = 50  + rank * 25
-laserInterval = 1 / (1 + rank * 0.5) seconds between shots
-laserWidth    = 3 * 2^rank  px  (3 → 6 → 12 → 24 → 48)
+laserDamage      = 50  + rank * 25
+laserInterval    = 1 / (1 + rank * 0.5) seconds between shots
+laserWidth       = 6 * 2^rank  px  (6 → 12 → 24 → 48 → 96)
+laserStunChance  = 5% if laserStun rank ≥ 1, else 0%
 
-arcDamage     = 40  + rank * 15
-arcInterval   = 1 / (1 + rank * 0.5) seconds between pulses
-arcRange      = 150 + rank * 60  px
-arcHalfAngle  = min(π, π/5 * 2^rank)  radians
-                rank 0 = 72° total | rank 1 = 144° | rank 2 = 288° | rank 3 = full circle
+arcDamage        = 40  + rank * 15
+arcInterval      = 1 / (1 + rank * 0.5) seconds between pulses
+arcRange         = 150 * 1.25^rank  px  (150 → 187.5 → 234.4 → 292.9)
+arcHalfAngle     = min(π, π/5 * 1.25^rank)  radians
+                   rank 0 = 72° total | rank 1 = 90° | rank 2 = 112.5° | rank 3 = 140.625°
+arcStunChance    = 2.5% * rank  (rank 1 = 2.5%, rank 2 = 5%)
 
-moveSpeed     = 200 * (1 + rank * 0.2)
+moveSpeed        = 200 * (1 + rank * 0.2)
 ```
+
+## Stun mechanic
+
+Arc Stun and Laser Stun apply a 2-second freeze to enemies on hit. The chance rolls independently per enemy hit per shot/pulse.
+
+- Bosses (`type === 'boss'`) and minibosses (`type === 'miniboss'`) are immune.
+- Stun uses the existing `enemy.freeze(2)` method from `BaseEnemy`.
+- Logic lives in `resolveLaser()` and `resolveArc()` in `src/systems/combat.js`.
 
 ## Selection UI
 
@@ -86,7 +100,7 @@ Tapping a card calls `_onUpgradePick()` in `src/core/game.js`.
 
 ## Persistence
 
-Upgrades are stored in `localStorage` under key `space-survivor-save` as a plain object mapping upgrade ID → rank (e.g. `{ laserFireRate: 3, arcRange: 8, ... }`). Locked upgrades are stored at rank 0 and simply excluded from choices until their unlock condition is met.
+Upgrades are stored in `localStorage` under key `space-survivor-save` as a plain object mapping upgrade ID → rank (e.g. `{ laserFireRate: 3, arcRange: 2, ... }`). Locked upgrades are stored at rank 0 and simply excluded from choices until their unlock condition is met.
 
 - Saved after every level completion (`src/utils/storage.js`).
 - Loaded on game start.
@@ -103,3 +117,4 @@ Upgrades are stored in `localStorage` under key `space-survivor-save` as a plain
 | `src/utils/storage.js` | Save / load / reset |
 | `src/entities/projectiles/laser.js` | Consumes `laserDamage`, `laserWidth` |
 | `src/entities/projectiles/arc.js` | Consumes `arcDamage`, `arcRange`, `arcHalfAngle` |
+| `src/systems/combat.js` | `resolveLaser` / `resolveArc` apply stun on hit |

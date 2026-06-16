@@ -1044,8 +1044,8 @@ export class Game {
     this._player.update(dt, this._laserJoystick, this._arcJoystick, this._camera);
 
     this._combat.score = this._score;
-    this._combat.resolveLaser(this._player.laser, this._enemies);
-    this._combat.resolveArc(this._player.arc, this._enemies);
+    this._combat.resolveLaser(this._player.laser, this._enemies, stats.laserStunChance ?? 0);
+    this._combat.resolveArc(this._player.arc, this._enemies, stats.arcStunChance ?? 0);
     this._score = this._combat.score;
 
     const hitResult = this._combat.resolveEnemyPlayerCollisions(this._enemies, this._camera);

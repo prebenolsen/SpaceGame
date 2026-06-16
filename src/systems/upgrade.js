@@ -39,6 +39,17 @@ export const UPGRADE_DEFS = [
     baseCost: 10,
     unlockWhen: (_, level) => level >= 2,
   },
+  {
+    id: 'laserStun',
+    category: 'Laser',
+    label: 'Laser Stun',
+    description: '5% chance to stun on hit',
+    maxRank: 2,
+    baseCost: 15,
+    unlockWhen: (upgrades) =>
+      (upgrades.laserFireRate ?? 0) >= 8 &&
+      (upgrades.laserDamage ?? 0) >= 10,
+  },
 
   // ── Arc ────────────────────────────────────────────────────────────────────
   {
@@ -53,8 +64,8 @@ export const UPGRADE_DEFS = [
     id: 'arcRange',
     category: 'Arc',
     label: 'Arc Range',
-    description: '+60px range',
-    maxRank: 8,
+    description: '+25% range',
+    maxRank: 3,
     baseCost: 10,
     unlockWhen: (_, level) => level >= 3,
   },
@@ -62,10 +73,10 @@ export const UPGRADE_DEFS = [
     id: 'arcCone',
     category: 'Arc',
     label: 'Arc Cone',
-    description: 'Doubles cone width',
+    description: '+25% cone width',
     maxRank: 3,
     baseCost: 10,
-    unlockWhen: (upgrades) => (upgrades.arcRange ?? 0) >= 8,
+    unlockWhen: (upgrades) => (upgrades.arcRange ?? 0) >= 3,
   },
   {
     id: 'arcDamage',
@@ -76,18 +87,33 @@ export const UPGRADE_DEFS = [
     baseCost: 10,
     unlockWhen: (_, level) => level >= 2,
   },
+  {
+    id: 'arcStun',
+    category: 'Arc',
+    label: 'Arc Stun',
+    description: '+2.5% stun chance on Arc hit',
+    maxRank: 2,
+    baseCost: 15,
+    unlockWhen: (upgrades) =>
+      (upgrades.arcFireRate ?? 0) >= 8 &&
+      (upgrades.arcRange ?? 0) >= 3 &&
+      (upgrades.arcCone ?? 0) >= 3 &&
+      (upgrades.arcDamage ?? 0) >= 10,
+  },
 ];
 
 export function getPlayerStats(upgrades) {
   return {
-    laserDamage:   50 + (upgrades.laserDamage ?? 0) * 25,
-    laserInterval: 1 / (1 + (upgrades.laserFireRate ?? 0) * 0.5),
-    laserWidth:    6 * Math.pow(2, upgrades.laserWidth ?? 0),
-    arcDamage:     40 + (upgrades.arcDamage ?? 0) * 15,
-    arcInterval:   1 / (1 + (upgrades.arcFireRate ?? 0) * 0.5),
-    arcRange:      150 + (upgrades.arcRange ?? 0) * 60,
-    arcHalfAngle:  Math.min(Math.PI, (Math.PI / 5) * Math.pow(2, upgrades.arcCone ?? 0)),
-    moveSpeed:     200 * (1 + (upgrades.moveSpeed ?? 0) * 0.2),
+    laserDamage:     50 + (upgrades.laserDamage ?? 0) * 25,
+    laserInterval:   1 / (1 + (upgrades.laserFireRate ?? 0) * 0.5),
+    laserWidth:      6 * Math.pow(2, upgrades.laserWidth ?? 0),
+    laserStunChance: (upgrades.laserStun ?? 0) > 0 ? 0.05 : 0,
+    arcDamage:       40 + (upgrades.arcDamage ?? 0) * 15,
+    arcInterval:     1 / (1 + (upgrades.arcFireRate ?? 0) * 0.5),
+    arcRange:        150 * Math.pow(1.25, upgrades.arcRange ?? 0),
+    arcHalfAngle:    Math.min(Math.PI, (Math.PI / 5) * Math.pow(1.25, upgrades.arcCone ?? 0)),
+    arcStunChance:   0.025 * (upgrades.arcStun ?? 0),
+    moveSpeed:       200 * (1 + (upgrades.moveSpeed ?? 0) * 0.2),
   };
 }
 
