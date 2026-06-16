@@ -39,9 +39,52 @@
       width: 100%;
       height: 100%;
     }
+
+    #rotate-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: #000;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      color: #fff;
+      font-family: sans-serif;
+      text-align: center;
+      padding: 24px;
+    }
+
+    #rotate-overlay svg {
+      width: 72px;
+      height: 72px;
+      animation: spin-phone 1.4s ease-in-out infinite alternate;
+    }
+
+    @keyframes spin-phone {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(-90deg); }
+    }
+
+    #rotate-overlay p {
+      font-size: 1.2rem;
+      letter-spacing: 0.03em;
+    }
+
+    @media (orientation: portrait) and (max-width: 1024px) {
+      #rotate-overlay { display: flex; }
+    }
   </style>
 </head>
 <body>
+  <div id="rotate-overlay" aria-live="polite">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="5" y="2" width="14" height="20" rx="2"/>
+      <path d="M9 21h6"/>
+    </svg>
+    <p>Please rotate your device<br>to landscape mode</p>
+  </div>
   <canvas id="game-canvas"></canvas>
   <script>
     // Polyfill for CanvasRenderingContext2D.roundRect (Safari < 15.4)
@@ -55,6 +98,12 @@
         this.arcTo(x, y, x + w, y, r);
         this.closePath();
       };
+    }
+  </script>
+  <script>
+    // Try to lock orientation to landscape on mobile (Android Chrome / PWA)
+    if (screen.orientation && screen.orientation.lock) {
+      screen.orientation.lock('landscape').catch(() => {});
     }
   </script>
   <script type="module" src="src/main.js"></script>

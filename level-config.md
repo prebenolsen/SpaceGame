@@ -22,7 +22,7 @@ Fills `duration` seconds with repeated spawns of `type`. Each entry gets a rando
 
 ### `once(type, time, options)`
 
-Single spawn entry — used for bosses and surprise minibosses. Takes the same `healthMult` / `speedMult` options.
+Single spawn entry — used for bosses and surprise minibosses. Takes the same `healthMult` / `speedMult` options. Any additional options (e.g. `enableLaser: true`) are passed through to the enemy constructor.
 
 ## Enemy types
 
@@ -96,7 +96,7 @@ HealthMult curve is roughly exponential so each level feels meaningfully harder 
 | 7 | 45 s | — | Drones (interval 2 s, **5.5× HP**, 1.6×) + tanks (**2.5× HP**, interval 14 s) + 1 miniboss at t=10 (**2.9× HP**, very slow) |
 | 8 | 45 s | — | Drones (interval 1.8 s, **7.0× HP**, 1.8×) + rushers (**3.5× HP**, interval 12 s) + **rusherClusters** (**2.8× HP**, interval 12 s, from t=18) + tanks (**3.8× HP**, interval 12 s) |
 | 9 | 45 s | — | Drones (interval 1.5 s, **9.0× HP**, 2.0×) + tanks (**5.5× HP**, interval 10 s) + 1 miniboss at t=12 (**4.8× HP**, very slow) |
-| 10 | ∞ | Boss | Boss (**10× HP**, **1.95× speed**, laser attack every 5 s) + drone support (**7.0× HP**) + rusher support (**4.0× HP**, interval 18 s) + **rusherCluster** support (**4.0× HP**, interval 14 s, from t=12) |
+| 10 | ∞ | Boss | Boss (**14× HP**, **2.44× speed**, laser attack every 5 s) + drone support (**7.0× HP**) + rusher support (**4.0× HP**, interval 18 s) + **rusherCluster** support (**4.0× HP**, interval 14 s, from t=12) |
 
 ## Auto-scaling beyond level 10
 

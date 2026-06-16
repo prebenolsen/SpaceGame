@@ -1,4 +1,5 @@
 import { VERSION } from '../version.js';
+import { fetchTopScores } from '../utils/supabase.js';
 
 const TAGLINE =
   'You are the ship at the center of the void. Steer, blast, and outlast relentless waves. How long can you survive?';
@@ -11,19 +12,25 @@ export class LandingScreen {
   constructor() {
     this._onTutorial = null;
     this._onCampaign = null;
+    this._onScoreboard = null;
     this._maxClearedLevel = 0;
     this._touchStart = null;
     this._tutorialRect = null;
     this._startRect = null;
+    this._scoreboardRect = null;
     this._stars = null; // cached starfield, generated once per size
     this._starsSize = null;
+    this._topScores = null; // null = loading, [] = none/unavailable
   }
 
-  show(onTutorial, onCampaign, maxClearedLevel) {
+  show(onTutorial, onCampaign, maxClearedLevel, onScoreboard) {
     this._onTutorial = onTutorial;
     this._onCampaign = onCampaign;
+    this._onScoreboard = onScoreboard;
     this._maxClearedLevel = maxClearedLevel ?? 0;
     this._touchStart = null;
+    this._topScores = null;
+    fetchTopScores(3).then(scores => { this._topScores = scores; });
   }
 
   handleTouchStart(x, y) {
@@ -41,6 +48,10 @@ export class LandingScreen {
     }
     if (inside(this._startRect)) {
       if (this._onCampaign) this._onCampaign();
+      return;
+    }
+    if (inside(this._scoreboardRect)) {
+      if (this._onScoreboard) this._onScoreboard();
       return;
     }
   }
@@ -68,9 +79,12 @@ export class LandingScreen {
     const baseScale = Math.min(1, screenW / 720, screenH / 380);
 
     // Height of the stacked layout for a given scale + tagline line count.
+    // Includes scoreboard button (28*s) + top-3 block (58*s) + gaps.
     const layoutH = (s, lineCount) =>
       56 * s + 14 * s + 40 * s + 14 * s + lineCount * 21 * s + // hero block
-      30 * s + 188 * s + 30 * s + 26 * s;                     // gaps + cards + legend
+      30 * s + 188 * s +                                        // gap + cards
+      14 * s + 28 * s + 10 * s + 58 * s + 12 * s +             // scoreboard btn + top-3
+      26 * s;                                                   // legend
 
     ctx.font = `${14 * baseScale}px monospace`;
     let taglineLines = this._wrap(ctx, TAGLINE, Math.min(460 * baseScale, screenW - 48));
@@ -88,9 +102,11 @@ export class LandingScreen {
     const taglineBlockH = taglineLines.length * taglineLineH;
 
     const gapHeroCards = 30 * scale;
-    const gapCardsLegend = 30 * scale;
     const heroH = shipSize + 14 * scale + titleSize + 14 * scale + taglineBlockH;
-    const totalH = heroH + gapHeroCards + cardH + gapCardsLegend + legendH;
+    const scoreboardBtnH = 28 * scale;
+    const top3BlockH = 58 * scale;
+    const totalH = heroH + gapHeroCards + cardH +
+      14 * scale + scoreboardBtnH + 10 * scale + top3BlockH + 12 * scale + legendH;
 
     let y = Math.max(8, (screenH - totalH) / 2);
     const cx = screenW / 2;
@@ -147,7 +163,64 @@ export class LandingScreen {
         ? { text: `Level ${this._maxClearedLevel + 1} next`, color: '#69f0ae', solid: true }
         : { text: 'Skip tutorial', color: '#69f0ae', solid: true },
     });
-    y += cardH + gapCardsLegend;
+    y += cardH + 14 * scale;
+
+    // ── Scoreboard button ─────────────────────────────────────────────────────
+    const sbW = Math.min(200 * scale, screenW * 0.48);
+    const sbH = scoreboardBtnH;
+    const sbX = cx - sbW / 2;
+    this._scoreboardRect = { x: sbX, y, w: sbW, h: sbH };
+
+    ctx.fillStyle = 'rgba(100,160,255,0.10)';
+    ctx.beginPath();
+    ctx.roundRect(sbX, y, sbW, sbH, 6 * scale);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(144,202,249,0.35)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    ctx.font = `bold ${Math.round(11 * scale)}px monospace`;
+    ctx.fillStyle = '#90caf9';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('SCOREBOARD', cx, y + sbH / 2);
+    ctx.textBaseline = 'alphabetic';
+    y += sbH + 10 * scale;
+
+    // ── Top-3 mini-leaderboard ────────────────────────────────────────────────
+    const rowH = top3BlockH / 3;
+    const scores = this._topScores;
+    const medal = ['#ffd700', '#c0c0c0', '#cd7f32'];
+
+    if (scores === null) {
+      // loading
+      ctx.font = `${Math.round(10 * scale)}px monospace`;
+      ctx.fillStyle = 'rgba(170,170,200,0.4)';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('Loading scores…', cx, y + top3BlockH / 2);
+      ctx.textBaseline = 'alphabetic';
+    } else if (scores.length === 0) {
+      ctx.font = `${Math.round(10 * scale)}px monospace`;
+      ctx.fillStyle = 'rgba(170,170,200,0.35)';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('No scores yet', cx, y + top3BlockH / 2);
+      ctx.textBaseline = 'alphabetic';
+    } else {
+      const nameX = cx - Math.min(130 * scale, screenW * 0.28);
+      const scoreX = cx + Math.min(100 * scale, screenW * 0.22);
+      const fontSize = Math.round(10 * scale);
+      ctx.font = `${fontSize}px monospace`;
+
+      scores.slice(0, 3).forEach((s, i) => {
+        const ry = y + rowH * i + rowH * 0.65;
+        ctx.fillStyle = medal[i] ?? '#aaaacc';
+        ctx.textAlign = 'left';
+        ctx.fillText(`${i + 1}. ${(s.name || 'Anonymous').substring(0, 14)}`, nameX, ry);
+        ctx.textAlign = 'right';
+        ctx.fillText(Number(s.score).toLocaleString(), scoreX, ry);
+        ctx.textAlign = 'center';
+      });
+    }
+    y += top3BlockH + 12 * scale;
 
     // ── Roster legend: "what hunts you" ───────────────────────────────────────
     this._drawLegend(ctx, cx, y + legendH / 2, scale);

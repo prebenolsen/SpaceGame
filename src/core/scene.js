@@ -8,4 +8,5 @@ export const SCENE = {
   UPGRADE: 'upgrade',
   DIED: 'died',                // lost a life, brief retry pause
   GAME_OVER: 'game_over',
+  SCOREBOARD: 'scoreboard',
 };

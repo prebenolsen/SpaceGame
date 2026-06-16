@@ -1,5 +1,15 @@
 # Changelog
 
+## 4.6
+- Force landscape orientation on mobile: attempts a Screen Orientation API lock (Android Chrome/PWA) and shows a "please rotate your device" overlay on portrait screens ≤1024px wide (works on iOS and all browsers without API support).
+
+## 4.5
+- Fixed level 10 boss laser attack: the `once()` spawn helper was silently dropping the `enableLaser` option, so the boss never used its laser. Boss now correctly fires its laser every 5 seconds as intended.
+- Level 10 boss speed increased by 25% (speedMult 1.95 → 2.44).
+- Global high-score leaderboard powered by Supabase: on game over, players enter their name and submit their score. Leaderboard sorts by points (descending) and shows highest level cleared alongside each score.
+- "SCOREBOARD" button added to the main menu; opens the top-10 leaderboard.
+- Top 3 scores are always shown on the home screen, refreshed each time the landing page is displayed.
+
 ## 4.4
 - Removed miniboss from level 3; minibosses now appear only on odd levels after 5 (7, 9, 11, …).
 - Rushers (and rusher clusters) now appear only on even levels after 5 (6, 8, 10, …); removed rusher waves from levels 7 and 9.

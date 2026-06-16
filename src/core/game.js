@@ -15,6 +15,7 @@ import { LevelClearScreen } from '../ui/level-clear.js';
 import { LevelSelectScreen } from '../ui/level-select.js';
 import { UpgradeScreen } from '../ui/upgrade-screen.js';
 import { GameOverScreen } from '../ui/game-over.js';
+import { ScoreboardScreen } from '../ui/scoreboard.js';
 import { Joystick } from '../ui/joystick.js';
 import { Renderer, GAME_ZOOM } from '../rendering/renderer.js';
 import { SoundManager } from '../audio/sound-manager.js';
@@ -37,6 +38,7 @@ export class Game {
     this._levelSelect = new LevelSelectScreen();
     this._upgradeScreen = new UpgradeScreen();
     this._gameOver = new GameOverScreen();
+    this._scoreboard = new ScoreboardScreen();
 
     this._enemies = [];
     this._scene = SCENE.LEVEL_INTRO;
@@ -251,7 +253,11 @@ export class Game {
       return;
     }
     if (this._scene === SCENE.GAME_OVER) {
-      this._gameOver.handleTap();
+      this._gameOver.handleTouchStart(touch.clientX, touch.clientY);
+      return;
+    }
+    if (this._scene === SCENE.SCOREBOARD) {
+      this._scoreboard.handleTouchStart(touch.clientX, touch.clientY);
       return;
     }
     if (this._scene === SCENE.UPGRADE) {
@@ -309,6 +315,14 @@ export class Game {
       this._levelSelect.handleTouchEnd(touch.clientX, touch.clientY);
       return;
     }
+    if (this._scene === SCENE.GAME_OVER) {
+      this._gameOver.handleTouchEnd(touch.clientX, touch.clientY);
+      return;
+    }
+    if (this._scene === SCENE.SCOREBOARD) {
+      this._scoreboard.handleTouchEnd(touch.clientX, touch.clientY);
+      return;
+    }
     this._moveJoystick.onTouchEnd(touch);
     this._laserJoystick.onTouchEnd(touch);
     this._arcJoystick.onTouchEnd(touch);
@@ -329,7 +343,13 @@ export class Game {
       () => this._startTutorial1(),
       () => this._onCampaignButton(),
       this._maxClearedLevel,
+      () => this._showScoreboard(() => this._showLanding()),
     );
+  }
+
+  _showScoreboard(onBack) {
+    this._scene = SCENE.SCOREBOARD;
+    this._scoreboard.show(onBack);
   }
 
   _onCampaignButton() {
@@ -681,7 +701,12 @@ export class Game {
       }
       this._sound.play('gameOver');
       this._scene = SCENE.GAME_OVER;
-      this._gameOver.show(this._score, () => this._restartGame());
+      this._gameOver.show(
+        this._score,
+        this._maxClearedLevel,
+        () => this._restartGame(),
+        () => this._showScoreboard(() => this._showLanding()),
+      );
     } else {
       this._freezeCharges++;
       this._scene = SCENE.DIED;
@@ -1068,6 +1093,12 @@ export class Game {
     // ── Level select ─────────────────────────────────────────────────────────
     if (this._scene === SCENE.LEVEL_SELECT) {
       renderer.drawOverlay((ctx, W, H) => this._levelSelect.draw(ctx, W, H));
+      return;
+    }
+
+    // ── Scoreboard ───────────────────────────────────────────────────────────
+    if (this._scene === SCENE.SCOREBOARD) {
+      renderer.drawOverlay((ctx, W, H) => this._scoreboard.draw(ctx, W, H));
       return;
     }
 

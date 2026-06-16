@@ -26,8 +26,8 @@ function wave(type, duration, { startTime = 2, interval = 6, jitter = 0.35, heal
 }
 
 // once()  — single spawn entry (boss, surprise miniboss, etc.)
-function once(type, time, { healthMult = 1, speedMult = 1 } = {}) {
-  return [{ type, time, healthMult, speedMult }];
+function once(type, time, { healthMult = 1, speedMult = 1, ...rest } = {}) {
+  return [{ type, time, healthMult, speedMult, ...rest }];
 }
 
 // Companion waves during boss fights are pre-scheduled for this long;
@@ -151,12 +151,12 @@ export const LEVELS = [
   },
 
   // ── Level 10 — Boss + companions ────────────────────────────────────────────
-  // Boss 3.5× → 5250 HP; +30% speed vs level 5; laser attack every 5 s
+  // Boss 14× HP; +25% speed vs previous (1.95 → 2.44); laser attack every 5 s
   {
     duration: null,
     isBoss: true,
     waves: [
-      ...once('boss', 3, { healthMult: 14, speedMult: 1.95, enableLaser: true }),
+      ...once('boss', 3, { healthMult: 14, speedMult: 2.44, enableLaser: true }),
       ...wave('drone',         BOSS_FILL, { startTime: 5,  interval: 6,  healthMult: 7.0, speedMult: 1.5 }),
       ...wave('rusher',        BOSS_FILL, { startTime: 8,  interval: 18, healthMult: 4.0, speedMult: 1.5 }),
       ...wave('rusherCluster', BOSS_FILL, { startTime: 12, interval: 14, healthMult: 4.0, speedMult: 1.5 }),
