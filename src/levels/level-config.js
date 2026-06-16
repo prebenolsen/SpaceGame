@@ -34,10 +34,10 @@ function once(type, time, { healthMult = 1, speedMult = 1 } = {}) {
 // the boss dying ends the level long before this elapses.
 const BOSS_FILL = 300;
 
-// ─── Health multiplier reference (base HP: drone 40 · rusher 30 · tank 150 · miniboss 300 · boss 1500) ──
+// ─── Health multiplier reference (base HP: drone 40 · rusher 12 · tank 150 · miniboss 300 · boss 1500) ──
 // Curve is roughly exponential so each level feels meaningfully harder at baseline laser damage (50 dmg/shot).
 // Expected shots-to-kill a drone at rank-0 laser per level:
-//   L1: 1  L2: 2  L3: 3  L4: 4  L6: 5  L7: 7  L8: 9  L9: ~11
+//   L1: 1  L2: 2  L3: 2  L4: 3  L6: 3  L7: 5  L8: 6  L9: ~8
 
 // ─── Level list ──────────────────────────────────────────────────────────────
 // duration  — seconds (or null = no timer, boss must die to advance)
@@ -56,49 +56,49 @@ export const LEVELS = [
   },
 
   // ── Level 2 ─────────────────────────────────────────────────────────────────
-  // Drone 1.8× → 72 HP → ~2 shots
+  // Drone 1.3× → 52 HP → ~2 shots
   {
     duration: 25,
     isBoss: false,
     waves: [
-      ...wave('drone',  30, { startTime: 0,  interval: 4,  healthMult: 1.8, speedMult: 1.25 }),
-      ...wave('rusher', 30, { startTime: 5, interval: 15, speedMult: 1.25 }),
+      ...wave('drone',  30, { startTime: 0,  interval: 4,  healthMult: 1.3, speedMult: 1.1 }),
+      ...wave('rusher', 30, { startTime: 5, interval: 15, speedMult: 1.1 }),
     ],
   },
 
   // ── Level 3 ─────────────────────────────────────────────────────────────────
+  // Drone 2.0× → 80 HP → ~2 shots
+  {
+    duration: 30,
+    isBoss: false,
+    waves: [
+      ...wave('drone',  45, { startTime: 0, interval: 3,  healthMult: 2.0, speedMult: 1.2 }),
+      ...wave('rusher', 45, { startTime: 8, interval: 8,  speedMult: 1.2 }),
+      ...once('miniboss', 20, { speedMult: 1.2 }),
+    ],
+  },
+
+  // ── Level 4 ─────────────────────────────────────────────────────────────────
   // Drone 3.0× → 120 HP → ~3 shots
   {
     duration: 30,
     isBoss: false,
     waves: [
-      ...wave('drone',  45, { startTime: 0, interval: 3,  healthMult: 3.0, speedMult: 1.5 }),
-      ...wave('rusher', 45, { startTime: 8, interval: 8,  speedMult: 1.5 }),
-      ...once('miniboss', 20, { speedMult: 1.5 }),
-    ],
-  },
-
-  // ── Level 4 ─────────────────────────────────────────────────────────────────
-  // Drone 4.5× → 180 HP → ~4 shots
-  {
-    duration: 30,
-    isBoss: false,
-    waves: [
-      ...wave('drone',  60, { startTime: 0,  interval: 2.5, healthMult: 4.5, speedMult: 1.7 }),
-      ...wave('rusher', 60, { startTime: 5,  interval: 5.5, healthMult: 1.8, speedMult: 1.7 }),
-      ...wave('tank',   60, { startTime: 15, interval: 20,  speedMult: 1.7 }),
+      ...wave('drone',  60, { startTime: 0,  interval: 2.5, healthMult: 3.0, speedMult: 1.4 }),
+      ...wave('rusher', 60, { startTime: 5,  interval: 5.5, healthMult: 1.2, speedMult: 1.4 }),
+      ...wave('tank',   60, { startTime: 15, interval: 20,  speedMult: 1.4 }),
     ],
   },
 
   // ── Level 5 — Boss ──────────────────────────────────────────────────────────
-  // Boss 2.5× → 3750 HP
+  // Boss 1.8× → 2700 HP
   {
     duration: null,
     isBoss: true,
     waves: [
-      ...once('boss', 3, { healthMult: 2.5, speedMult: 1.5 }),
-      ...wave('drone',  BOSS_FILL, { startTime: 10, interval: 8,  healthMult: 4.0, speedMult: 1.5 }),
-      ...wave('rusher', BOSS_FILL, { startTime: 0,  interval: 12, healthMult: 2.5, speedMult: 1.5 }),
+      ...once('boss', 3, { healthMult: 1.8, speedMult: 1.2 }),
+      ...wave('drone',  BOSS_FILL, { startTime: 10, interval: 8,  healthMult: 2.5, speedMult: 1.2 }),
+      ...wave('rusher', BOSS_FILL, { startTime: 0,  interval: 12, healthMult: 1.5, speedMult: 1.2 }),
     ],
   },
 
@@ -108,62 +108,62 @@ export const LEVELS = [
     duration: 30,
     isBoss: false,
     waves: [
-      ...wave('drone',         60, { startTime: 0,  interval: 2.5, healthMult: 4.5, speedMult: 1.7 }),
-      ...wave('rusherCluster', 60, { startTime: 5,  interval: 5.5, healthMult: 1.8, speedMult: 1.7 }),
-      ...wave('tank',          60, { startTime: 15, interval: 20,  speedMult: 1.7 }),
+      ...wave('drone',         60, { startTime: 0,  interval: 2.5, healthMult: 3.0, speedMult: 1.4 }),
+      ...wave('rusherCluster', 60, { startTime: 5,  interval: 5.5, healthMult: 1.2, speedMult: 1.4 }),
+      ...wave('tank',          60, { startTime: 15, interval: 20,  speedMult: 1.4 }),
     ],
   },
 
   // ── Level 7 ─────────────────────────────────────────────────────────────────
-  // Drone 8.0× → 320 HP → ~7 shots
+  // Drone 5.5× → 220 HP → ~5 shots
   {
     duration: 45,
     isBoss: false,
     waves: [
-      ...wave('drone',    75, { startTime: 0,  interval: 2,  healthMult: 8.0,  speedMult: 2.0 }),
-      ...wave('rusher',   75, { startTime: 4,  interval: 4,  healthMult: 3.5,  speedMult: 2.0 }),
-      ...wave('tank',     75, { startTime: 12, interval: 14, healthMult: 3.5,  speedMult: 2.0 }),
-      ...wave('miniboss', 75, { startTime: 0,  interval: 30, healthMult: 2.0,  speedMult: 2.0 }),
+      ...wave('drone',    75, { startTime: 0,  interval: 2,  healthMult: 5.5, speedMult: 1.6 }),
+      ...wave('rusher',   75, { startTime: 4,  interval: 4,  healthMult: 2.5, speedMult: 1.6 }),
+      ...wave('tank',     75, { startTime: 12, interval: 14, healthMult: 2.5, speedMult: 1.6 }),
+      ...wave('miniboss', 75, { startTime: 0,  interval: 30, healthMult: 1.5, speedMult: 1.6 }),
     ],
   },
 
   // ── Level 8 ─────────────────────────────────────────────────────────────────
-  // Drone 10.5× → 420 HP → ~9 shots
+  // Drone 7.0× → 280 HP → ~6 shots
   {
     duration: 45,
     isBoss: false,
     waves: [
-      ...wave('drone',         75, { startTime: 0,  interval: 1.8, healthMult: 10.5, speedMult: 2.2 }),
-      ...wave('rusher',        75, { startTime: 3,  interval: 3.5, healthMult: 5.0,  speedMult: 2.2 }),
-      ...wave('rusherCluster', 75, { startTime: 18, interval: 12,  healthMult: 4.0,  speedMult: 2.2 }),
-      ...wave('tank',          75, { startTime: 10, interval: 12,  healthMult: 5.5,  speedMult: 2.2 }),
-      ...wave('miniboss',      75, { startTime: 15, interval: 22,  healthMult: 3.5,  speedMult: 2.2 }),
+      ...wave('drone',         75, { startTime: 0,  interval: 1.8, healthMult: 7.0, speedMult: 1.8 }),
+      ...wave('rusher',        75, { startTime: 3,  interval: 3.5, healthMult: 3.5, speedMult: 1.8 }),
+      ...wave('rusherCluster', 75, { startTime: 18, interval: 12,  healthMult: 2.8, speedMult: 1.8 }),
+      ...wave('tank',          75, { startTime: 10, interval: 12,  healthMult: 3.8, speedMult: 1.8 }),
+      ...wave('miniboss',      75, { startTime: 15, interval: 22,  healthMult: 2.5, speedMult: 1.8 }),
     ],
   },
 
   // ── Level 9 ─────────────────────────────────────────────────────────────────
-  // Drone 13.0× → 520 HP → ~11 shots at baseline; manageable with weapon upgrades
+  // Drone 9.0× → 360 HP → ~8 shots; manageable with weapon upgrades
   {
     duration: 45,
     isBoss: false,
     waves: [
-      ...wave('drone',    90, { startTime: 0,  interval: 1.5, healthMult: 13.0, speedMult: 2.5 }),
-      ...wave('rusher',   90, { startTime: 3,  interval: 3,   healthMult: 7.0,  speedMult: 2.5 }),
-      ...wave('tank',     90, { startTime: 8,  interval: 10,  healthMult: 8.0,  speedMult: 2.5 }),
-      ...wave('miniboss', 90, { startTime: 12, interval: 18,  healthMult: 5.0,  speedMult: 2.5 }),
+      ...wave('drone',    90, { startTime: 0,  interval: 1.5, healthMult: 9.0, speedMult: 2.0 }),
+      ...wave('rusher',   90, { startTime: 3,  interval: 3,   healthMult: 5.0, speedMult: 2.0 }),
+      ...wave('tank',     90, { startTime: 8,  interval: 10,  healthMult: 5.5, speedMult: 2.0 }),
+      ...wave('miniboss', 90, { startTime: 12, interval: 18,  healthMult: 3.5, speedMult: 2.0 }),
     ],
   },
 
   // ── Level 10 — Boss + companions ────────────────────────────────────────────
-  // Boss 5.0× → 7500 HP
+  // Boss 3.5× → 5250 HP
   {
     duration: null,
     isBoss: true,
     waves: [
-      ...once('boss', 3, { healthMult: 5.0, speedMult: 1.8 }),
-      ...wave('drone',         BOSS_FILL, { startTime: 5,  interval: 6,  healthMult: 10.0, speedMult: 1.8 }),
-      ...wave('rusher',        BOSS_FILL, { startTime: 8,  interval: 6,  healthMult: 6.0,  speedMult: 1.8 }),
-      ...wave('rusherCluster', BOSS_FILL, { startTime: 12, interval: 14, healthMult: 6.0,  speedMult: 1.8 }),
+      ...once('boss', 3, { healthMult: 3.5, speedMult: 1.5 }),
+      ...wave('drone',         BOSS_FILL, { startTime: 5,  interval: 6,  healthMult: 7.0, speedMult: 1.5 }),
+      ...wave('rusher',        BOSS_FILL, { startTime: 8,  interval: 6,  healthMult: 4.0, speedMult: 1.5 }),
+      ...wave('rusherCluster', BOSS_FILL, { startTime: 12, interval: 14, healthMult: 4.0, speedMult: 1.5 }),
     ],
   },
 ];

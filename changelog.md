@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.6
+- After completing Tutorial 2 the player is now returned to the landing/home screen instead of being immediately sent into Level 1, so they can choose whether to start or review the intro.
+- Fixed boss levels (level 5, 10, and auto-scaled boss levels) auto-completing immediately on load: the completion check now waits until the boss has actually spawned before watching for its death (`_bossHasSpawned` flag in `game.js`).
+- Reduced health pools for all enemies in levels 2 and beyond (~30–40% lower `healthMult` across the board), bringing shot-to-kill counts down and making the difficulty curve less steep.
+- Reduced movement speed multipliers on all levels 2+ so enemies close in more slowly overall.
+- Reduced rusher base speed from 150 → 110 px/s; rushers are now meaningfully faster than drones (80 px/s) without feeling erratic.
+
 ## 3.5
 - Redesigned the landing page (`src/ui/landing.js`) to match the Space Survivor design system. The plain `#05050f` fill gains a procedural starfield (deterministic, cached per size). A glowing geometric **ship glyph** now sits above the title, the title carries the ship-blue text glow, and "Choose how to begin" is replaced by the full tagline ("You are the ship at the center of the void…").
 - The two choice cards now use the design's recipe: translucent deep-blue fill (`rgba(10,10,46,.55)`) with a glowing accent border (Tutorial = laser blue `#42a5f5`, Start = success green `#69f0ae`). Emoji icons (🎓 🚀) are replaced by the brand's geometric glyphs — a **drone** circle for Tutorial and the **ship** triangle for Start — and each card ends in a pill **badge** ("New players" neutral, "Skip tutorial" solid green).

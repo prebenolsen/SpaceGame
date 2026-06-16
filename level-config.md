@@ -46,7 +46,7 @@ Each entry in `LEVELS` has:
 |-------|---------|-------|
 | Drone | 40 | Below baseline laser (50 dmg) → one-shot in level 1 |
 | RusherCluster | 40 | Drone HP and speed; rusher shape and size; spawns as a trio (lead + 2 wings) |
-| Rusher | 30 | Fast; low HP is intentional |
+| Rusher | 12 | Fast; low HP is intentional |
 | Tank | 150 | Scaled down from 300; heavy healthMult compensates |
 | Miniboss | 300 | Scaled down from 500; heavily multiplied in late levels |
 | Boss | 1500 | Unchanged |
@@ -68,24 +68,35 @@ Tutorials run before Level 1 on every fresh start (`defaultSave().level === 0`).
 | Tutorial 1 | Phase 1: one stationary drone far right, laser joystick only, bottom tooltip. Phase 2 (drone dead): two close drones, arc joystick only, arc tooltip. Phase 3 (both dead): 2 s wait. Phase 4: "Tutorial 1 completed!" overlay, tap to continue. |
 | Tutorial 2 | Move joystick only. Top tooltip (7 s) explaining outrunning. Then one chasing drone spawns; player survives 20 s to finish. |
 
-After Tutorial 2 completes, `_levelNumber` is set to 1 and a normal level intro starts.
+After Tutorial 2 completes, `_levelNumber` is set to 1 and the player is returned to the **landing/home screen** to choose whether to begin Level 1 or not.
+
+## Base speed per enemy type
+
+| Enemy | Base speed | Notes |
+|-------|-----------|-------|
+| Drone | 80 px/s | Baseline chaser |
+| Rusher | 110 px/s | ~37% faster than drone; still manageable to dodge |
+| RusherCluster (members) | 80 px/s | Same as drone; danger is the formation count |
+| Tank | 40 px/s | Slow but tanky |
+| Miniboss | 55 px/s | Medium |
+| Boss | 45 px/s | Slow but huge HP pool |
 
 ## Handcrafted levels (1–10)
 
-HealthMult curve is roughly exponential so each level feels meaningfully harder at baseline laser damage (50 dmg/shot). Expected shots-to-kill a drone: L1 1, L2 2, L3 3, L4 4, L6 5, L7 7, L8 9, L9 ~11.
+HealthMult curve is roughly exponential so each level feels meaningfully harder at baseline laser damage (50 dmg/shot).
 
 | Level | Duration | isBoss | Enemy mix |
 |-------|----------|--------|-----------|
 | 1 | 25 s | — | Drones only (interval 4 s, 1× stats) — one-shot kills |
-| 2 | 30 s | — | Drones (interval 4 s, **1.8× HP**, 1.25× speed) + rushers from t=5 (interval 15 s) |
-| 3 | 45 s | — | Drones (interval 3 s, **3.0× HP**, 1.5× speed) + rushers (interval 8 s) + 1 miniboss at t=20 |
-| 4 | 60 s | — | Drones (interval 2.5 s, **4.5× HP**, 1.7×) + rushers (**1.8× HP**, interval 5.5 s) + tanks (interval 20 s) |
-| 5 | ∞ | Boss | Boss (**2.5× HP**, 1.5× speed) + drone support (**4.0× HP**) + rusher support (**2.5× HP**) from t=10/20 |
-| 6 | 30 s | — | Level 4 mix with **rusherCluster** replacing rushers — drones (**4.5× HP**, 1.7×) + rusherClusters (**1.8× HP**, interval 5.5 s) + tanks (interval 20 s) |
-| 7 | 75 s | — | Drones (interval 2 s, **8.0× HP**, 2.0×) + rushers (**3.5× HP**, interval 4 s) + tanks (**3.5× HP**, interval 14 s) + minibosses (**2.0× HP**, interval 30 s) |
-| 8 | 75 s | — | Drones (interval 1.8 s, **10.5× HP**, 2.2×) + rushers (**5.0× HP**, interval 3.5 s) + **rusherClusters** (**4.0× HP**, interval 12 s, from t=18) + tanks (**5.5× HP**, interval 12 s) + minibosses (**3.5× HP**, interval 22 s) |
-| 9 | 90 s | — | Drones (interval 1.5 s, **13.0× HP**, 2.5×) + rushers (**7.0× HP**) + tanks (**8.0× HP**, interval 10 s) + minibosses (**5.0× HP**, interval 18 s) |
-| 10 | ∞ | Boss | Boss (**5.0× HP**, 1.8× speed) + drone support (**10.0× HP**) + rusher support (**6.0× HP**) + **rusherCluster** support (**6.0× HP**, interval 14 s, from t=12) |
+| 2 | 25 s | — | Drones (interval 4 s, **1.3× HP**, 1.1× speed) + rushers from t=5 (interval 15 s, 1.1× speed) |
+| 3 | 30 s | — | Drones (interval 3 s, **2.0× HP**, 1.2× speed) + rushers (interval 8 s, 1.2× speed) + 1 miniboss at t=20 |
+| 4 | 30 s | — | Drones (interval 2.5 s, **3.0× HP**, 1.4×) + rushers (**1.2× HP**, interval 5.5 s, 1.4×) + tanks (interval 20 s) |
+| 5 | ∞ | Boss | Boss (**1.8× HP**, 1.2× speed) + drone support (**2.5× HP**) + rusher support (**1.5× HP**) |
+| 6 | 30 s | — | Level 4 mix with **rusherCluster** replacing rushers — drones (**3.0× HP**, 1.4×) + rusherClusters (**1.2× HP**, interval 5.5 s) + tanks (interval 20 s) |
+| 7 | 45 s | — | Drones (interval 2 s, **5.5× HP**, 1.6×) + rushers (**2.5× HP**, interval 4 s) + tanks (**2.5× HP**, interval 14 s) + minibosses (**1.5× HP**, interval 30 s) |
+| 8 | 45 s | — | Drones (interval 1.8 s, **7.0× HP**, 1.8×) + rushers (**3.5× HP**, interval 3.5 s) + **rusherClusters** (**2.8× HP**, interval 12 s, from t=18) + tanks (**3.8× HP**, interval 12 s) + minibosses (**2.5× HP**, interval 22 s) |
+| 9 | 45 s | — | Drones (interval 1.5 s, **9.0× HP**, 2.0×) + rushers (**5.0× HP**) + tanks (**5.5× HP**, interval 10 s) + minibosses (**3.5× HP**, interval 18 s) |
+| 10 | ∞ | Boss | Boss (**3.5× HP**, 1.5× speed) + drone support (**7.0× HP**) + rusher support (**4.0× HP**) + **rusherCluster** support (**4.0× HP**, interval 14 s, from t=12) |
 
 ## Auto-scaling beyond level 10
 

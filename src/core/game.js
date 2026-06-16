@@ -38,6 +38,7 @@ export class Game {
     this._scene = SCENE.LEVEL_INTRO;
     this._levelTimer = new Timer(60);
     this._bossLevel = false;
+    this._bossHasSpawned = false;
     this._hitFlashTimer = 0;
     this._levelNumber = 0;
     this._upgrades = defaultSave().upgrades;
@@ -471,7 +472,7 @@ export class Game {
     this._enemies = [];
     this._sound.play('levelClear');
     this._save();
-    this._startLevelIntro();
+    this._showLanding();
   }
 
   // ── Normal level flow ───────────────────────────────────────────────────────
@@ -487,6 +488,7 @@ export class Game {
     this._scene = SCENE.PLAYING;
     const config = getLevelConfig(this._levelNumber - 1);
     this._bossLevel = config.isBoss && config.duration == null;
+    this._bossHasSpawned = false;
     this._levelTimer.reset(config.duration ?? Infinity);
     this._enemies = [];
     this._score = 0;
@@ -829,7 +831,10 @@ export class Game {
 
     this._enemies = this._enemies.filter((e) => e.active);
 
-    if (this._bossLevel && !this._enemies.some((e) => e.type === 'boss')) {
+    if (this._bossLevel && this._enemies.some((e) => e.type === 'boss')) {
+      this._bossHasSpawned = true;
+    }
+    if (this._bossLevel && this._bossHasSpawned && !this._enemies.some((e) => e.type === 'boss')) {
       this._onLevelClear();
       return;
     }
