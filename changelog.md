@@ -1,5 +1,13 @@
 # Changelog
 
+## 4.4
+- Removed miniboss from level 3; minibosses now appear only on odd levels after 5 (7, 9, 11, …).
+- Rushers (and rusher clusters) now appear only on even levels after 5 (6, 8, 10, …); removed rusher waves from levels 7 and 9.
+- Minibosses are always very slow (speedMult 0.5; exempt from the per-level progressive speed boost).
+- Miniboss HP is now 8× the drone HP for its level.
+- Miniboss score value raised from 75 to 120 points.
+- Auto-scale levels (11+) follow the same rules: miniboss on odd levels, rushers/rusherClusters on even levels only.
+
 ## 4.3
 - Rusher speed is now capped at 528 px/s (20% faster than a fully-upgraded player's max move speed of 440 px/s), preventing rushers from becoming impossible to dodge at high levels.
 - Freeze button moved to the bottom-right corner of the screen.

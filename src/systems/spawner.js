@@ -79,8 +79,9 @@ export class Spawner {
     const factory = FACTORY[entry.type];
     if (!factory) return null;
     const spawnPos = this._randomCirclePosition();
-    // +10 % speed per level beyond level 5 (compounding)
-    const levelSpeedBoost = this._levelNumber > 5 ? Math.pow(1.1, this._levelNumber - 5) : 1;
+    // +10 % speed per level beyond level 5 (compounding); minibosses are always slow
+    const levelSpeedBoost = (this._levelNumber > 5 && entry.type !== 'miniboss')
+      ? Math.pow(1.1, this._levelNumber - 5) : 1;
     return factory({
       wx: spawnPos.x,
       wy: spawnPos.y,

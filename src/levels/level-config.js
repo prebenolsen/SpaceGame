@@ -74,7 +74,6 @@ export const LEVELS = [
     waves: [
       ...wave('drone',  45, { startTime: 0, interval: 3,  healthMult: 2.0, speedMult: 1.2 }),
       ...wave('rusher', 45, { startTime: 8, interval: 8,  speedMult: 1.2 }),
-      ...once('miniboss', 20, { speedMult: 1.2 }),
     ],
   },
 
@@ -121,9 +120,8 @@ export const LEVELS = [
     isBoss: false,
     waves: [
       ...wave('drone',  75, { startTime: 0,  interval: 2,  healthMult: 5.5, speedMult: 1.6 }),
-      ...wave('rusher', 75, { startTime: 4,  interval: 12, healthMult: 2.5, speedMult: 1.6 }),
       ...wave('tank',   75, { startTime: 12, interval: 14, healthMult: 2.5, speedMult: 1.6 }),
-      ...once('miniboss', 10, { healthMult: 1.5, speedMult: 1.6 }),
+      ...once('miniboss', 10, { healthMult: 2.9, speedMult: 0.5 }),
     ],
   },
 
@@ -137,7 +135,6 @@ export const LEVELS = [
       ...wave('rusher',        75, { startTime: 3,  interval: 12,  healthMult: 3.5, speedMult: 1.8 }),
       ...wave('rusherCluster', 75, { startTime: 18, interval: 12,  healthMult: 2.8, speedMult: 1.8 }),
       ...wave('tank',          75, { startTime: 10, interval: 12,  healthMult: 3.8, speedMult: 1.8 }),
-      ...once('miniboss', 15, { healthMult: 2.5, speedMult: 1.8 }),
     ],
   },
 
@@ -148,9 +145,8 @@ export const LEVELS = [
     isBoss: false,
     waves: [
       ...wave('drone',  90, { startTime: 0,  interval: 1.5, healthMult: 9.0, speedMult: 2.0 }),
-      ...wave('rusher', 90, { startTime: 3,  interval: 12,  healthMult: 5.0, speedMult: 2.0 }),
       ...wave('tank',   90, { startTime: 8,  interval: 10,  healthMult: 5.5, speedMult: 2.0 }),
-      ...once('miniboss', 12, { healthMult: 3.5, speedMult: 2.0 }),
+      ...once('miniboss', 12, { healthMult: 4.8, speedMult: 0.5 }),
     ],
   },
 
@@ -200,14 +196,16 @@ export function getLevelConfig(levelIndex) {
   }
 
   const isEven = (levelIndex + 1) % 2 === 0;
+  const minibossHealthMult = Math.round((8 * 40 / 600) * enemyScale * 100) / 100;
   return {
     duration: dur,
     isBoss: false,
     waves: [
       ...wave('drone',  dur, { startTime: 0,  interval,                healthMult: enemyScale,                    speedMult: Math.min(Math.max(1, enemyScale * 0.05), 2.5) }),
-      ...wave('rusher', dur, { startTime: 5,  interval: interval * 2.5, healthMult: Math.round(enemyScale * 0.5) }),
       ...wave('tank',   dur, { startTime: 12, interval: interval * 5,   healthMult: Math.round(enemyScale * 0.6) }),
+      ...(isEven ? wave('rusher', dur, { startTime: 5,  interval: interval * 2.5, healthMult: Math.round(enemyScale * 0.5) }) : []),
       ...(isEven ? wave('rusherCluster', dur, { startTime: 8, interval: interval * 3, healthMult: Math.round(enemyScale * 0.4) }) : []),
+      ...(!isEven ? once('miniboss', 15, { healthMult: minibossHealthMult, speedMult: 0.5 }) : []),
     ],
   };
 }
