@@ -69,7 +69,7 @@ export const LEVELS = [
   // ── Level 3 ─────────────────────────────────────────────────────────────────
   // Drone 2.0× → 80 HP → ~2 shots
   {
-    duration: 30,
+    duration: 40,
     isBoss: false,
     waves: [
       ...wave('drone',  45, { startTime: 0, interval: 3,  healthMult: 2.0, speedMult: 1.2 }),
@@ -81,7 +81,7 @@ export const LEVELS = [
   // ── Level 4 ─────────────────────────────────────────────────────────────────
   // Drone 3.0× → 120 HP → ~3 shots
   {
-    duration: 30,
+    duration: 40,
     isBoss: false,
     waves: [
       ...wave('drone',  60, { startTime: 0,  interval: 2.5, healthMult: 3.0, speedMult: 1.4 }),
@@ -96,7 +96,7 @@ export const LEVELS = [
     duration: null,
     isBoss: true,
     waves: [
-      ...once('boss', 3, { healthMult: 1.8, speedMult: 1.2 }),
+      ...once('boss', 3, { healthMult: 4, speedMult: 1.2 }),
       ...wave('drone',  BOSS_FILL, { startTime: 10, interval: 8,  healthMult: 2.5, speedMult: 1.2 }),
       ...wave('rusher', BOSS_FILL, { startTime: 0,  interval: 12, healthMult: 1.5, speedMult: 1.2 }),
     ],
@@ -160,7 +160,7 @@ export const LEVELS = [
     duration: null,
     isBoss: true,
     waves: [
-      ...once('boss', 3, { healthMult: 3.5, speedMult: 1.5 }),
+      ...once('boss', 3, { healthMult: 10, speedMult: 1.5 }),
       ...wave('drone',         BOSS_FILL, { startTime: 5,  interval: 6,  healthMult: 7.0, speedMult: 1.5 }),
       ...wave('rusher',        BOSS_FILL, { startTime: 8,  interval: 18, healthMult: 4.0, speedMult: 1.5 }),
       ...wave('rusherCluster', BOSS_FILL, { startTime: 12, interval: 14, healthMult: 4.0, speedMult: 1.5 }),
@@ -181,7 +181,7 @@ export function getLevelConfig(levelIndex) {
   const enemyScale = 13 + extra * 2;
   const bossScale  = 5  + extra * 0.5;
   const isBoss     = (levelIndex + 1) % 5 === 0;
-  const dur        = 45;
+  const dur        = 60;
   const interval   = Math.max(1.5, 5 / (1 + extra * 0.15));
 
   if (isBoss) {
