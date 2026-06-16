@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.2
+- Score-based bonus upgrade picks now trigger at fixed milestones (500, 1500, 3000, 5000 points) instead of every 400 points.
+- Level 10 boss speed increased by 30% (speedMult 1.5 → 1.95).
+- Level 10 boss gains a laser attack: every 5 seconds it stops, tracks the player for 1 second (orange warm-up beam), locks direction for 0.5 seconds (yellow warning beam), then fires a damaging red/white beam. One hit to the player per firing cycle; boss resumes movement after each attack.
+
 ## 4.1
 - Fixed joystick stuck issue: if the player was moving when Tutorial 2 ended, the move joystick would remain active in level 1. All joysticks and held keys are now reset when any level or tutorial starts.
 

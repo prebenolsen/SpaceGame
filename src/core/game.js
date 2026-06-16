@@ -21,6 +21,8 @@ import { SoundManager } from '../audio/sound-manager.js';
 import { saveGame, loadGame, clearSave, defaultSave } from '../utils/storage.js';
 import { clamp } from '../utils/math.js';
 
+const SCORE_MILESTONES = [500, 1500, 3000, 5000];
+
 export class Game {
   constructor(canvas) {
     this._renderer = new Renderer(canvas);
@@ -603,8 +605,8 @@ export class Game {
 
   _onLevelClearContinue() {
     const basePicks = this._levelNumber >= 8 ? 2 : 1;
-    const earned = Math.floor(this._score / 500);
-    const extraPicks = earned - this._scoreUpgradeMilestones;
+    const earned = SCORE_MILESTONES.filter(m => this._score >= m).length;
+    const extraPicks = Math.max(0, earned - this._scoreUpgradeMilestones);
     this._scoreUpgradeMilestones = earned;
     const totalPicks = basePicks + extraPicks;
     this._startUpgradePhase(totalPicks, totalPicks);
@@ -616,8 +618,8 @@ export class Game {
       // Stepping into new territory — exit replay and continue as a real run
       this._exitReplay(true);
       const basePicks = this._levelNumber >= 8 ? 2 : 1;
-      const earned = Math.floor(this._score / 500);
-      const extraPicks = earned - this._scoreUpgradeMilestones;
+      const earned = SCORE_MILESTONES.filter(m => this._score >= m).length;
+      const extraPicks = Math.max(0, earned - this._scoreUpgradeMilestones);
       this._scoreUpgradeMilestones = earned;
       this._startUpgradePhase(basePicks + extraPicks, basePicks + extraPicks);
     } else {
@@ -1009,6 +1011,14 @@ export class Game {
       this._hitFlashTimer = 0.3;
       if (hitResult === 'died' || hitResult === 'game_over') {
         this._onPlayerDied(hitResult);
+      }
+    }
+
+    const laserHitResult = this._combat.resolveBossLasers(this._enemies, this._camera);
+    if (laserHitResult) {
+      this._hitFlashTimer = 0.3;
+      if (laserHitResult === 'died' || laserHitResult === 'game_over') {
+        this._onPlayerDied(laserHitResult);
       }
     }
 

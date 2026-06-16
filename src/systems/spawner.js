@@ -86,6 +86,7 @@ export class Spawner {
       wy: spawnPos.y,
       healthMult: entry.healthMult ?? 1,
       speedMult: (entry.speedMult ?? 1) * levelSpeedBoost,
+      enableLaser: entry.enableLaser ?? false,
     });
   }
 

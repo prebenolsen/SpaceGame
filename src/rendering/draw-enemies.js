@@ -10,6 +10,13 @@ export function drawEnemies(ctx, enemies, camera, screenW, screenH) {
     ) continue;
     drawEnemy(ctx, enemy, screen.x, screen.y);
   }
+
+  // Boss laser beams drawn on top of all enemies
+  for (const enemy of enemies) {
+    if (!enemy.active || enemy.type !== 'boss' || enemy.laserPhase === 'idle') continue;
+    const screen = camera.worldToScreen(enemy.wx, enemy.wy, screenW, screenH);
+    drawBossLaser(ctx, enemy, screen.x, screen.y);
+  }
 }
 
 function drawEnemy(ctx, enemy, sx, sy) {
@@ -127,6 +134,62 @@ function drawMiniboss(ctx, enemy, flash) {
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
+}
+
+function drawBossLaser(ctx, boss, sx, sy) {
+  const phase = boss.laserPhase;
+  const angle = boss.laserAngle;
+  const range = boss.laserRange;
+  const tx = sx + Math.cos(angle) * range;
+  const ty = sy + Math.sin(angle) * range;
+
+  ctx.save();
+  ctx.lineCap = 'round';
+
+  if (phase === 'warmup') {
+    const pulse = 0.55 + 0.45 * Math.sin(Date.now() / 80);
+    ctx.globalAlpha = pulse * 0.9;
+    ctx.strokeStyle = '#ff9800';
+    ctx.lineWidth = 7;
+    ctx.shadowColor = '#ff9800';
+    ctx.shadowBlur = 22;
+    ctx.beginPath();
+    ctx.moveTo(sx, sy);
+    ctx.lineTo(tx, ty);
+    ctx.stroke();
+  } else if (phase === 'preFire') {
+    const pulse = 0.8 + 0.2 * Math.sin(Date.now() / 35);
+    ctx.globalAlpha = pulse;
+    ctx.strokeStyle = '#ffff00';
+    ctx.lineWidth = 10;
+    ctx.shadowColor = '#ffff00';
+    ctx.shadowBlur = 35;
+    ctx.beginPath();
+    ctx.moveTo(sx, sy);
+    ctx.lineTo(tx, ty);
+    ctx.stroke();
+  } else if (phase === 'firing') {
+    // Outer red beam
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = '#ff1744';
+    ctx.lineWidth = 14;
+    ctx.shadowColor = '#ff6d00';
+    ctx.shadowBlur = 45;
+    ctx.beginPath();
+    ctx.moveTo(sx, sy);
+    ctx.lineTo(tx, ty);
+    ctx.stroke();
+    // Inner white core
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(sx, sy);
+    ctx.lineTo(tx, ty);
+    ctx.stroke();
+  }
+
+  ctx.restore();
 }
 
 function drawBoss(ctx, enemy, flash) {

@@ -155,12 +155,12 @@ export const LEVELS = [
   },
 
   // ── Level 10 — Boss + companions ────────────────────────────────────────────
-  // Boss 3.5× → 5250 HP
+  // Boss 3.5× → 5250 HP; +30% speed vs level 5; laser attack every 5 s
   {
     duration: null,
     isBoss: true,
     waves: [
-      ...once('boss', 3, { healthMult: 10, speedMult: 1.5 }),
+      ...once('boss', 3, { healthMult: 14, speedMult: 1.95, enableLaser: true }),
       ...wave('drone',         BOSS_FILL, { startTime: 5,  interval: 6,  healthMult: 7.0, speedMult: 1.5 }),
       ...wave('rusher',        BOSS_FILL, { startTime: 8,  interval: 18, healthMult: 4.0, speedMult: 1.5 }),
       ...wave('rusherCluster', BOSS_FILL, { startTime: 12, interval: 14, healthMult: 4.0, speedMult: 1.5 }),

@@ -6,6 +6,19 @@ Upgrades are offered after each level is cleared. When the level-clear screen is
 
 Every available upgrade is shown — there is no cap on the number of cards. The upgrade screen uses up to 2 rows when there are more than 4 choices, scaling card width to fit the screen.
 
+### Score-based bonus picks
+
+Reaching certain cumulative score thresholds awards one extra upgrade pick each, granted at the end of the level where the threshold is first crossed:
+
+| Milestone | Points |
+|-----------|--------|
+| 1st bonus | 500 |
+| 2nd bonus | 1 500 |
+| 3rd bonus | 3 000 |
+| 4th bonus | 5 000 |
+
+Logic lives in `_onLevelClearContinue()` / `_onReplayLevelClearContinue()` in `src/core/game.js`. `_scoreUpgradeMilestones` tracks how many thresholds have already been rewarded.
+
 ## Unlock progression
 
 Upgrades are gated — not all are available from the start.

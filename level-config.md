@@ -96,7 +96,7 @@ HealthMult curve is roughly exponential so each level feels meaningfully harder 
 | 7 | 45 s | — | Drones (interval 2 s, **5.5× HP**, 1.6×) + rushers (**2.5× HP**, interval 12 s) + tanks (**2.5× HP**, interval 14 s) + 1 miniboss at t=10 (**1.5× HP**) |
 | 8 | 45 s | — | Drones (interval 1.8 s, **7.0× HP**, 1.8×) + rushers (**3.5× HP**, interval 12 s) + **rusherClusters** (**2.8× HP**, interval 12 s, from t=18) + tanks (**3.8× HP**, interval 12 s) + 1 miniboss at t=15 (**2.5× HP**) |
 | 9 | 45 s | — | Drones (interval 1.5 s, **9.0× HP**, 2.0×) + rushers (**5.0× HP**, interval 12 s) + tanks (**5.5× HP**, interval 10 s) + 1 miniboss at t=12 (**3.5× HP**) |
-| 10 | ∞ | Boss | Boss (**3.5× HP**, 1.5× speed) + drone support (**7.0× HP**) + rusher support (**4.0× HP**, interval 18 s) + **rusherCluster** support (**4.0× HP**, interval 14 s, from t=12) |
+| 10 | ∞ | Boss | Boss (**10× HP**, **1.95× speed**, laser attack every 5 s) + drone support (**7.0× HP**) + rusher support (**4.0× HP**, interval 18 s) + **rusherCluster** support (**4.0× HP**, interval 14 s, from t=12) |
 
 ## Auto-scaling beyond level 10
 

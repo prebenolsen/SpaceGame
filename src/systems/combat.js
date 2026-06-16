@@ -57,4 +57,34 @@ export class CombatSystem {
     }
     return null;
   }
+
+  // Returns result string or null
+  resolveBossLasers(enemies, camera) {
+    for (const enemy of enemies) {
+      if (!enemy.active || enemy.type !== 'boss') continue;
+      if (enemy.laserPhase !== 'firing' || enemy._laserDamaged) continue;
+      if (this._bossLaserHitsPlayer(enemy, camera)) {
+        enemy._laserDamaged = true;
+        const result = this.lives.takeHit();
+        if (result) {
+          this.sound.play('playerHit');
+          return result;
+        }
+      }
+    }
+    return null;
+  }
+
+  _bossLaserHitsPlayer(boss, camera) {
+    const px = camera.playerWorldX;
+    const py = camera.playerWorldY;
+    const ox = boss.wx;
+    const oy = boss.wy;
+    const cdx = Math.cos(boss.laserAngle);
+    const cdy = Math.sin(boss.laserAngle);
+    const t = (px - ox) * cdx + (py - oy) * cdy;
+    if (t < 0 || t > boss.laserRange) return false;
+    const perpDist = Math.abs((px - ox) * cdy - (py - oy) * cdx);
+    return perpDist < 30;
+  }
 }
