@@ -12,6 +12,7 @@ import { HUD } from '../ui/hud.js';
 import { LandingScreen } from '../ui/landing.js';
 import { LevelIntroScreen } from '../ui/level-intro.js';
 import { LevelClearScreen } from '../ui/level-clear.js';
+import { LevelSelectScreen } from '../ui/level-select.js';
 import { UpgradeScreen } from '../ui/upgrade-screen.js';
 import { GameOverScreen } from '../ui/game-over.js';
 import { Joystick } from '../ui/joystick.js';
@@ -31,6 +32,7 @@ export class Game {
     this._landing = new LandingScreen();
     this._levelIntro = new LevelIntroScreen();
     this._levelClear = new LevelClearScreen();
+    this._levelSelect = new LevelSelectScreen();
     this._upgradeScreen = new UpgradeScreen();
     this._gameOver = new GameOverScreen();
 
@@ -44,6 +46,13 @@ export class Game {
     this._upgrades = defaultSave().upgrades;
     this._score = 0;
     this._scoreUpgradeMilestones = 0;
+    this._levelStartScore = 0;
+
+    // Replay state
+    this._replayMode = false;
+    this._replaySavedState = null;
+    this._maxClearedLevel = 0;
+    this._levelHighScores = {};
 
     // Tutorial state — _tutorialPhase 0=none, 1=Tutorial1, 2=Tutorial2
     this._tutorialPhase = 0;
@@ -80,6 +89,8 @@ export class Game {
       this._upgrades = save.upgrades;
       this._score = save.score ?? save.totalScore ?? 0;
       this._scoreUpgradeMilestones = save.scoreUpgradeMilestones ?? 0;
+      this._maxClearedLevel = save.maxClearedLevel ?? Math.max(0, (save.level || 0) - 1);
+      this._levelHighScores = save.levelHighScores ?? {};
     }
 
     this._combat = new CombatSystem(this._livesSystem, this._sound);
@@ -116,16 +127,16 @@ export class Game {
     const r = 55;
     const bottomY = H - pad - r - this._safeBottom;
     if (!this._moveJoystick) {
-      this._moveJoystick = new Joystick(pad + r, bottomY, r);
-      this._laserJoystick = new Joystick(W - pad - r * 3 - 20, bottomY, r);
-      this._arcJoystick = new Joystick(W - pad - r, bottomY, r);
+      this._moveJoystick = new Joystick(pad + r * 3, bottomY, r);
+      this._laserJoystick = new Joystick(W - pad - r * 5 - 20, bottomY, r);
+      this._arcJoystick = new Joystick(W - pad - r * 3, bottomY, r);
     } else {
-      this._moveJoystick.reposition(pad + r, bottomY);
-      this._laserJoystick.reposition(W - pad - r * 3 - 20, bottomY);
-      this._arcJoystick.reposition(W - pad - r, bottomY);
+      this._moveJoystick.reposition(pad + r * 3, bottomY);
+      this._laserJoystick.reposition(W - pad - r * 5 - 20, bottomY);
+      this._arcJoystick.reposition(W - pad - r * 3, bottomY);
     }
     const btnR = 28;
-    const btnX = (W - pad - r * 3 - 20 + W - pad - r) / 2;
+    const btnX = (W - pad - r * 5 - 20 + W - pad - r * 3) / 2;
     const btnY = bottomY - r - 24 - btnR;
     this._freezeButton = { x: btnX, y: btnY, radius: btnR };
 
@@ -230,7 +241,11 @@ export class Game {
       return;
     }
     if (this._scene === SCENE.LEVEL_CLEAR) {
-      this._levelClear.handleTap();
+      this._levelClear.handleTouchStart(touch.clientX, touch.clientY);
+      return;
+    }
+    if (this._scene === SCENE.LEVEL_SELECT) {
+      this._levelSelect.handleTouchStart(touch.clientX, touch.clientY);
       return;
     }
     if (this._scene === SCENE.GAME_OVER) {
@@ -284,6 +299,14 @@ export class Game {
       this._levelIntro.handleTouchEnd(touch.clientX, touch.clientY);
       return;
     }
+    if (this._scene === SCENE.LEVEL_CLEAR) {
+      this._levelClear.handleTouchEnd(touch.clientX, touch.clientY);
+      return;
+    }
+    if (this._scene === SCENE.LEVEL_SELECT) {
+      this._levelSelect.handleTouchEnd(touch.clientX, touch.clientY);
+      return;
+    }
     this._moveJoystick.onTouchEnd(touch);
     this._laserJoystick.onTouchEnd(touch);
     this._arcJoystick.onTouchEnd(touch);
@@ -302,15 +325,63 @@ export class Game {
     this._enemies = [];
     this._landing.show(
       () => this._startTutorial1(),
-      () => this._startAtLevel1(),
+      () => this._onCampaignButton(),
+      this._maxClearedLevel,
     );
   }
 
-  // "Start Level 1" — skip the tutorial and jump straight into Level 1
-  _startAtLevel1() {
-    this._levelNumber = 1;
-    this._save();
+  _onCampaignButton() {
+    if (this._maxClearedLevel > 0) {
+      this._showLevelSelect();
+    } else {
+      if (this._levelNumber === 0) this._levelNumber = 1;
+      this._save();
+      this._startLevelIntro();
+    }
+  }
+
+  _showLevelSelect() {
+    this._scene = SCENE.LEVEL_SELECT;
+    this._levelSelect.show(
+      this._maxClearedLevel,
+      this._maxClearedLevel + 1,
+      this._levelHighScores,
+      (level) => this._onLevelSelected(level),
+      () => this._showLanding(),
+    );
+  }
+
+  _onLevelSelected(level) {
+    if (level <= this._maxClearedLevel) {
+      this._replayMode = true;
+      this._replaySavedState = {
+        level: this._levelNumber,
+        lives: this._livesSystem.lives,
+        score: this._score,
+        upgrades: { ...this._upgrades },
+        scoreUpgradeMilestones: this._scoreUpgradeMilestones,
+      };
+      this._livesSystem.lives = 3;
+      this._levelNumber = level;
+    } else {
+      this._replayMode = false;
+      this._levelNumber = level;
+      this._save();
+    }
     this._startLevelIntro();
+  }
+
+  _exitReplay(keepProgress) {
+    if (!this._replayMode) return;
+    this._replayMode = false;
+    this._livesSystem.lives = this._replaySavedState.lives;
+    if (!keepProgress) {
+      this._score = this._replaySavedState.score;
+      this._upgrades = this._replaySavedState.upgrades;
+      this._scoreUpgradeMilestones = this._replaySavedState.scoreUpgradeMilestones;
+      this._levelNumber = this._replaySavedState.level;
+      this._applyUpgrades();
+    }
   }
 
   // ── Tutorial 1 ─────────────────────────────────────────────────────────────
@@ -486,6 +557,7 @@ export class Game {
   }
 
   _startLevel() {
+    this._levelStartScore = this._score;
     this._scene = SCENE.PLAYING;
     const config = getLevelConfig(this._levelNumber - 1);
     this._bossLevel = config.isBoss && config.duration == null;
@@ -500,8 +572,23 @@ export class Game {
   _onLevelClear() {
     this._sound.play('levelClear');
     this._scene = SCENE.LEVEL_CLEAR;
-    this._levelClear.show(this._levelNumber, this._score, () => this._onLevelClearContinue());
+
+    const levelScore = this._score - this._levelStartScore;
+    const prevBest = this._levelHighScores[this._levelNumber] ?? 0;
+    const newBest = levelScore > prevBest;
+    if (newBest) this._levelHighScores[this._levelNumber] = levelScore;
+
+    if (!this._replayMode && this._levelNumber > this._maxClearedLevel) {
+      this._maxClearedLevel = this._levelNumber;
+    }
     this._save();
+
+    this._levelClear.show(
+      this._levelNumber, levelScore, this._score,
+      newBest ? levelScore : prevBest, newBest, this._replayMode,
+      () => this._replayMode ? this._onReplayLevelClearContinue() : this._onLevelClearContinue(),
+      () => this._onLevelClearMenu(),
+    );
   }
 
   _onLevelClearContinue() {
@@ -511,6 +598,34 @@ export class Game {
     this._scoreUpgradeMilestones = earned;
     const totalPicks = basePicks + extraPicks;
     this._startUpgradePhase(totalPicks, totalPicks);
+  }
+
+  _onReplayLevelClearContinue() {
+    const nextLevel = this._levelNumber + 1;
+    if (nextLevel > this._maxClearedLevel) {
+      // Stepping into new territory — exit replay and continue as a real run
+      this._exitReplay(true);
+      const basePicks = this._levelNumber >= 8 ? 2 : 1;
+      const earned = Math.floor(this._score / 500);
+      const extraPicks = earned - this._scoreUpgradeMilestones;
+      this._scoreUpgradeMilestones = earned;
+      this._startUpgradePhase(basePicks + extraPicks, basePicks + extraPicks);
+    } else {
+      // Still replaying cleared levels — give one pick, upgrades reset on exit anyway
+      const basePicks = this._levelNumber >= 8 ? 2 : 1;
+      this._startUpgradePhase(basePicks, basePicks);
+    }
+  }
+
+  _onLevelClearMenu() {
+    if (this._replayMode) {
+      this._exitReplay(false);
+    } else {
+      // Advance past cleared level without upgrades; player chose menu over picks
+      this._levelNumber++;
+    }
+    this._save();
+    this._showLanding();
   }
 
   _startUpgradePhase(picksRemaining, totalPicks) {
@@ -529,6 +644,9 @@ export class Game {
 
   _advanceLevel() {
     this._levelNumber++;
+    if (!this._replayMode && this._levelNumber - 1 > this._maxClearedLevel) {
+      this._maxClearedLevel = this._levelNumber - 1;
+    }
     this._save();
     this._startLevelIntro();
   }
@@ -543,6 +661,12 @@ export class Game {
 
   _onPlayerDied(result) {
     if (result === 'game_over') {
+      if (this._replayMode) {
+        this._exitReplay(false);
+        this._save();
+        this._showLanding();
+        return;
+      }
       this._sound.play('gameOver');
       this._scene = SCENE.GAME_OVER;
       this._gameOver.show(this._score, () => this._restartGame());
@@ -556,10 +680,14 @@ export class Game {
   _restartGame() {
     this._levelNumber = 0;
     this._tutorialPhase = 0;
+    this._maxClearedLevel = 0;
+    this._replayMode = false;
+    this._replaySavedState = null;
     this._livesSystem.reset();
     this._upgrades = defaultSave().upgrades;
     this._score = 0;
     this._scoreUpgradeMilestones = 0;
+    // _levelHighScores preserved across runs
     this._applyUpgrades();
     this._save();
     this._showLanding();
@@ -569,21 +697,28 @@ export class Game {
     clearSave();
     this._levelNumber = 0;
     this._tutorialPhase = 0;
+    this._maxClearedLevel = 0;
+    this._replayMode = false;
+    this._replaySavedState = null;
     this._livesSystem.reset();
     this._upgrades = defaultSave().upgrades;
     this._score = 0;
     this._scoreUpgradeMilestones = 0;
+    this._levelHighScores = {};
     this._applyUpgrades();
     this._showLanding();
   }
 
   _save() {
+    const r = this._replayMode ? this._replaySavedState : null;
     saveGame({
-      level: this._levelNumber,
-      lives: this._livesSystem.lives,
-      upgrades: this._upgrades,
-      score: this._score,
-      scoreUpgradeMilestones: this._scoreUpgradeMilestones,
+      level:                  r ? r.level                  : this._levelNumber,
+      maxClearedLevel:        this._maxClearedLevel,
+      lives:                  r ? r.lives                  : this._livesSystem.lives,
+      upgrades:               r ? r.upgrades               : this._upgrades,
+      score:                  r ? r.score                  : this._score,
+      scoreUpgradeMilestones: r ? r.scoreUpgradeMilestones : this._scoreUpgradeMilestones,
+      levelHighScores:        this._levelHighScores,
     });
   }
 
@@ -905,6 +1040,12 @@ export class Game {
     // ── Landing page ────────────────────────────────────────────────────────
     if (this._scene === SCENE.LANDING) {
       renderer.drawOverlay((ctx, W, H) => this._landing.draw(ctx, W, H));
+      return;
+    }
+
+    // ── Level select ─────────────────────────────────────────────────────────
+    if (this._scene === SCENE.LEVEL_SELECT) {
+      renderer.drawOverlay((ctx, W, H) => this._levelSelect.draw(ctx, W, H));
       return;
     }
 

@@ -1,5 +1,17 @@
 # Changelog
 
+## 4.0
+- Added "Menu" button to the level-clear screen alongside "Continue", taking the player back to the front page.
+- Front page "START" button becomes "CAMPAIGN" once levels have been cleared, showing how many levels are done and what's next.
+- Added level-select screen: after clearing at least one level, the Campaign button opens a grid showing every cleared level (replay) plus the next unplayed level.
+- Replay mode: replaying a cleared level uses 3 fresh practice lives, preserves the real campaign state, and does not add to cumulative score. Per-level high scores are tracked and updated whenever a level is beaten.
+- Continuing past the highest cleared level in a replay exits replay mode and converts the run into a real campaign session (score and upgrades from the replay carry over, original lives are restored).
+- Per-level high scores persist across game-over resets (only a full "Reset Everything" wipes them).
+- Level-clear screen now shows the score earned this level and flags a new per-level best.
+
+## 3.9
+- Repositioned joysticks: left (move/steer) joystick shifted right by one joystick width; both right joysticks (laser, arc) shifted left by one joystick width, bringing them all closer to center.
+
 ## 3.8
 - Level 3 and 4 last longer
 - Level 5 boss has a greater health pool

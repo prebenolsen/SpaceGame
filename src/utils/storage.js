@@ -21,6 +21,7 @@ export function clearSave() {
 
 export const defaultSave = () => ({
   level: 0,
+  maxClearedLevel: 0,
   lives: 5,
   upgrades: {
     laserFireRate: 0,
@@ -34,4 +35,5 @@ export const defaultSave = () => ({
   },
   score: 0,
   scoreUpgradeMilestones: 0,
+  levelHighScores: {},
 });

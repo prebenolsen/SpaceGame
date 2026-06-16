@@ -10,7 +10,8 @@ const ROSTER = ['drone', 'rusher', 'tank', 'miniboss', 'boss'];
 export class LandingScreen {
   constructor() {
     this._onTutorial = null;
-    this._onStartLevel1 = null;
+    this._onCampaign = null;
+    this._maxClearedLevel = 0;
     this._touchStart = null;
     this._tutorialRect = null;
     this._startRect = null;
@@ -18,9 +19,10 @@ export class LandingScreen {
     this._starsSize = null;
   }
 
-  show(onTutorial, onStartLevel1) {
+  show(onTutorial, onCampaign, maxClearedLevel) {
     this._onTutorial = onTutorial;
-    this._onStartLevel1 = onStartLevel1;
+    this._onCampaign = onCampaign;
+    this._maxClearedLevel = maxClearedLevel ?? 0;
     this._touchStart = null;
   }
 
@@ -38,7 +40,7 @@ export class LandingScreen {
       return;
     }
     if (inside(this._startRect)) {
-      if (this._onStartLevel1) this._onStartLevel1();
+      if (this._onCampaign) this._onCampaign();
       return;
     }
   }
@@ -132,13 +134,18 @@ export class LandingScreen {
       desc: 'Learn the controls at your own pace',
       badge: { text: 'New players', color: '#aaaacc', solid: false },
     });
+    const hasProgress = this._maxClearedLevel > 0;
     this._drawCard(ctx, this._startRect, scale, {
-      accent: '#69f0ae', // success green
+      accent: '#69f0ae',
       glyph: 'ship',
       glyphGlow: true,
-      title: 'START',
-      desc: 'Jump straight into Level 1',
-      badge: { text: 'Skip tutorial', color: '#69f0ae', solid: true },
+      title: hasProgress ? 'CAMPAIGN' : 'START',
+      desc: hasProgress
+        ? `${this._maxClearedLevel} level${this._maxClearedLevel > 1 ? 's' : ''} cleared — replay or push on`
+        : 'Jump straight into Level 1',
+      badge: hasProgress
+        ? { text: `Level ${this._maxClearedLevel + 1} next`, color: '#69f0ae', solid: true }
+        : { text: 'Skip tutorial', color: '#69f0ae', solid: true },
     });
     y += cardH + gapCardsLegend;
 
