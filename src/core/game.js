@@ -386,10 +386,18 @@ export class Game {
 
   // ── Tutorial 1 ─────────────────────────────────────────────────────────────
 
+  _resetInputState() {
+    this._moveJoystick.reset();
+    this._laserJoystick.reset();
+    this._arcJoystick.reset();
+    this._keys = {};
+  }
+
   _startTutorial1() {
     this._tutorialPhase = 1;
     this._tut1Step = 1;
     this._tut1WaitTimer = 0;
+    this._resetInputState();
     this._scene = SCENE.PLAYING;
     this._enemies = [];
     this._score = 0;
@@ -460,6 +468,7 @@ export class Game {
     this._tutorialPhase = 2;
     this._tut2Step = 1;
     this._tut2TooltipTimer = 7; // seconds to show the top tooltip
+    this._resetInputState();
     this._scene = SCENE.PLAYING;
     this._enemies = [];
     this._score = 0;
@@ -558,6 +567,7 @@ export class Game {
 
   _startLevel() {
     this._levelStartScore = this._score;
+    this._resetInputState();
     this._scene = SCENE.PLAYING;
     const config = getLevelConfig(this._levelNumber - 1);
     this._bossLevel = config.isBoss && config.duration == null;

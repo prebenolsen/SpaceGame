@@ -38,6 +38,10 @@ export class Joystick {
 
   onTouchEnd(touch) {
     if (touch.identifier !== this._touchId) return;
+    this.reset();
+  }
+
+  reset() {
     this._touchId = null;
     this.active = false;
     this.dx = 0;

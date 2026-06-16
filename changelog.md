@@ -1,5 +1,8 @@
 # Changelog
 
+## 4.1
+- Fixed joystick stuck issue: if the player was moving when Tutorial 2 ended, the move joystick would remain active in level 1. All joysticks and held keys are now reset when any level or tutorial starts.
+
 ## 4.0
 - Added "Menu" button to the level-clear screen alongside "Continue", taking the player back to the front page.
 - Front page "START" button becomes "CAMPAIGN" once levels have been cleared, showing how many levels are done and what's next.
