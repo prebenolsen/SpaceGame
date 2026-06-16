@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.5
+- Redesigned the landing page (`src/ui/landing.js`) to match the Space Survivor design system. The plain `#05050f` fill gains a procedural starfield (deterministic, cached per size). A glowing geometric **ship glyph** now sits above the title, the title carries the ship-blue text glow, and "Choose how to begin" is replaced by the full tagline ("You are the ship at the center of the void…").
+- The two choice cards now use the design's recipe: translucent deep-blue fill (`rgba(10,10,46,.55)`) with a glowing accent border (Tutorial = laser blue `#42a5f5`, Start = success green `#69f0ae`). Emoji icons (🎓 🚀) are replaced by the brand's geometric glyphs — a **drone** circle for Tutorial and the **ship** triangle for Start — and each card ends in a pill **badge** ("New players" neutral, "Skip tutorial" solid green).
+- Added a **"WHAT HUNTS YOU"** roster legend along the bottom showing the drone / rusher / tank / miniboss / boss glyphs. Glyph shapes/colors mirror `src/rendering/draw-player.js` & `draw-enemies.js`. Whole composition scales down on small screens.
+
 ## 3.4
 - Tutorial 1 bottom tooltip now sits much lower — anchored down into the top of the joystick band (bottom-center of the screen) instead of floating above it where it read as mid-screen. Also fixed a width bug where the box could be capped narrower than its own text and clip it.
 - Actually fixed the lingering Arc in Tutorial 2: the leftover was the **aim cone** (`arcAim`), not just the fired projectile. Tutorial 2 never calls `Player.update`, so `arcAim.active`/`laserAim.active` kept their Tutorial 1 values and stayed drawn. Both aim flags are now cleared (alongside the projectiles) when Tutorial 2 starts.
