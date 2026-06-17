@@ -86,11 +86,23 @@ export class Spawner {
     // +10 % speed per level beyond level 5 (compounding); minibosses are always slow
     const levelSpeedBoost = (this._levelNumber > 5 && entry.type !== 'miniboss')
       ? Math.pow(1.1, this._levelNumber - 5) : 1;
+    // Max effective speed (px/s); ramps up as player levels and upgrades speed
+    // Player max speed (rank-6 moveSpeed) = 440 px/s; thresholds are % of that
+    // Minibosses are always slow (spawned with speedMult 0.5, no cap needed)
+    const speedCap =
+      entry.type === 'miniboss' ? Infinity :
+      entry.type === 'boss'     ? (this._levelNumber >= 16 ? 484 : Infinity) :  // 110% — bosses from L16+
+      this._levelNumber >= 21   ? 484 :  // 110% — L21+, hard stop
+      this._levelNumber >= 18   ? 462 :  // 105% — L18-20
+      this._levelNumber >= 17   ? 440 :  // 100% — L17
+      this._levelNumber >= 11   ? 418 :  // 95%  — L11-16
+                                  528;   // 120% — L1-10 (actual speeds never reach this)
     return factory({
       wx: spawnPos.x,
       wy: spawnPos.y,
       healthMult: entry.healthMult ?? 1,
       speedMult: (entry.speedMult ?? 1) * levelSpeedBoost,
+      speedCap,
       enableLaser: entry.enableLaser ?? false,
     });
   }

@@ -29,7 +29,7 @@ export class Boss extends BaseEnemy {
   get laserPhase() { return this._laserEnabled ? this._laserState : 'idle'; }
 
   _isStopped() {
-    return this._laserEnabled && this._laserState !== 'idle';
+    return (this._laserEnabled && this._laserState !== 'idle') || this._stunTimer > 0;
   }
 
   update(dt, camera) {
@@ -40,6 +40,11 @@ export class Boss extends BaseEnemy {
 
     if (this._laserEnabled) {
       this._updateLaser(dt, camera);
+    }
+
+    // Tick stun timer here so it counts down even when laser-stopped
+    if (this._stunTimer > 0) {
+      this._stunTimer = Math.max(0, this._stunTimer - dt);
     }
 
     if (!this._isStopped()) {

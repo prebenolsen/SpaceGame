@@ -1,21 +1,27 @@
 import { normalizeVector } from '../../utils/math.js';
 
 export class BaseEnemy {
-  constructor({ wx, wy, hp, speed, radius, scoreValue, healthMult = 1, speedMult = 1 }) {
+  constructor({ wx, wy, hp, speed, radius, scoreValue, healthMult = 1, speedMult = 1, speedCap = Infinity }) {
     this.wx = wx;
     this.wy = wy;
     this.hp = hp * healthMult;
     this.maxHp = this.hp;
-    this.speed = speed * speedMult;
+    this.speed = Math.min(speed * speedMult, speedCap);
     this.radius = radius;
     this.scoreValue = scoreValue;
     this.active = true;
     this._hitFlash = 0;
     this._freezeTimer = 0;
+    this._stunTimer = 0;
   }
 
   freeze(duration) {
     this._freezeTimer = duration;
+  }
+
+  // Stun stops movement regardless of freeze immunity (used when boss hits player)
+  stun(duration) {
+    this._stunTimer = duration;
   }
 
   // Returns speed multiplier while frozen (0 = fully stopped)
@@ -32,7 +38,10 @@ export class BaseEnemy {
     if (this._freezeTimer > 0) {
       this._freezeTimer = Math.max(0, this._freezeTimer - dt);
     }
-    const speedMult = this._freezeTimer > 0 ? this._getFreezeSpeedMult() : 1;
+    if (this._stunTimer > 0) {
+      this._stunTimer = Math.max(0, this._stunTimer - dt);
+    }
+    const speedMult = this._stunTimer > 0 ? 0 : (this._freezeTimer > 0 ? this._getFreezeSpeedMult() : 1);
     if (speedMult > 0) {
       const dx = camera.playerWorldX - this.wx;
       const dy = camera.playerWorldY - this.wy;

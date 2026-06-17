@@ -1,5 +1,16 @@
 # Changelog
 
+## 5.8
+- Fixed bug where bosses and minibosses were instantly killed when they collided with the player. Bosses and minibosses now survive player contact and can only die from weapon damage. When a boss or miniboss hits the player it is frozen for 1 second instead of being deactivated.
+
+## 5.7
+- Level 20 dual bosses are now capped at 484 px/s (110% of max player speed) by the spawner, matching the hard stop for L21+ regular enemies. Previously the spawner boost pushed the L20 boss to ~865 px/s. Phase 2 (below 50% HP) still multiplies speed by 1.5× (726 px/s).
+
+## 5.6
+- Enemy speed is now capped by a level-specific limit applied in the spawner before the enemy is constructed: 418 px/s (95% player max) for levels 11–16, 440 px/s (100%) at level 17, 462 px/s (105%) for levels 18–20, and 484 px/s (110%) from level 21 onward (hard stop). This replaces the previous blanket 528 px/s cap and fixes rusherClusters which had no cap and could become unboundedly fast at high levels.
+- RusherCluster members now share the same healthMult as drones at their level, across all hand-authored and auto-scaled levels. Previously clusters used 40% of drone HP in auto-scale and mismatched values in levels 6, 8, 10, and 15. In levels 21+ rusherCluster HP now scales with drones (was frozen at the level-21 base).
+- Drone and rusher constructor hard-caps lowered from 528 px/s (120% player max) to 484 px/s (110%), matching the new absolute ceiling.
+
 ## 5.5
 - Godmode redesigned: after the 5-second activation, a level picker (1–21) is shown instead of jumping straight to level 20 with all upgrades maxed. Selecting a level opens the upgrade screen with the number of picks a normal campaign run would have earned by that point (7 picks for levels 1–8, then +2 per level from 8 onward) plus 4 extra picks. Only upgrades unlocked at the chosen level are offered, so the player builds an appropriate loadout through manual choices rather than receiving everything at once.
 

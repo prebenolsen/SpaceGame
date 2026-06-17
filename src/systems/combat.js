@@ -51,7 +51,11 @@ export class CombatSystem {
     for (const enemy of enemies) {
       if (!enemy.active) continue;
       if (checkEnemyPlayerHit(enemy, camera)) {
-        enemy.active = false; // enemy crashes on contact
+        if (enemy.type === 'boss' || enemy.type === 'miniboss') {
+          enemy.stun(1); // bounces off player, frozen 1 second
+        } else {
+          enemy.active = false; // regular enemies crash on contact
+        }
         const result = this.lives.takeHit();
         if (result) {
           this.sound.play('playerHit');

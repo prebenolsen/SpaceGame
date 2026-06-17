@@ -92,11 +92,11 @@ HealthMult curve is roughly exponential so each level feels meaningfully harder 
 | 3 | 30 s | — | Drones (interval 3 s, **2.0× HP**, 1.2× speed) + rushers (interval 8 s, 1.2× speed) |
 | 4 | 30 s | — | Drones (interval 2.5 s, **3.0× HP**, 1.4×) + rushers (**1.2× HP**, interval 5.5 s, 1.4×) + tanks (interval 20 s) |
 | 5 | ∞ | Boss | Boss (**1.8× HP**, 1.2× speed) + drone support (**2.5× HP**) + rusher support (**1.5× HP**) |
-| 6 | 45 s | — | Level 4 mix with **rusherCluster** replacing rushers — drones (**3.0× HP**, 1.4×) + rusherClusters (**1.2× HP**, interval 5.5 s) + tanks (interval 20 s) |
+| 6 | 45 s | — | Level 4 mix with **rusherCluster** replacing rushers — drones (**3.0× HP**, 1.4×) + rusherClusters (**3.0× HP**, interval 5.5 s) + tanks (interval 20 s) |
 | 7 | 45 s | — | Drones (interval 2 s, **5.5× HP**, 1.6×) + tanks (**2.5× HP**, interval 14 s) + 1 miniboss at t=10 (**2.9× HP**, very slow) |
-| 8 | 45 s | — | Drones (interval 1.8 s, **7.0× HP**, 1.8×) + rushers (**3.5× HP**, interval 12 s) + **rusherClusters** (**2.8× HP**, interval 12 s, from t=18) + tanks (**3.8× HP**, interval 12 s) |
+| 8 | 45 s | — | Drones (interval 1.8 s, **7.0× HP**, 1.8×) + rushers (**3.5× HP**, interval 12 s) + **rusherClusters** (**7.0× HP**, interval 12 s, from t=18) + tanks (**3.8× HP**, interval 12 s) |
 | 9 | 45 s | — | Drones (interval 1.5 s, **9.0× HP**, 2.0×) + tanks (**5.5× HP**, interval 10 s) + 1 miniboss at t=12 (**4.8× HP**, very slow) |
-| 10 | ∞ | Boss | Boss (**14× HP**, **2.44× speed**, laser attack every 5 s) + drone support (**7.0× HP**) + rusher support (**4.0× HP**, interval 18 s) + **rusherCluster** support (**4.0× HP**, interval 14 s, from t=12) |
+| 10 | ∞ | Boss | Boss (**14× HP**, **2.44× speed**, laser attack every 5 s) + drone support (**7.0× HP**) + rusher support (**4.0× HP**, interval 18 s) + **rusherCluster** support (**7.0× HP**, interval 14 s, from t=12) |
 
 ## Auto-scaling beyond level 10
 
@@ -105,11 +105,11 @@ HealthMult curve is roughly exponential so each level feels meaningfully harder 
 - `extra = levelIndex - LEVELS.length` (0 = level 11)
 - `enemyScale = 11.25 × 1.20^extra` — 25% harder than L9's 9.0× at L11, then +20% per level
 - `interval   = max(0.5, 1.2 / 1.15^extra)` — 25% more mobs than L9's 1.5 s at L11, then +15% more per level; floor 0.5 s
-- `speedMult  = 2.4 × 1.075^extra` — 20% faster than L9's 2.0× at L11, then +7.5% per level; hard-capped at 528 px/s (120% of max player speed) inside drone and rusher constructors
+- `speedMult  = 2.4 × 1.075^extra` — 20% faster than L9's 2.0× at L11, then +7.5% per level; spawner stacks `1.1^(level-5)` on top, then caps the result at a level-specific limit (see speed cap table below)
 - `bossScale  = 5 + extra × 0.5` — continues from level-10 boss, grows more gently
 - Boss levels every 5th level (`(levelIndex + 1) % 5 === 0`), using `once('boss')` with `healthMult: bossScale` — aligns with predefined bosses at levels 5 and 10
 - Normal levels: drones + tanks (interval × 5, 60% enemy scale); all use the computed `speedMult`
-- Even-numbered normal levels also add **rushers** (interval × 2.5, 50% enemy scale) + **rusherClusters** (interval × 3, 40% enemy scale, from t=8)
+- Even-numbered normal levels also add **rushers** (interval × 2.5, 50% enemy scale) + **rusherClusters** (interval × 3, 100% enemy scale = same as drones, from t=8)
 - Odd-numbered normal levels add 1 **miniboss** at t=15 (HP = 8× drone HP for that scale, speedMult 0.5)
 
 | Level | extra | enemyScale | interval | speedMult (config) |
@@ -134,7 +134,7 @@ Mirrors level 10: laser attack every 5 s, companion waves of drones + rushers + 
 - **Boss speed:** speedMult 3.21 (auto-scale formula); phase 2 (below 50% HP) multiplies speed by 1.5×
 - Companion drones: healthMult ≈ 23, interval 6 s, from t=5
 - Companion rushers: healthMult ≈ 12, interval 18 s, from t=8
-- Companion rusherClusters: healthMult ≈ 9, interval 14 s, from t=12
+- Companion rusherClusters: healthMult ≈ 23 (= drones), interval 14 s, from t=12
 
 `BOSS_FILL = 300` s is used as the companion-wave duration in boss levels; the boss dying ends the level long before this elapses.
 
@@ -144,7 +144,7 @@ Dual-boss encounter — no companion enemies. Both bosses fire lasers; the secon
 
 - **Boss count:** 2 (boss 1 at t=3 s, boss 2 at t=5.5 s)
 - **Each boss HP:** 75 × a level-19 drone = 40 × 48.37 × 75 ≈ **145 119 HP** (healthMult ≈ 96.75)
-- **Boss speed:** speedMult 4.60 (auto-scale formula)
+- **Boss speed:** 484 px/s (110% player max — capped by spawner); phase 2 (below 50% HP) ×1.5 = 726 px/s
 - No companion waves
 
 ## Post-level-20 scaling (levels 21+)
@@ -155,7 +155,7 @@ From level 21 (`extra ≥ 10`) there are **no more boss levels**. A separate sca
 - `droneBase = 11.25 × 1.20^10 ≈ 69.66` — level-21 drone health base
 - **Drone health:** `droneBase × 1.05^postExtra` — +5% per level, compounding
 - **Rusher health:** frozen at `round(droneBase × 0.5) = 35`
-- **RusherCluster health:** frozen at `round(droneBase × 0.4) = 28`
+- **RusherCluster health:** `droneScale` — scales with drone HP (same healthMult; was previously frozen)
 - **Tank health:** `round(droneScale × 0.6)` — scales with drones
 - **Miniboss health:** `8 × 40 / 600 × droneScale` — scales with drones (odd levels only)
 - **Drone spawn interval:** `max(0.3, 0.5 × 0.9^postExtra)` — 10% more frequent each level
@@ -175,15 +175,17 @@ From level 21 (`extra ≥ 10`) there are **no more boss levels**. A separate sca
 | 25 | 4 | 84.67 | 0.33 s |
 | 30 | 9 | 108.0 | 0.30 s (floor) |
 
-## Progressive speed scaling (levels 6+)
+## Progressive speed scaling and caps (levels 6+)
 
-Implemented in `src/systems/spawner.js`, not in level-config.js. For every level beyond 5 the spawner multiplies all `speedMult` values by `1.1^(levelNumber − 5)` before passing them to enemy constructors. This stacks on top of the per-wave `speedMult` already present in each level's config:
+Implemented in `src/systems/spawner.js`. For every level beyond 5 the spawner multiplies all `speedMult` values by `1.1^(levelNumber − 5)` before passing them to enemy constructors. After applying the boost, the spawner clamps the effective speed to a level-specific maximum. Minibosses are exempt from the boost (always slow) and have no cap.
 
-| Level | Boost factor (applied on top of wave speedMult) |
-|-------|--------------------------------------------------|
-| 6 | × 1.10 |
-| 7 | × 1.21 |
-| 8 | × 1.33 |
-| 9 | × 1.46 |
-| 10 | × 1.61 |
-| 11+ | × 1.1^(level − 5) |
+| Level range | Spawner boost | Effective speed cap (regular enemies) | Boss speed cap |
+|-------------|--------------|---------------------------------------|----------------|
+| 1–5 | × 1.0 | — | — |
+| 6–10 | × 1.1^(level−5) | 528 px/s (120%) | — |
+| 11–16 | × 1.1^(level−5) | 418 px/s (95%) | **484 px/s (110%)** |
+| 17 | × 1.1^12 | 440 px/s (100%) | **484 px/s (110%)** |
+| 18–20 | × 1.1^(level−5) | 462 px/s (105%) | **484 px/s (110%)** |
+| 21+ | × 1.1^(level−5) | **484 px/s (110%) — hard stop** | **484 px/s (110%)** |
+
+All percentages are of player max speed (440 px/s at rank-6 moveSpeed upgrade). The cap is applied in `BaseEnemy` via a `speedCap` parameter. Drone and rusher constructors also carry a secondary hard cap at 484 px/s. RusherCluster members rely solely on the `speedCap` passed from the spawner.
