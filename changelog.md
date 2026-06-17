@@ -1,5 +1,8 @@
 # Changelog
 
+## 5.10
+- Pending upgrade picks: if the player clears a level and chooses "Menu" instead of picking an upgrade, the skipped picks are now banked and added on top of the next level's picks. Score-milestone bonus picks are also banked correctly. Banked picks survive app restarts (stored in `localStorage` as `pendingUpgradePicks`). Replay-mode level clears that step into new campaign territory also consume banked picks.
+
 ## 5.9
 - PWA auto-update: the app now checks for a new version on every launch and reloads automatically if one is already staged. If a new version installs while the app is running (mid-session), a "Update available" button appears at the bottom of the screen; tapping it reloads into the new version. Users never need to manually clear the cache. Offline play continues to work unchanged. Also fixed the service worker asset list which was missing several JS files (`rusher-cluster.js`, `supabase.js`, `scoreboard.js`, `config.js`, `level-select.js`, `version.js`); updated cache name to `space-survivor-v4`.
 

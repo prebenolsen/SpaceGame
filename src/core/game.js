@@ -57,6 +57,7 @@ export class Game {
     this._replaySavedState = null;
     this._maxClearedLevel = 0;
     this._levelHighScores = {};
+    this._pendingUpgradePicks = 0;
 
     // Tutorial state — _tutorialPhase 0=none, 1=Tutorial1, 2=Tutorial2
     this._tutorialPhase = 0;
@@ -95,6 +96,7 @@ export class Game {
       this._scoreUpgradeMilestones = save.scoreUpgradeMilestones ?? 0;
       this._maxClearedLevel = save.maxClearedLevel ?? Math.max(0, (save.level || 0) - 1);
       this._levelHighScores = save.levelHighScores ?? {};
+      this._pendingUpgradePicks = save.pendingUpgradePicks ?? 0;
     }
 
     this._combat = new CombatSystem(this._livesSystem, this._sound);
@@ -675,7 +677,8 @@ export class Game {
     const earned = SCORE_MILESTONES.filter(m => this._score >= m).length;
     const extraPicks = Math.max(0, earned - this._scoreUpgradeMilestones);
     this._scoreUpgradeMilestones = earned;
-    const totalPicks = basePicks + extraPicks;
+    const totalPicks = basePicks + extraPicks + this._pendingUpgradePicks;
+    this._pendingUpgradePicks = 0;
     this._startUpgradePhase(totalPicks, totalPicks);
   }
 
@@ -688,7 +691,9 @@ export class Game {
       const earned = SCORE_MILESTONES.filter(m => this._score >= m).length;
       const extraPicks = Math.max(0, earned - this._scoreUpgradeMilestones);
       this._scoreUpgradeMilestones = earned;
-      this._startUpgradePhase(basePicks + extraPicks, basePicks + extraPicks);
+      const totalPicks = basePicks + extraPicks + this._pendingUpgradePicks;
+      this._pendingUpgradePicks = 0;
+      this._startUpgradePhase(totalPicks, totalPicks);
     } else {
       // Still replaying cleared levels — give one pick, upgrades reset on exit anyway
       const basePicks = this._levelNumber >= 8 ? 2 : 1;
@@ -700,7 +705,12 @@ export class Game {
     if (this._replayMode) {
       this._exitReplay(false);
     } else {
-      // Advance past cleared level without upgrades; player chose menu over picks
+      // Bank the picks the player skipped so they carry over to the next level clear
+      const basePicks = this._levelNumber >= 8 ? 2 : 1;
+      const earned = SCORE_MILESTONES.filter(m => this._score >= m).length;
+      const extraPicks = Math.max(0, earned - this._scoreUpgradeMilestones);
+      this._scoreUpgradeMilestones = earned;
+      this._pendingUpgradePicks += basePicks + extraPicks;
       this._levelNumber++;
     }
     this._save();
@@ -771,6 +781,7 @@ export class Game {
     this._upgrades = defaultSave().upgrades;
     this._score = 0;
     this._scoreUpgradeMilestones = 0;
+    this._pendingUpgradePicks = 0;
     // _levelHighScores preserved across runs
     this._applyUpgrades();
     this._save();
@@ -788,6 +799,7 @@ export class Game {
     this._upgrades = defaultSave().upgrades;
     this._score = 0;
     this._scoreUpgradeMilestones = 0;
+    this._pendingUpgradePicks = 0;
     this._levelHighScores = {};
     this._applyUpgrades();
     this._showLanding();
@@ -802,6 +814,7 @@ export class Game {
       upgrades:               r ? r.upgrades               : this._upgrades,
       score:                  r ? r.score                  : this._score,
       scoreUpgradeMilestones: r ? r.scoreUpgradeMilestones : this._scoreUpgradeMilestones,
+      pendingUpgradePicks:    this._pendingUpgradePicks,
       levelHighScores:        this._levelHighScores,
     });
   }

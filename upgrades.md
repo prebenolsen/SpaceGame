@@ -19,6 +19,10 @@ Reaching certain cumulative score thresholds awards one extra upgrade pick each,
 
 Logic lives in `_onLevelClearContinue()` / `_onReplayLevelClearContinue()` in `src/core/game.js`. `_scoreUpgradeMilestones` tracks how many thresholds have already been rewarded.
 
+### Banked (pending) picks
+
+If the player clicks **Menu** on the level-clear screen instead of taking upgrades, that level's picks (base + score-milestone bonus) are added to `_pendingUpgradePicks` and the score milestone counter is advanced. The next time the player completes a level and continues, pending picks are included in `totalPicks` and then cleared. Banked picks survive app restarts (`pendingUpgradePicks` field in `localStorage`). Replay-mode exits into new campaign territory also consume banked picks.
+
 ## Unlock progression
 
 Upgrades are gated — not all are available from the start.
@@ -102,7 +106,7 @@ Tapping a card calls `_onUpgradePick()` in `src/core/game.js`.
 
 Upgrades are stored in `localStorage` under key `space-survivor-save` as a plain object mapping upgrade ID → rank (e.g. `{ laserFireRate: 3, arcRange: 2, ... }`). Locked upgrades are stored at rank 0 and simply excluded from choices until their unlock condition is met.
 
-- Saved after every level completion (`src/utils/storage.js`).
+- Saved after every level completion (`src/utils/storage.js`), along with `pendingUpgradePicks`.
 - Loaded on game start.
 - Reset to all-zeros on game over / restart.
 
