@@ -349,16 +349,49 @@ export class Game {
   }
 
   _startGodmode() {
-    const maxed = {};
-    for (const def of UPGRADE_DEFS) maxed[def.id] = def.maxRank;
-    this._upgrades = maxed;
-    this._levelNumber = 20;
+    this._showGodmodeLevelSelect();
+  }
+
+  _showGodmodeLevelSelect() {
+    this._scene = SCENE.LEVEL_SELECT;
+    this._levelSelect.show(
+      21, 22, {}, // godmode: all 21 levels available, no high scores
+      (level) => this._onGodmodeLevelSelected(level),
+      () => this._showLanding(),
+      true, // godmodeMode
+    );
+  }
+
+  _onGodmodeLevelSelected(level) {
+    // Picks = total a normal run would have earned through level-1 clears + 4 extra
+    const normalPicks = level <= 8
+      ? level - 1
+      : 7 + (level - 8) * 2;
+    const totalPicks = normalPicks + 4;
+
+    this._upgrades = {};
+    this._levelNumber = level;
     this._score = 0;
     this._scoreUpgradeMilestones = 0;
     this._replayMode = false;
     this._applyUpgrades();
-    this._save();
-    this._startLevelIntro();
+
+    this._startGodmodeUpgradePhase(totalPicks, totalPicks);
+  }
+
+  _startGodmodeUpgradePhase(picksRemaining, totalPicks) {
+    const choices = pickUpgradeChoices(this._upgrades, this._levelNumber);
+    if (choices.length === 0 || picksRemaining === 0) {
+      this._save();
+      this._startLevelIntro();
+      return;
+    }
+    this._scene = SCENE.UPGRADE;
+    this._upgradeScreen.show(choices, this._upgrades, picksRemaining, totalPicks, (id) => {
+      this._upgrades = applyUpgrade(this._upgrades, id);
+      this._applyUpgrades();
+      this._startGodmodeUpgradePhase(picksRemaining - 1, totalPicks);
+    });
   }
 
   _showScoreboard(onBack) {

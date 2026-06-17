@@ -1,5 +1,8 @@
 # Changelog
 
+## 5.5
+- Godmode redesigned: after the 5-second activation, a level picker (1–21) is shown instead of jumping straight to level 20 with all upgrades maxed. Selecting a level opens the upgrade screen with the number of picks a normal campaign run would have earned by that point (7 picks for levels 1–8, then +2 per level from 8 onward) plus 4 extra picks. Only upgrades unlocked at the chosen level are offered, so the player builds an appropriate loadout through manual choices rather than receiving everything at once.
+
 ## 5.4
 - From level 21 onwards there are no more boss levels. Drone health grows an additional +5% per level (compounding from the level-21 base); rusher and rusherCluster health is frozen at the level-21 base value (~35× and ~28× respectively). Drones spawn 10% more frequently each level (interval shrinks ×0.9 per level, floor 0.3 s). Tank and miniboss health continue to scale proportionally with drones; all other spawn intervals are frozen at their level-21 values.
 
