@@ -103,7 +103,8 @@ export class Spawner {
       healthMult: entry.healthMult ?? 1,
       speedMult: (entry.speedMult ?? 1) * levelSpeedBoost,
       speedCap,
-      enableLaser: entry.enableLaser ?? false,
+      enableLaser:        entry.enableLaser        ?? false,
+      enablePhase2Speed:  entry.enablePhase2Speed  ?? true,
     });
   }
 

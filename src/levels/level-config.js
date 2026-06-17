@@ -156,7 +156,7 @@ export const LEVELS = [
     duration: null,
     isBoss: true,
     waves: [
-      ...once('boss', 3, { healthMult: 14, speedMult: 2.44, enableLaser: true }),
+      ...once('boss', 3, { healthMult: 14, speedMult: 2.44, enableLaser: true, enablePhase2Speed: false }),
       ...wave('drone',         BOSS_FILL, { startTime: 5,  interval: 6,  healthMult: 7.0, speedMult: 1.5 }),
       ...wave('rusher',        BOSS_FILL, { startTime: 8,  interval: 18, healthMult: 4.0, speedMult: 1.5 }),
       ...wave('rusherCluster', BOSS_FILL, { startTime: 12, interval: 14, healthMult: 7.0, speedMult: 1.5 }),
@@ -168,7 +168,7 @@ export const LEVELS = [
 // Level 11 starts 25% harder than level 9 (the last hand-authored non-boss level):
 //   - enemyScale: 9.0 × 1.25 = 11.25  (+20% per level after)
 //   - interval:   1.5 s ÷ 1.25 = 1.2 s (+15% more mobs per level, floor 0.5 s)
-//   - speedMult:  2.0 × 1.20 = 2.4     (+7.5% per level; spawner stacks a 1.1^(level-5) boost and
+//   - speedMult:  2.1           (+5% over L9's 2.0; +7.5% per level; spawner stacks a 1.1^(level-5) boost and
 //                then caps the result: 418 px/s L11-16, 440 L17, 462 L18-20, 484 L21+)
 // bossScale continues from the level-10 boss (5×) and grows more gently.
 // From level 21 (extra ≥ 10): no more boss levels. Drone HP grows +5% per level;
@@ -183,7 +183,7 @@ export function getLevelConfig(levelIndex) {
   const isBoss     = (levelIndex + 1) % 5 === 0;
   const dur        = 60;
   const interval   = Math.max(0.5, 1.2 / Math.pow(1.15, extra));
-  const speedMult  = 2.4 * Math.pow(1.075, extra);
+  const speedMult  = 2.1 * Math.pow(1.075, extra);
 
   // ── Level 21+: no more boss levels ───────────────────────────────────────
   if (extra >= 10) {

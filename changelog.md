@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.11
+- Boss 10 no longer enters a phase 2 speed increase at 50% HP (`enablePhase2Speed: false` in the level config). A new `enablePhase2Speed` option on the Boss entity (default `true`) controls this per-boss; the spawner passes it through from the wave entry.
+- Auto-scale base `speedMult` reduced from 2.4 to 2.1 (level 11 drops from ~340 px/s to ~297 px/s for drones; the +7.5%/level ramp is unchanged).
+
 ## 5.10
 - Pending upgrade picks: if the player clears a level and chooses "Menu" instead of picking an upgrade, the skipped picks are now banked and added on top of the next level's picks. Score-milestone bonus picks are also banked correctly. Banked picks survive app restarts (stored in `localStorage` as `pendingUpgradePicks`). Replay-mode level clears that step into new campaign territory also consume banked picks.
 

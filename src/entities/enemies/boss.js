@@ -13,6 +13,7 @@ export class Boss extends BaseEnemy {
     this.color = '#f44336';
     this._phase = 1;
 
+    this._phase2SpeedEnabled = opts.enablePhase2Speed ?? true;
     this._laserEnabled    = opts.enableLaser ?? false;
     this._laserTimer      = LASER_INTERVAL;
     this._laserState      = 'idle'; // 'idle' | 'warmup' | 'preFire' | 'firing'
@@ -33,7 +34,7 @@ export class Boss extends BaseEnemy {
   }
 
   update(dt, camera) {
-    if (this.hp <= this.maxHp * 0.5 && this._phase === 1) {
+    if (this._phase2SpeedEnabled && this.hp <= this.maxHp * 0.5 && this._phase === 1) {
       this._phase = 2;
       this.speed *= 1.5;
     }

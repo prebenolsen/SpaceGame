@@ -96,7 +96,7 @@ HealthMult curve is roughly exponential so each level feels meaningfully harder 
 | 7 | 45 s | — | Drones (interval 2 s, **5.5× HP**, 1.6×) + tanks (**2.5× HP**, interval 14 s) + 1 miniboss at t=10 (**2.9× HP**, very slow) |
 | 8 | 45 s | — | Drones (interval 1.8 s, **7.0× HP**, 1.8×) + rushers (**3.5× HP**, interval 12 s) + **rusherClusters** (**7.0× HP**, interval 12 s, from t=18) + tanks (**3.8× HP**, interval 12 s) |
 | 9 | 45 s | — | Drones (interval 1.5 s, **9.0× HP**, 2.0×) + tanks (**5.5× HP**, interval 10 s) + 1 miniboss at t=12 (**4.8× HP**, very slow) |
-| 10 | ∞ | Boss | Boss (**14× HP**, **2.44× speed**, laser attack every 5 s) + drone support (**7.0× HP**) + rusher support (**4.0× HP**, interval 18 s) + **rusherCluster** support (**7.0× HP**, interval 14 s, from t=12) |
+| 10 | ∞ | Boss | Boss (**14× HP**, **2.44× speed**, laser attack every 5 s, **no phase 2 speed increase**) + drone support (**7.0× HP**) + rusher support (**4.0× HP**, interval 18 s) + **rusherCluster** support (**7.0× HP**, interval 14 s, from t=12) |
 
 ## Auto-scaling beyond level 10
 
@@ -105,7 +105,7 @@ HealthMult curve is roughly exponential so each level feels meaningfully harder 
 - `extra = levelIndex - LEVELS.length` (0 = level 11)
 - `enemyScale = 11.25 × 1.20^extra` — 25% harder than L9's 9.0× at L11, then +20% per level
 - `interval   = max(0.5, 1.2 / 1.15^extra)` — 25% more mobs than L9's 1.5 s at L11, then +15% more per level; floor 0.5 s
-- `speedMult  = 2.4 × 1.075^extra` — 20% faster than L9's 2.0× at L11, then +7.5% per level; spawner stacks `1.1^(level-5)` on top, then caps the result at a level-specific limit (see speed cap table below)
+- `speedMult  = 2.1 × 1.075^extra` — 5% faster than L9's 2.0× at L11, then +7.5% per level; spawner stacks `1.1^(level-5)` on top, then caps the result at a level-specific limit (see speed cap table below)
 - `bossScale  = 5 + extra × 0.5` — continues from level-10 boss, grows more gently
 - Boss levels every 5th level (`(levelIndex + 1) % 5 === 0`), using `once('boss')` with `healthMult: bossScale` — aligns with predefined bosses at levels 5 and 10
 - Normal levels: drones + tanks (interval × 5, 60% enemy scale); all use the computed `speedMult`
@@ -114,16 +114,16 @@ HealthMult curve is roughly exponential so each level feels meaningfully harder 
 
 | Level | extra | enemyScale | interval | speedMult (config) |
 |-------|-------|-----------|----------|--------------------|
-| 11 | 0 | 11.25 | 1.20 s | 2.40 |
-| 12 | 1 | 13.50 | 1.04 s | 2.58 |
-| 13 | 2 | 16.20 | 0.91 s | 2.77 |
-| 14 | 3 | 19.44 | 0.79 s | 2.98 |
-| **15** | 4 | **Boss** — special case | — | 3.21 |
-| 16 | 5 | 27.99 | 0.60 s | 3.45 |
-| 17 | 6 | 33.59 | 0.52 s | 3.70 |
-| 18 | 7 | 40.31 | 0.50 s (floor) | 3.98 |
-| 19 | 8 | 48.37 | 0.50 s (floor) | 4.28 |
-| **20** | 9 | **Boss** — special case | — | 4.60 |
+| 11 | 0 | 11.25 | 1.20 s | 2.10 |
+| 12 | 1 | 13.50 | 1.04 s | 2.26 |
+| 13 | 2 | 16.20 | 0.91 s | 2.43 |
+| 14 | 3 | 19.44 | 0.79 s | 2.61 |
+| **15** | 4 | **Boss** — special case | — | 2.81 |
+| 16 | 5 | 27.99 | 0.60 s | 3.02 |
+| 17 | 6 | 33.59 | 0.52 s | 3.24 |
+| 18 | 7 | 40.31 | 0.50 s (floor) | 3.49 |
+| 19 | 8 | 48.37 | 0.50 s (floor) | 3.75 |
+| **20** | 9 | **Boss** — special case | — | 4.03 |
 | 21+ | ≥ 10 | See post-level-20 section | — | — |
 
 ### Level 15 boss (special case)
@@ -131,7 +131,7 @@ HealthMult curve is roughly exponential so each level feels meaningfully harder 
 Mirrors level 10: laser attack every 5 s, companion waves of drones + rushers + rusherClusters.
 
 - **Boss HP:** 100 × a level-14 drone = 40 × 19.44 × 100 = **77 760 HP** (healthMult 51.84)
-- **Boss speed:** speedMult 3.21 (auto-scale formula); phase 2 (below 50% HP) multiplies speed by 1.5×
+- **Boss speed:** speedMult 2.81 (auto-scale formula); phase 2 (below 50% HP) multiplies speed by 1.5×
 - Companion drones: healthMult ≈ 23, interval 6 s, from t=5
 - Companion rushers: healthMult ≈ 12, interval 18 s, from t=8
 - Companion rusherClusters: healthMult ≈ 23 (= drones), interval 14 s, from t=12
@@ -162,7 +162,7 @@ From level 21 (`extra ≥ 10`) there are **no more boss levels**. A separate sca
 - **Rusher interval:** frozen at 1.25 s (= level-21 base)
 - **RusherCluster interval:** frozen at 1.5 s (= level-21 base)
 - **Tank interval:** frozen at 2.5 s (= level-21 base)
-- **speedMult:** continues as `2.4 × 1.075^extra` (unchanged formula)
+- **speedMult:** continues as `2.1 × 1.075^extra` (unchanged formula)
 - Even-numbered levels: drones + tanks + rushers + rusherClusters
 - Odd-numbered levels: drones + tanks + 1 miniboss at t=15
 
