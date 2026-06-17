@@ -75,6 +75,29 @@
     @media (orientation: portrait) and (max-width: 1024px) {
       #rotate-overlay { display: flex; }
     }
+
+    #update-banner {
+      display: none;
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10000;
+      background: rgba(10, 10, 46, 0.95);
+      border: 1.5px solid #4fc3f7;
+      color: #4fc3f7;
+      font-family: sans-serif;
+      font-size: 13px;
+      font-weight: bold;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 10px 22px;
+      border-radius: 8px;
+      cursor: pointer;
+      white-space: nowrap;
+      box-shadow: 0 0 16px rgba(79, 195, 247, 0.3);
+    }
+    #update-banner.visible { display: block; }
   </style>
 </head>
 <body>
@@ -86,6 +109,7 @@
     <p>Please rotate your device<br>to landscape mode</p>
   </div>
   <canvas id="game-canvas"></canvas>
+  <button id="update-banner" aria-label="Update available — tap to reload">Update available</button>
   <script>
     // Polyfill for CanvasRenderingContext2D.roundRect (Safari < 15.4)
     if (!CanvasRenderingContext2D.prototype.roundRect) {
@@ -109,7 +133,46 @@
   <script type="module" src="src/main.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js');
+      // Guard: only reload when WE triggered the SW swap, not on first install
+      let updatePending = false;
+
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (updatePending) window.location.reload();
+      });
+
+      function activateUpdate(waitingSW) {
+        updatePending = true;
+        waitingSW.postMessage({ type: 'SKIP_WAITING' });
+      }
+
+      navigator.serviceWorker.register('service-worker.js').then((reg) => {
+        // Ask the browser to check for a new SW version right now
+        reg.update().catch(() => {}); // ignore errors when offline
+
+        if (reg.waiting) {
+          // A new version was already installed in a previous session —
+          // activate it immediately before the game finishes loading
+          activateUpdate(reg.waiting);
+          return;
+        }
+
+        // Watch for a new SW that installs while the app is running
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          newWorker.addEventListener('statechange', () => {
+            // 'installed' + existing controller = update ready mid-session
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              document.getElementById('update-banner').classList.add('visible');
+            }
+          });
+        });
+      });
+
+      document.getElementById('update-banner').addEventListener('click', () => {
+        navigator.serviceWorker.getRegistration().then((reg) => {
+          if (reg?.waiting) activateUpdate(reg.waiting);
+        });
+      });
     }
   </script>
 </body>

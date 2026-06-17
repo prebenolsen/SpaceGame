@@ -1,5 +1,8 @@
 # Changelog
 
+## 5.9
+- PWA auto-update: the app now checks for a new version on every launch and reloads automatically if one is already staged. If a new version installs while the app is running (mid-session), a "Update available" button appears at the bottom of the screen; tapping it reloads into the new version. Users never need to manually clear the cache. Offline play continues to work unchanged. Also fixed the service worker asset list which was missing several JS files (`rusher-cluster.js`, `supabase.js`, `scoreboard.js`, `config.js`, `level-select.js`, `version.js`); updated cache name to `space-survivor-v4`.
+
 ## 5.8
 - Fixed bug where bosses and minibosses were instantly killed when they collided with the player. Bosses and minibosses now survive player contact and can only die from weapon damage. When a boss or miniboss hits the player it is frozen for 1 second instead of being deactivated.
 
