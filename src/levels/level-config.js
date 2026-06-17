@@ -165,22 +165,86 @@ export const LEVELS = [
 ];
 
 // ─── Auto-scale beyond level 10 ──────────────────────────────────────────────
-// Each extra level tightens the spawn interval so more enemies are on screen
-// simultaneously. The floor of 1.5 s prevents the game from becoming a wall of
-// enemies even at very high levels.
-// enemyScale starts from level-9 territory (~13×) and grows linearly (+2 per level).
+// Level 11 starts 25% harder than level 9 (the last hand-authored non-boss level):
+//   - enemyScale: 9.0 × 1.25 = 11.25  (+20% per level after)
+//   - interval:   1.5 s ÷ 1.25 = 1.2 s (+15% more mobs per level, floor 0.5 s)
+//   - speedMult:  2.0 × 1.20 = 2.4     (+7.5% per level; hard-capped in drone/rusher constructors at 528 px/s = 120% of max player speed)
 // bossScale continues from the level-10 boss (5×) and grows more gently.
+// From level 21 (extra ≥ 10): no more boss levels. Drone HP grows +5% per level;
+//   rusher/rusherCluster HP frozen at the level-21 base; drone spawn interval
+//   shrinks 10% per level (floor 0.3 s).
 export function getLevelConfig(levelIndex) {
   if (levelIndex < LEVELS.length) return LEVELS[levelIndex];
 
   const extra      = levelIndex - LEVELS.length;
-  const enemyScale = 13 + extra * 2;
-  const bossScale  = 5  + extra * 0.5;
+  const enemyScale = 11.25 * Math.pow(1.20, extra);
+  const bossScale  = 5 + extra * 0.5;
   const isBoss     = (levelIndex + 1) % 5 === 0;
   const dur        = 60;
-  const interval   = Math.max(1.5, 5 / (1 + extra * 0.15));
+  const interval   = Math.max(0.5, 1.2 / Math.pow(1.15, extra));
+  const speedMult  = 2.4 * Math.pow(1.075, extra);
+
+  // ── Level 21+: no more boss levels ───────────────────────────────────────
+  if (extra >= 10) {
+    const postExtra  = extra - 10;
+    const droneBase  = 11.25 * Math.pow(1.20, 10); // level-21 drone health base (~69.66)
+    const droneScale = droneBase * Math.pow(1.05, postExtra);
+    const droneInt   = Math.max(0.3, 0.5 * Math.pow(0.9, postExtra));
+    const rusherMult = Math.round(droneBase * 0.5);   // frozen at level-21 value (~35)
+    const rClustMult = Math.round(droneBase * 0.4);   // frozen at level-21 value (~28)
+    const tankMult   = Math.round(droneScale * 0.6);
+    const mbMult     = Math.round((8 * 40 / 600) * droneScale * 100) / 100;
+    const isEven     = (levelIndex + 1) % 2 === 0;
+    return {
+      duration: dur,
+      isBoss: false,
+      waves: [
+        ...wave('drone',  dur, { startTime: 0,  interval: droneInt, healthMult: droneScale, speedMult }),
+        ...wave('tank',   dur, { startTime: 12, interval: 2.5,      healthMult: tankMult,   speedMult }),
+        ...(isEven
+          ? [
+              ...wave('rusher',        dur, { startTime: 5, interval: 1.25, healthMult: rusherMult,  speedMult }),
+              ...wave('rusherCluster', dur, { startTime: 8, interval: 1.5,  healthMult: rClustMult,  speedMult }),
+            ]
+          : once('miniboss', 15, { healthMult: mbMult, speedMult: 0.5 })),
+      ],
+    };
+  }
 
   if (isBoss) {
+    // ── Level 15 — mirrors level 10: laser + drone/rusher/rusherCluster companions ──
+    // Boss HP = 100 × a level-14 drone (40 × 19.44 × 100 = 77 760 HP → healthMult 51.84).
+    if (extra === 4) {
+      const l14DroneHP     = 40 * (11.25 * Math.pow(1.20, 3)); // 777.6
+      const bossHealthMult = (l14DroneHP * 100) / 1500;        // 51.84
+      return {
+        duration: null,
+        isBoss: true,
+        waves: [
+          ...once('boss', 3, { healthMult: bossHealthMult, speedMult, enableLaser: true }),
+          ...wave('drone',         BOSS_FILL, { startTime: 5,  interval: 6,  healthMult: Math.round(enemyScale),       speedMult }),
+          ...wave('rusher',        BOSS_FILL, { startTime: 8,  interval: 18, healthMult: Math.round(enemyScale * 0.5), speedMult }),
+          ...wave('rusherCluster', BOSS_FILL, { startTime: 12, interval: 14, healthMult: Math.round(enemyScale * 0.4), speedMult }),
+        ],
+      };
+    }
+
+    // ── Level 20 — dual boss: two laser bosses, no companions ──
+    // Each boss HP = 75 × a level-19 drone (40 × 48.37 × 75 ≈ 145 119 HP → healthMult ≈ 96.75).
+    // Second boss spawns 2.5 s after the first so their laser cycles are offset.
+    if (extra === 9) {
+      const l19DroneHP     = 40 * (11.25 * Math.pow(1.20, 8)); // ≈ 1934.9
+      const bossHealthMult = (l19DroneHP * 75) / 1500;         // ≈ 96.75
+      return {
+        duration: null,
+        isBoss: true,
+        waves: [
+          ...once('boss', 3,   { healthMult: bossHealthMult, speedMult, enableLaser: true }),
+          ...once('boss', 5.5, { healthMult: bossHealthMult, speedMult, enableLaser: true }),
+        ],
+      };
+    }
+
     return {
       duration: null,
       isBoss: true,
@@ -190,6 +254,7 @@ export function getLevelConfig(levelIndex) {
           startTime:  12,
           interval:   Math.max(5, 12 - extra),
           healthMult: enemyScale,
+          speedMult,
         }),
       ],
     };
@@ -201,10 +266,10 @@ export function getLevelConfig(levelIndex) {
     duration: dur,
     isBoss: false,
     waves: [
-      ...wave('drone',  dur, { startTime: 0,  interval,                healthMult: enemyScale,                    speedMult: Math.min(Math.max(1, enemyScale * 0.05), 2.5) }),
-      ...wave('tank',   dur, { startTime: 12, interval: interval * 5,   healthMult: Math.round(enemyScale * 0.6) }),
-      ...(isEven ? wave('rusher', dur, { startTime: 5,  interval: interval * 2.5, healthMult: Math.round(enemyScale * 0.5) }) : []),
-      ...(isEven ? wave('rusherCluster', dur, { startTime: 8, interval: interval * 3, healthMult: Math.round(enemyScale * 0.4) }) : []),
+      ...wave('drone',  dur, { startTime: 0,  interval,               healthMult: enemyScale,                    speedMult }),
+      ...wave('tank',   dur, { startTime: 12, interval: interval * 5,  healthMult: Math.round(enemyScale * 0.6), speedMult }),
+      ...(isEven ? wave('rusher',        dur, { startTime: 5, interval: interval * 2.5, healthMult: Math.round(enemyScale * 0.5), speedMult }) : []),
+      ...(isEven ? wave('rusherCluster', dur, { startTime: 8, interval: interval * 3,   healthMult: Math.round(enemyScale * 0.4), speedMult }) : []),
       ...(!isEven ? once('miniboss', 15, { healthMult: minibossHealthMult, speedMult: 0.5 }) : []),
     ],
   };

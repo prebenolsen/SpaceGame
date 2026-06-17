@@ -1,5 +1,17 @@
 # Changelog
 
+## 5.4
+- From level 21 onwards there are no more boss levels. Drone health grows an additional +5% per level (compounding from the level-21 base); rusher and rusherCluster health is frozen at the level-21 base value (~35× and ~28× respectively). Drones spawn 10% more frequently each level (interval shrinks ×0.9 per level, floor 0.3 s). Tank and miniboss health continue to scale proportionally with drones; all other spawn intervals are frozen at their level-21 values.
+
+## 5.3
+- Level 20 is now a handcrafted dual-boss encounter: two laser bosses, no companion enemies. Each boss HP = 75 × a level-19 drone (≈ 145 119 HP, healthMult ≈ 96.75). The second boss spawns 2.5 s after the first so their laser cycles are staggered.
+
+## 5.2
+- Auto-scale difficulty reworked: level 11 now starts 25% harder than level 9 (drone healthMult 11.25, spawn interval 1.2 s, speedMult 2.4) instead of the previous formula which made it easier.
+- Health scales ×1.20 per level (was linear +2), spawn interval shrinks ÷1.15 per level for 15% more mobs (was `5/(1+extra×0.15)` with a 1.5 s floor), and speed grows ×1.075 per level from a 2.4 base. Speed floor for interval raised from 1.5 s to 0.5 s.
+- Boss companion drones in auto-scale levels now receive the correct `speedMult` (was omitted, defaulting to 1×).
+- Level 15 boss is now a full-featured fight matching level 10: fires a laser attack every 5 s, spawns drone + rusher + rusherCluster companion waves. Boss HP = 100× a level-14 drone (77 760 HP, healthMult 51.84).
+
 ## 5.1
 - Arc cone now scales by ×1.25 per rank instead of ×2 (72° → 90° → 112.5° → 140.625°); maxRank stays 3.
 - Arc range now scales by ×1.25 per rank (150 → 187.5 → 234.4 → 293px); maxRank reduced from 8 to 3.
