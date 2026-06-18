@@ -22,8 +22,6 @@ import { SoundManager } from '../audio/sound-manager.js';
 import { saveGame, loadGame, clearSave, defaultSave } from '../utils/storage.js';
 import { clamp } from '../utils/math.js';
 
-const SCORE_MILESTONES = [500, 1500, 3000, 5000];
-
 export class Game {
   constructor(canvas) {
     this._renderer = new Renderer(canvas);
@@ -49,7 +47,6 @@ export class Game {
     this._levelNumber = 0;
     this._upgrades = defaultSave().upgrades;
     this._score = 0;
-    this._scoreUpgradeMilestones = 0;
     this._levelStartScore = 0;
 
     // Replay state
@@ -93,7 +90,6 @@ export class Game {
       this._livesSystem.lives = save.lives;
       this._upgrades = save.upgrades;
       this._score = save.score ?? save.totalScore ?? 0;
-      this._scoreUpgradeMilestones = save.scoreUpgradeMilestones ?? 0;
       this._maxClearedLevel = save.maxClearedLevel ?? Math.max(0, (save.level || 0) - 1);
       this._levelHighScores = save.levelHighScores ?? {};
       this._pendingUpgradePicks = save.pendingUpgradePicks ?? 0;
@@ -365,16 +361,14 @@ export class Game {
   }
 
   _onGodmodeLevelSelected(level) {
-    // Picks = total a normal run would have earned through level-1 clears + 4 extra
-    const normalPicks = level <= 8
-      ? level - 1
-      : 7 + (level - 8) * 2;
+    // Picks = total a normal run would have earned clearing levels 1..(level-1)
+    // (1 per level, 2 per boss level) + 4 extra
+    const normalPicks = (level - 1) + Math.floor((level - 1) / 5);
     const totalPicks = normalPicks + 4;
 
     this._upgrades = {};
     this._levelNumber = level;
     this._score = 0;
-    this._scoreUpgradeMilestones = 0;
     this._replayMode = false;
     this._applyUpgrades();
 
@@ -430,7 +424,6 @@ export class Game {
         lives: this._livesSystem.lives,
         score: this._score,
         upgrades: { ...this._upgrades },
-        scoreUpgradeMilestones: this._scoreUpgradeMilestones,
       };
       this._livesSystem.lives = 3;
       this._levelNumber = level;
@@ -449,7 +442,6 @@ export class Game {
     if (!keepProgress) {
       this._score = this._replaySavedState.score;
       this._upgrades = this._replaySavedState.upgrades;
-      this._scoreUpgradeMilestones = this._replaySavedState.scoreUpgradeMilestones;
       this._levelNumber = this._replaySavedState.level;
       this._applyUpgrades();
     }
@@ -672,12 +664,14 @@ export class Game {
     );
   }
 
+  // Upgrade picks awarded for clearing the current level:
+  // 1 per level, 2 for a boss level. No score/points-based bonus picks.
+  _picksForClearedLevel() {
+    return getLevelConfig(this._levelNumber - 1).isBoss ? 2 : 1;
+  }
+
   _onLevelClearContinue() {
-    const basePicks = this._levelNumber >= 8 ? 2 : 1;
-    const earned = SCORE_MILESTONES.filter(m => this._score >= m).length;
-    const extraPicks = Math.max(0, earned - this._scoreUpgradeMilestones);
-    this._scoreUpgradeMilestones = earned;
-    const totalPicks = basePicks + extraPicks + this._pendingUpgradePicks;
+    const totalPicks = this._picksForClearedLevel() + this._pendingUpgradePicks;
     this._pendingUpgradePicks = 0;
     this._startUpgradePhase(totalPicks, totalPicks);
   }
@@ -687,16 +681,12 @@ export class Game {
     if (nextLevel > this._maxClearedLevel) {
       // Stepping into new territory — exit replay and continue as a real run
       this._exitReplay(true);
-      const basePicks = this._levelNumber >= 8 ? 2 : 1;
-      const earned = SCORE_MILESTONES.filter(m => this._score >= m).length;
-      const extraPicks = Math.max(0, earned - this._scoreUpgradeMilestones);
-      this._scoreUpgradeMilestones = earned;
-      const totalPicks = basePicks + extraPicks + this._pendingUpgradePicks;
+      const totalPicks = this._picksForClearedLevel() + this._pendingUpgradePicks;
       this._pendingUpgradePicks = 0;
       this._startUpgradePhase(totalPicks, totalPicks);
     } else {
-      // Still replaying cleared levels — give one pick, upgrades reset on exit anyway
-      const basePicks = this._levelNumber >= 8 ? 2 : 1;
+      // Still replaying cleared levels — give the level's picks, upgrades reset on exit anyway
+      const basePicks = this._picksForClearedLevel();
       this._startUpgradePhase(basePicks, basePicks);
     }
   }
@@ -706,11 +696,7 @@ export class Game {
       this._exitReplay(false);
     } else {
       // Bank the picks the player skipped so they carry over to the next level clear
-      const basePicks = this._levelNumber >= 8 ? 2 : 1;
-      const earned = SCORE_MILESTONES.filter(m => this._score >= m).length;
-      const extraPicks = Math.max(0, earned - this._scoreUpgradeMilestones);
-      this._scoreUpgradeMilestones = earned;
-      this._pendingUpgradePicks += basePicks + extraPicks;
+      this._pendingUpgradePicks += this._picksForClearedLevel();
       this._levelNumber++;
     }
     this._save();
@@ -780,7 +766,6 @@ export class Game {
     this._livesSystem.reset();
     this._upgrades = defaultSave().upgrades;
     this._score = 0;
-    this._scoreUpgradeMilestones = 0;
     this._pendingUpgradePicks = 0;
     // _levelHighScores preserved across runs
     this._applyUpgrades();
@@ -798,7 +783,6 @@ export class Game {
     this._livesSystem.reset();
     this._upgrades = defaultSave().upgrades;
     this._score = 0;
-    this._scoreUpgradeMilestones = 0;
     this._pendingUpgradePicks = 0;
     this._levelHighScores = {};
     this._applyUpgrades();
@@ -813,7 +797,6 @@ export class Game {
       lives:                  r ? r.lives                  : this._livesSystem.lives,
       upgrades:               r ? r.upgrades               : this._upgrades,
       score:                  r ? r.score                  : this._score,
-      scoreUpgradeMilestones: r ? r.scoreUpgradeMilestones : this._scoreUpgradeMilestones,
       pendingUpgradePicks:    this._pendingUpgradePicks,
       levelHighScores:        this._levelHighScores,
     });

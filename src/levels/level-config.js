@@ -34,244 +34,266 @@ function once(type, time, { healthMult = 1, speedMult = 1, ...rest } = {}) {
 // the boss dying ends the level long before this elapses.
 const BOSS_FILL = 300;
 
-// ─── Health multiplier reference (base HP: drone 40 · rusher 12 · tank 150 · miniboss 600 · boss 1500) ──
-// Curve is roughly exponential so each level feels meaningfully harder at baseline laser damage (50 dmg/shot).
-// Expected shots-to-kill a drone at rank-0 laser per level:
-//   L1: 1  L2: 1  L3: 2  L4: 3  L6: 3  L7: 5  L8: 6  L9: ~8
+// ═══════════════════════════════════════════════════════════════════════════
+//  ENEMY SCALING MODEL  (see enemy_scaling.md for the full per-level tables)
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// Health is tuned against the *assumed* upgrade path: the player spends every
+// pick on laser damage / laser fire-rate, alternating (damage first), until both
+// are maxed. Picks are earned by clearing levels (1 per level, 2 per boss), so
+// the per-shot damage the player has when *entering* a level is fixed and known.
+//
+//   • laserDamage   +25/shot per rank, max rank 10  → 50 … 300 dmg/shot
+//   • laserFireRate +0.5 shots/s per rank, max rank 8 → 1 … 5 shots/s
+//
+// Each enemy's HP is set so a drone dies in a target number of shots *at the
+// damage the player has on that level*:  droneHP = shots × damage(level).
+// HP is expressed as a healthMult over the entity base HP (drone 40, rusher 12,
+// boss 1500), which is what the spawner/entities consume.
+
+const DRONE_BASE_HP  = 40;
+const RUSHER_BASE_HP = 12;
+const BOSS_BASE_HP   = 1500;
+
+const PLAYER_MAX_SPEED = 440;                    // maxed moveSpeed: 200 × (1 + 6×0.2)
+export const MOB_SPEED_CAP = PLAYER_MAX_SPEED * 0.95; // 418 px/s — mobs never exceed 95 % of player max
+
+const BOSS_LEVELS = new Set([5, 10, 15, 20]);    // the only boss levels; none beyond 20
+
+// Target "shots to kill a drone" per level (1-based). Boss-level entries describe
+// that level's *companion* drones. Levels 21+ are a flat 4 shots.
+const DRONE_SHOTS = {
+  1: 1.0,  2: 1.15, 3: 1.25, 4: 1.35, 5: 1.4,
+  6: 1.5,  7: 1.75, 8: 2.0,  9: 2.0, 10: 2.0,
+  11: 2.2, 12: 2.4, 13: 2.6, 14: 2.8, 15: 3.0,
+  16: 3.0, 17: 3.25, 18: 3.5, 19: 3.75,
+};
+function droneShots(level) {
+  return DRONE_SHOTS[level] ?? 4.0; // level 21+
+}
+
+// Boss "shots to kill" (against the player's damage on that level).
+const BOSS_SHOTS = { 5: 25, 10: 50, 15: 60, 20: 60 };
+
+// Upgrade picks earned before *entering* `level` (1 per cleared level, 2 per boss).
+function picksBeforeLevel(level) {
+  let picks = 0;
+  for (let l = 1; l < level; l++) picks += BOSS_LEVELS.has(l) ? 2 : 1;
+  return picks;
+}
+
+// Per-shot laser damage the player has when entering `level`, following the
+// alternating damage/fire-rate build (damage first; a maxed stat is skipped).
+function laserDamageAtLevel(level) {
+  const picks = picksBeforeLevel(level);
+  let dmg = 0, fire = 0;
+  for (let i = 0; i < picks; i++) {
+    const wantDamage = i % 2 === 0;
+    if (wantDamage) { if (dmg < 10) dmg++; else if (fire < 8) fire++; }
+    else            { if (fire < 8) fire++; else if (dmg < 10) dmg++; }
+  }
+  return 50 + dmg * 25;
+}
+
+// healthMult helpers — HP = (shots × damage) expressed over each entity's base HP.
+function droneHealthMult(level)  { return droneShots(level) * laserDamageAtLevel(level) / DRONE_BASE_HP; }
+function bossHealthMult(level)   { return BOSS_SHOTS[level] * laserDamageAtLevel(level) / BOSS_BASE_HP; }
+// A rusher is a lighter skirmisher: half a drone's shots-to-kill.
+function rusherHealthMult(level) { return 0.5 * droneShots(level) * laserDamageAtLevel(level) / RUSHER_BASE_HP; }
+// Derived from the drone: a cluster member is a drone (same base HP); a tank is
+// 3 drones' worth of HP; a miniboss is 8 drones' worth.
+function clusterHealthMult(level) { return droneHealthMult(level); }
+function tankHealthMult(level)     { return 3 * droneHealthMult(level) * DRONE_BASE_HP / 150; }
+function minibossHealthMult(level) { return 8 * droneHealthMult(level) * DRONE_BASE_HP / 600; }
+
+// Mob speed: base speed through level 10, then +7.5 % per level from level 11.
+// The spawner clamps the resulting px/s to MOB_SPEED_CAP (95 % of player max).
+function speedMultForLevel(level) {
+  return level <= 10 ? 1.0 : Math.pow(1.075, level - 10);
+}
+
+// Spawn frequency: flat through level 11 (the new baseline cadence), then grows
+// so spawns are twice as frequent by level 20 (≈8 %/level, continuing past 20).
+function spawnFreqForLevel(level) {
+  return level <= 11 ? 1.0 : Math.pow(2, (level - 11) / 9);
+}
 
 // ─── Level list ──────────────────────────────────────────────────────────────
 // duration  — seconds (or null = no timer, boss must die to advance)
 // isBoss    — true shows "BOSS" on intro screen and disables the HUD timer
 // waves     — mix of once() and wave() entries; enemies spawn for the full
 //             level duration so the player always has targets to fight
+//
+// Levels 1-10 keep base mob speed (speedMult 1.0) per the "mobs only speed up
+// from level 11" rule. Boss speed is authored separately (bosses are not mobs).
 export const LEVELS = [
-  // ── Level 1 ─────────────────────────────────────────────────────────────────
-  // Drone base HP 40 < laser 50 dmg → one-shot kills
+  // ── Level 1 — drone dies in 1 shot (50 HP vs 50 dmg) ─────────────────────────
   {
     duration: 25,
     isBoss: false,
     waves: [
-      ...wave('drone', 25, { startTime: 0, interval: 3, speedMult: 1.0 }),
+      ...wave('drone', 25, { startTime: 0, interval: 3, healthMult: droneHealthMult(1) }),
     ],
   },
 
   // ── Level 2 ─────────────────────────────────────────────────────────────────
-  // Drone 1.0× → 40 HP → 1 shot
   {
     duration: 25,
     isBoss: false,
     waves: [
-      ...wave('drone',  30, { startTime: 0,  interval: 4,  healthMult: 1.0, speedMult: 1.1 }),
-      ...wave('rusher', 30, { startTime: 5, interval: 15, speedMult: 1.1 }),
+      ...wave('drone',  30, { startTime: 0, interval: 4,  healthMult: droneHealthMult(2) }),
+      ...wave('rusher', 30, { startTime: 5, interval: 15, healthMult: rusherHealthMult(2) }),
     ],
   },
 
   // ── Level 3 ─────────────────────────────────────────────────────────────────
-  // Drone 2.0× → 80 HP → ~2 shots
   {
     duration: 40,
     isBoss: false,
     waves: [
-      ...wave('drone',  45, { startTime: 0, interval: 3,  healthMult: 2.0, speedMult: 1.2 }),
-      ...wave('rusher', 45, { startTime: 8, interval: 8,  speedMult: 1.2 }),
+      ...wave('drone',  45, { startTime: 0, interval: 3, healthMult: droneHealthMult(3) }),
+      ...wave('rusher', 45, { startTime: 8, interval: 8, healthMult: rusherHealthMult(3) }),
     ],
   },
 
   // ── Level 4 ─────────────────────────────────────────────────────────────────
-  // Drone 3.0× → 120 HP → ~3 shots
   {
     duration: 40,
     isBoss: false,
     waves: [
-      ...wave('drone',  60, { startTime: 0,  interval: 2.5, healthMult: 3.0, speedMult: 1.4 }),
-      ...wave('rusher', 60, { startTime: 5,  interval: 5.5, healthMult: 1.2, speedMult: 1.4 }),
-      ...wave('tank',   60, { startTime: 15, interval: 20,  speedMult: 1.4 }),
+      ...wave('drone',  60, { startTime: 0,  interval: 2.5, healthMult: droneHealthMult(4) }),
+      ...wave('rusher', 60, { startTime: 5,  interval: 5.5, healthMult: rusherHealthMult(4) }),
+      ...wave('tank',   60, { startTime: 15, interval: 20,  healthMult: tankHealthMult(4) }),
     ],
   },
 
-  // ── Level 5 — Boss ──────────────────────────────────────────────────────────
-  // Boss 1.8× → 2700 HP
+  // ── Level 5 — Boss (25 shots) ────────────────────────────────────────────────
   {
     duration: null,
     isBoss: true,
     waves: [
-      ...once('boss', 3, { healthMult: 4, speedMult: 1.2 }),
-      ...wave('drone',  BOSS_FILL, { startTime: 10, interval: 8,  healthMult: 2.5, speedMult: 1.2 }),
-      ...wave('rusher', BOSS_FILL, { startTime: 0,  interval: 12, healthMult: 1.5, speedMult: 1.2 }),
+      ...once('boss', 3, { healthMult: bossHealthMult(5), speedMult: 1.2 }),
+      ...wave('drone',  BOSS_FILL, { startTime: 10, interval: 8,  healthMult: droneHealthMult(5) }),
+      ...wave('rusher', BOSS_FILL, { startTime: 0,  interval: 12, healthMult: rusherHealthMult(5) }),
     ],
   },
 
-  // ── Level 6 ─────────────────────────────────────────────────────────────────
-  // Level 4 enemy mix with rusherCluster replacing rushers — first cluster encounter
+  // ── Level 6 — first rusherCluster encounter ──────────────────────────────────
   {
     duration: 45,
     isBoss: false,
     waves: [
-      ...wave('drone',         60, { startTime: 0,  interval: 2.5, healthMult: 3.0, speedMult: 1.4 }),
-      ...wave('rusherCluster', 60, { startTime: 5,  interval: 5.5, healthMult: 3.0, speedMult: 1.4 }),
-      ...wave('tank',          60, { startTime: 15, interval: 20,  speedMult: 1.4 }),
+      ...wave('drone',         60, { startTime: 0,  interval: 2.5, healthMult: droneHealthMult(6) }),
+      ...wave('rusherCluster', 60, { startTime: 5,  interval: 5.5, healthMult: clusterHealthMult(6) }),
+      ...wave('tank',          60, { startTime: 15, interval: 20,  healthMult: tankHealthMult(6) }),
     ],
   },
 
   // ── Level 7 ─────────────────────────────────────────────────────────────────
-  // Drone 5.5× → 220 HP → ~5 shots
   {
     duration: 45,
     isBoss: false,
     waves: [
-      ...wave('drone',  75, { startTime: 0,  interval: 2,  healthMult: 5.5, speedMult: 1.6 }),
-      ...wave('tank',   75, { startTime: 12, interval: 14, healthMult: 2.5, speedMult: 1.6 }),
-      ...once('miniboss', 10, { healthMult: 2.9, speedMult: 0.5 }),
+      ...wave('drone', 75, { startTime: 0,  interval: 2,  healthMult: droneHealthMult(7) }),
+      ...wave('tank',  75, { startTime: 12, interval: 14, healthMult: tankHealthMult(7) }),
+      ...once('miniboss', 10, { healthMult: minibossHealthMult(7), speedMult: 0.5 }),
     ],
   },
 
   // ── Level 8 ─────────────────────────────────────────────────────────────────
-  // Drone 7.0× → 280 HP → ~6 shots
   {
     duration: 45,
     isBoss: false,
     waves: [
-      ...wave('drone',         75, { startTime: 0,  interval: 1.8, healthMult: 7.0, speedMult: 1.8 }),
-      ...wave('rusher',        75, { startTime: 3,  interval: 12,  healthMult: 3.5, speedMult: 1.8 }),
-      ...wave('rusherCluster', 75, { startTime: 18, interval: 12,  healthMult: 7.0, speedMult: 1.8 }),
-      ...wave('tank',          75, { startTime: 10, interval: 12,  healthMult: 3.8, speedMult: 1.8 }),
+      ...wave('drone',         75, { startTime: 0,  interval: 1.8, healthMult: droneHealthMult(8) }),
+      ...wave('rusher',        75, { startTime: 3,  interval: 12,  healthMult: rusherHealthMult(8) }),
+      ...wave('rusherCluster', 75, { startTime: 18, interval: 12,  healthMult: clusterHealthMult(8) }),
+      ...wave('tank',          75, { startTime: 10, interval: 12,  healthMult: tankHealthMult(8) }),
     ],
   },
 
   // ── Level 9 ─────────────────────────────────────────────────────────────────
-  // Drone 9.0× → 360 HP → ~8 shots; manageable with weapon upgrades
   {
     duration: 45,
     isBoss: false,
     waves: [
-      ...wave('drone',  90, { startTime: 0,  interval: 1.5, healthMult: 9.0, speedMult: 2.0 }),
-      ...wave('tank',   90, { startTime: 8,  interval: 10,  healthMult: 5.5, speedMult: 2.0 }),
-      ...once('miniboss', 12, { healthMult: 4.8, speedMult: 0.5 }),
+      ...wave('drone', 90, { startTime: 0, interval: 1.5, healthMult: droneHealthMult(9) }),
+      ...wave('tank',  90, { startTime: 8, interval: 10,  healthMult: tankHealthMult(9) }),
+      ...once('miniboss', 12, { healthMult: minibossHealthMult(9), speedMult: 0.5 }),
     ],
   },
 
-  // ── Level 10 — Boss + companions ────────────────────────────────────────────
-  // Boss 14× HP; +25% speed vs previous (1.95 → 2.44); laser attack every 5 s
+  // ── Level 10 — Boss + companions (50 shots; laser attack) ────────────────────
   {
     duration: null,
     isBoss: true,
     waves: [
-      ...once('boss', 3, { healthMult: 14, speedMult: 2.44, enableLaser: true, enablePhase2Speed: false }),
-      ...wave('drone',         BOSS_FILL, { startTime: 5,  interval: 6,  healthMult: 7.0, speedMult: 1.5 }),
-      ...wave('rusher',        BOSS_FILL, { startTime: 8,  interval: 18, healthMult: 4.0, speedMult: 1.5 }),
-      ...wave('rusherCluster', BOSS_FILL, { startTime: 12, interval: 14, healthMult: 7.0, speedMult: 1.5 }),
+      ...once('boss', 3, { healthMult: bossHealthMult(10), speedMult: 2.0, enableLaser: true, enablePhase2Speed: false }),
+      ...wave('drone',         BOSS_FILL, { startTime: 5,  interval: 6,  healthMult: droneHealthMult(10) }),
+      ...wave('rusher',        BOSS_FILL, { startTime: 8,  interval: 18, healthMult: rusherHealthMult(10) }),
+      ...wave('rusherCluster', BOSS_FILL, { startTime: 12, interval: 14, healthMult: clusterHealthMult(10) }),
     ],
   },
 ];
 
 // ─── Auto-scale beyond level 10 ──────────────────────────────────────────────
-// Level 11 starts 25% harder than level 9 (the last hand-authored non-boss level):
-//   - enemyScale: 9.0 × 1.25 = 11.25  (+20% per level after)
-//   - interval:   1.5 s ÷ 1.25 = 1.2 s (+15% more mobs per level, floor 0.5 s)
-//   - speedMult:  2.1           (+5% over L9's 2.0; +7.5% per level; spawner stacks a 1.1^(level-5) boost and
-//                then caps the result: 418 px/s L11-16, 440 L17, 462 L18-20, 484 L21+)
-// bossScale continues from the level-10 boss (5×) and grows more gently.
-// From level 21 (extra ≥ 10): no more boss levels. Drone HP grows +5% per level;
-//   rusherCluster HP scales with drone HP; rusher HP frozen at the level-21 base; drone spawn
-//   interval shrinks 10% per level (floor 0.3 s).
+// Everything is driven by the scaling helpers above:
+//   • health  — droneShots() × laserDamageAtLevel() (drones 2.2→4 shots; rushers
+//               half a drone; tanks ×3, clusters ×1, minibosses ×8 vs a drone).
+//   • speed   — speedMultForLevel(): +7.5 %/level from L11, capped at 418 px/s.
+//   • cadence — spawnFreqForLevel(): doubles from L11 to L20 (continues after,
+//               drone interval floored at 0.3 s).
+// Boss levels exist only at 15 and 20; from level 21 on there are no more bosses.
 export function getLevelConfig(levelIndex) {
   if (levelIndex < LEVELS.length) return LEVELS[levelIndex];
 
-  const extra      = levelIndex - LEVELS.length;
-  const enemyScale = 11.25 * Math.pow(1.20, extra);
-  const bossScale  = 5 + extra * 0.5;
-  const isBoss     = (levelIndex + 1) % 5 === 0;
-  const dur        = 60;
-  const interval   = Math.max(0.5, 1.2 / Math.pow(1.15, extra));
-  const speedMult  = 2.1 * Math.pow(1.075, extra);
+  const level     = levelIndex + 1; // 1-based
+  const dur       = 60;
+  const speedMult = speedMultForLevel(level);
+  const freq      = spawnFreqForLevel(level);
+  const di        = Math.max(0.3, 1.2 / freq); // drone interval
 
-  // ── Level 21+: no more boss levels ───────────────────────────────────────
-  if (extra >= 10) {
-    const postExtra  = extra - 10;
-    const droneBase  = 11.25 * Math.pow(1.20, 10); // level-21 drone health base (~69.66)
-    const droneScale = droneBase * Math.pow(1.05, postExtra);
-    const droneInt   = Math.max(0.3, 0.5 * Math.pow(0.9, postExtra));
-    const rusherMult = Math.round(droneBase * 0.5);   // frozen at level-21 value (~35)
-    const rClustMult = droneScale;                     // scales with drone HP (same healthMult)
-    const tankMult   = Math.round(droneScale * 0.6);
-    const mbMult     = Math.round((8 * 40 / 600) * droneScale * 100) / 100;
-    const isEven     = (levelIndex + 1) % 2 === 0;
-    return {
-      duration: dur,
-      isBoss: false,
-      waves: [
-        ...wave('drone',  dur, { startTime: 0,  interval: droneInt, healthMult: droneScale, speedMult }),
-        ...wave('tank',   dur, { startTime: 12, interval: 2.5,      healthMult: tankMult,   speedMult }),
-        ...(isEven
-          ? [
-              ...wave('rusher',        dur, { startTime: 5, interval: 1.25, healthMult: rusherMult,  speedMult }),
-              ...wave('rusherCluster', dur, { startTime: 8, interval: 1.5,  healthMult: rClustMult,  speedMult }),
-            ]
-          : once('miniboss', 15, { healthMult: mbMult, speedMult: 0.5 })),
-      ],
-    };
-  }
-
-  if (isBoss) {
-    // ── Level 15 — mirrors level 10: laser + drone/rusher/rusherCluster companions ──
-    // Boss HP = 100 × a level-14 drone (40 × 19.44 × 100 = 77 760 HP → healthMult 51.84).
-    if (extra === 4) {
-      const l14DroneHP     = 40 * (11.25 * Math.pow(1.20, 3)); // 777.6
-      const bossHealthMult = (l14DroneHP * 100) / 1500;        // 51.84
-      return {
-        duration: null,
-        isBoss: true,
-        waves: [
-          ...once('boss', 3, { healthMult: bossHealthMult, speedMult, enableLaser: true }),
-          ...wave('drone',         BOSS_FILL, { startTime: 5,  interval: 6,  healthMult: Math.round(enemyScale),       speedMult }),
-          ...wave('rusher',        BOSS_FILL, { startTime: 8,  interval: 18, healthMult: Math.round(enemyScale * 0.5), speedMult }),
-          ...wave('rusherCluster', BOSS_FILL, { startTime: 12, interval: 14, healthMult: Math.round(enemyScale),       speedMult }),
-        ],
-      };
-    }
-
-    // ── Level 20 — dual boss: two laser bosses, no companions ──
-    // Each boss HP = 75 × a level-19 drone (40 × 48.37 × 75 ≈ 145 119 HP → healthMult ≈ 96.75).
-    // Second boss spawns 2.5 s after the first so their laser cycles are offset.
-    if (extra === 9) {
-      const l19DroneHP     = 40 * (11.25 * Math.pow(1.20, 8)); // ≈ 1934.9
-      const bossHealthMult = (l19DroneHP * 75) / 1500;         // ≈ 96.75
-      return {
-        duration: null,
-        isBoss: true,
-        waves: [
-          ...once('boss', 3,   { healthMult: bossHealthMult, speedMult, enableLaser: true }),
-          ...once('boss', 5.5, { healthMult: bossHealthMult, speedMult, enableLaser: true }),
-        ],
-      };
-    }
-
+  // ── Level 15 — boss (60 shots): laser + drone/rusher/cluster companions ──
+  if (level === 15) {
     return {
       duration: null,
       isBoss: true,
       waves: [
-        ...once('boss', 3, { healthMult: bossScale }),
-        ...wave('drone', BOSS_FILL, {
-          startTime:  12,
-          interval:   Math.max(5, 12 - extra),
-          healthMult: enemyScale,
-          speedMult,
-        }),
+        ...once('boss', 3, { healthMult: bossHealthMult(15), speedMult: 2.5, enableLaser: true }),
+        ...wave('drone',         BOSS_FILL, { startTime: 5,  interval: 6,  healthMult: droneHealthMult(15),   speedMult }),
+        ...wave('rusher',        BOSS_FILL, { startTime: 8,  interval: 18, healthMult: rusherHealthMult(15),  speedMult }),
+        ...wave('rusherCluster', BOSS_FILL, { startTime: 12, interval: 14, healthMult: clusterHealthMult(15), speedMult }),
       ],
     };
   }
 
-  const isEven = (levelIndex + 1) % 2 === 0;
-  const minibossHealthMult = Math.round((8 * 40 / 600) * enemyScale * 100) / 100;
+  // ── Level 20 — dual boss (60 shots each): two laser bosses, no companions ──
+  // Second boss spawns 2.5 s later so their laser cycles stay offset.
+  if (level === 20) {
+    return {
+      duration: null,
+      isBoss: true,
+      waves: [
+        ...once('boss', 3,   { healthMult: bossHealthMult(20), speedMult: 2.5, enableLaser: true }),
+        ...once('boss', 5.5, { healthMult: bossHealthMult(20), speedMult: 2.5, enableLaser: true }),
+      ],
+    };
+  }
+
+  // ── Normal levels 11+ ────────────────────────────────────────────────────
+  const isEven = level % 2 === 0;
   return {
     duration: dur,
     isBoss: false,
     waves: [
-      ...wave('drone',  dur, { startTime: 0,  interval,               healthMult: enemyScale,                    speedMult }),
-      ...wave('tank',   dur, { startTime: 12, interval: interval * 5,  healthMult: Math.round(enemyScale * 0.6), speedMult }),
-      ...(isEven ? wave('rusher',        dur, { startTime: 5, interval: interval * 2.5, healthMult: Math.round(enemyScale * 0.5), speedMult }) : []),
-      ...(isEven ? wave('rusherCluster', dur, { startTime: 8, interval: interval * 3,   healthMult: enemyScale,                    speedMult }) : []),
-      ...(!isEven ? once('miniboss', 15, { healthMult: minibossHealthMult, speedMult: 0.5 }) : []),
+      ...wave('drone', dur, { startTime: 0,  interval: di,      healthMult: droneHealthMult(level), speedMult }),
+      ...wave('tank',  dur, { startTime: 12, interval: di * 4,  healthMult: tankHealthMult(level),  speedMult }),
+      ...(isEven
+        ? [
+            ...wave('rusher',        dur, { startTime: 5, interval: di * 2,   healthMult: rusherHealthMult(level),  speedMult }),
+            ...wave('rusherCluster', dur, { startTime: 8, interval: di * 2.5, healthMult: clusterHealthMult(level), speedMult }),
+          ]
+        : once('miniboss', 15, { healthMult: minibossHealthMult(level), speedMult: 0.5 })),
     ],
   };
 }

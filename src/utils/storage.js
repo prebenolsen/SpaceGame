@@ -34,7 +34,6 @@ export const defaultSave = () => ({
     moveSpeed: 0,
   },
   score: 0,
-  scoreUpgradeMilestones: 0,
   pendingUpgradePicks: 0,
   levelHighScores: {},
 });

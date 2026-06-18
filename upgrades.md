@@ -6,22 +6,13 @@ Upgrades are offered after each level is cleared. When the level-clear screen is
 
 Every available upgrade is shown — there is no cap on the number of cards. The upgrade screen uses up to 2 rows when there are more than 4 choices, scaling card width to fit the screen.
 
-### Score-based bonus picks
+### Picks awarded per level
 
-Reaching certain cumulative score thresholds awards one extra upgrade pick each, granted at the end of the level where the threshold is first crossed:
-
-| Milestone | Points |
-|-----------|--------|
-| 1st bonus | 500 |
-| 2nd bonus | 1 500 |
-| 3rd bonus | 3 000 |
-| 4th bonus | 5 000 |
-
-Logic lives in `_onLevelClearContinue()` / `_onReplayLevelClearContinue()` in `src/core/game.js`. `_scoreUpgradeMilestones` tracks how many thresholds have already been rewarded.
+Clearing a level awards a fixed number of upgrade picks based only on the level — **1 pick per level, 2 picks for a boss level** (`isBoss` in the level config). There are no score- or points-based bonus picks. The count is computed by `_picksForClearedLevel()` in `src/core/game.js`, used by `_onLevelClearContinue()` / `_onReplayLevelClearContinue()`.
 
 ### Banked (pending) picks
 
-If the player clicks **Menu** on the level-clear screen instead of taking upgrades, that level's picks (base + score-milestone bonus) are added to `_pendingUpgradePicks` and the score milestone counter is advanced. The next time the player completes a level and continues, pending picks are included in `totalPicks` and then cleared. Banked picks survive app restarts (`pendingUpgradePicks` field in `localStorage`). Replay-mode exits into new campaign territory also consume banked picks.
+If the player clicks **Menu** on the level-clear screen instead of taking upgrades, that level's picks are added to `_pendingUpgradePicks`. The next time the player completes a level and continues, pending picks are included in `totalPicks` and then cleared. Banked picks survive app restarts (`pendingUpgradePicks` field in `localStorage`). Replay-mode exits into new campaign territory also consume banked picks.
 
 ## Unlock progression
 

@@ -1,5 +1,17 @@
 # Changelog
 
+## 5.14
+- **Reworked the entire enemy scaling system** (`src/levels/level-config.js`, `src/systems/spawner.js`). Enemy health is now derived from a single model: assuming the player follows the recommended build (every pick into laser damage / fire-rate, alternating, damage first), each level's drone HP is set to a target *shots-to-kill* × the player's *damage-per-shot at that level* (which ramps 50→300 as picks accrue, maxed by L16). Drone shots-to-kill: L1 1.0, L2 1.15, L3 1.25, L4 1.35, L6 1.5, L7 1.75, L8 2.0, L9 2.0, L11 2.2, L12 2.4, L13 2.6, L14 2.8, L16 3.0, L17 3.25, L18 3.5, L19 3.75, L21+ flat 4.0. Bosses: L5 25 shots, L10 50, L15 60, L20 60 each. Rushers are half a drone's shots; clusters = a drone; tanks ×3; minibosses ×8.
+- **Speed:** mobs now move at base speed through level 10 and only speed up from level 11 (+7.5 %/level, `1.075^(level−10)`), capped at 418 px/s (95 % of player max, `MOB_SPEED_CAP`). Removed the old compounding `1.1^(level−5)` spawner boost and the tiered per-level speed caps; speed is now fully defined by the level config's `speedMult`, with the spawner only enforcing the mob cap (minibosses/bosses uncapped).
+- **Spawn rate:** cadence is flat through level 11 (baseline 1.20 s drone interval) then rises so spawns are twice as frequent by level 20 (`freq = 2^((level−11)/9)`), continuing past 20 with the drone interval floored at 0.30 s. Tank/rusher/cluster intervals are multiples of the drone interval so the whole mix tightens together.
+- New `enemy_scaling.md` documents every level's health, speed, and spawn cadence per enemy type, plus the damage model.
+
+## 5.13
+- Reworked upgrade-pick awards: clearing a level now grants a fixed **1 pick per level, 2 picks for boss levels** (`isBoss`), via the new `_picksForClearedLevel()` helper in `src/core/game.js`. Removed the score-milestone bonus-pick system entirely — the `SCORE_MILESTONES` table, the `_scoreUpgradeMilestones` counter, and its `localStorage`/save-state plumbing are gone (`game.js`, `src/utils/storage.js`). Base picks were previously `levelNumber >= 8 ? 2 : 1`. Godmode's starting-pick formula now mirrors the new scheme (`(level-1) + floor((level-1)/5) + 4`). Banked/pending picks (Menu-on-clear) still work, now banking only the level's fixed picks.
+
+## 5.12
+- Fixed two stale comments in `src/levels/level-config.js` so they match the code: the Level 5 boss comment now reads `Boss 4× → 6000 HP` (was `1.8× → 2700 HP`), and the auto-scale `bossScale` comment no longer claims it "continues from the level-10 boss (5×)" (the level-10 boss is 14×) — it now describes the formula's 5× base. No gameplay change.
+
 ## 5.11
 - Boss 10 no longer enters a phase 2 speed increase at 50% HP (`enablePhase2Speed: false` in the level config). A new `enablePhase2Speed` option on the Boss entity (default `true`) controls this per-boss; the spawner passes it through from the wave entry.
 - Auto-scale base `speedMult` reduced from 2.4 to 2.1 (level 11 drops from ~340 px/s to ~297 px/s for drones; the +7.5%/level ramp is unchanged).
