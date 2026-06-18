@@ -48,7 +48,7 @@ Each entry in `LEVELS` has:
 | RusherCluster | 40 | Drone HP and speed; rusher shape and size; spawns as a trio (lead + 2 wings) |
 | Rusher | 12 | Fast; low HP is intentional |
 | Tank | 150 | Scaled down from 300; heavy healthMult compensates |
-| Miniboss | 600 | Exactly one spawns per odd level after 5 via once(); always slow (speedMult 0.5, not boosted); HP is 8× drone HP for the level |
+| Miniboss | 600 | Exactly one spawns per odd level after 5 via once(); now keeps pace with the level's drones (speedMult from `minibossSpeedMult()`, no longer a flat 0.5); HP is 8× drone HP for the level |
 | Boss | 1500 | Unchanged |
 
 ## Level structure fields
@@ -78,7 +78,7 @@ After Tutorial 2 completes, `_levelNumber` is set to 1 and the player is returne
 | Rusher | 110 px/s | ~37% faster than drone; still manageable to dodge |
 | RusherCluster (members) | 80 px/s | Same as drone; danger is the formation count |
 | Tank | 40 px/s | Slow but tanky |
-| Miniboss | 55 px/s | Always spawned with speedMult 0.5 → effective 27.5 px/s; level speed boost does not apply |
+| Miniboss | 55 px/s | speedMult from `minibossSpeedMult(droneSpeedMult)` so its effective speed matches the level's drones (base 80); held to the absolute speed cap |
 | Boss | 45 px/s | Slow but huge HP pool |
 
 ## Scaling model
@@ -93,13 +93,15 @@ per-level numbers** — this section only summarises the mechanics.
   accrue (maxed by L16). Helpers: `droneHealthMult`, `rusherHealthMult` (½ a drone),
   `clusterHealthMult` (= a drone), `tankHealthMult` (×3), `minibossHealthMult` (×8),
   `bossHealthMult`.
-- **Speed:** `speedMultForLevel(level)` = 1.0 through level 10, then `1.075^(level−10)`
-  (+7.5 %/level). Mobs are capped at `MOB_SPEED_CAP = 418 px/s` (95 % of the 440 px/s
-  player max) in the spawner. Minibosses (speedMult 0.5) and bosses are uncapped.
+- **Speed:** `speedMultForLevel(level)` = 1.0 through level 10, then `1.10^(level−10)`
+  (+10 %/level). Mobs are capped at `MOB_SPEED_CAP = 407 px/s` (92.5 % of the 440 px/s
+  player max) in the spawner; the cap applies to every enemy except bosses (minibosses
+  included). Minibosses use `minibossSpeedMult()` to match drone speed; bosses are
+  uncapped (authored speeds).
 - **Spawn rate:** `spawnFreqForLevel(level)` = 1.0 through level 11, then
-  `2^((level−11)/9)` so spawns double from L11 to L20 (continuing past 20). The
-  drone interval is `1.2 / freq` (floored at 0.30 s); tank/rusher/cluster intervals
-  are multiples of it.
+  `2^((level−11)/12)` so spawns double from L11 to ~L23 (gentler than before;
+  continuing past). The drone interval is `1.2 / freq` (floored at 0.30 s);
+  tank/rusher/cluster intervals are multiples of it.
 
 ## Handcrafted levels (1–10)
 
@@ -113,12 +115,12 @@ level 11). See `enemy_scaling.md` for exact HP.
 | 2 | 25 s | — | Drones (interval 4 s) + rushers from t=5 (interval 15 s) |
 | 3 | 40 s | — | Drones (interval 3 s) + rushers (interval 8 s) |
 | 4 | 40 s | — | Drones (interval 2.5 s) + rushers (interval 5.5 s) + tanks (interval 20 s) |
-| 5 | ∞ | Boss | Boss (**25 shots**, speedMult 1.2) + drone + rusher companions |
-| 6 | 45 s | — | Drones (interval 2.5 s) + **rusherClusters** (interval 5.5 s) + tanks (interval 20 s) |
-| 7 | 45 s | — | Drones (interval 2 s) + tanks (interval 14 s) + 1 miniboss at t=10 (slow) |
-| 8 | 45 s | — | Drones (interval 1.8 s) + rushers (interval 12 s) + **rusherClusters** (interval 12 s, t=18) + tanks (interval 12 s) |
-| 9 | 45 s | — | Drones (interval 1.5 s) + tanks (interval 10 s) + 1 miniboss at t=12 (slow) |
-| 10 | ∞ | Boss | Boss (**50 shots**, speedMult 2.0, laser, no phase-2 speed) + drone + rusher + rusherCluster companions |
+| 5 | ∞ | Boss | Boss (**25 shots**, speedMult 1.2) + drone (interval **4 s**) + rusher (interval **6 s**) companions — adds spawn twice as often |
+| 6 | 45 s | — | Drones (interval 2.5 s) + **rusherClusters** (interval 5.5 s) + tanks (interval 20 s); all adds **speedMult 1.10** |
+| 7 | 45 s | — | Drones (interval 2 s) + tanks (interval 14 s); adds **speedMult 1.15** + 1 miniboss at t=10 (matches drone speed) |
+| 8 | 45 s | — | Drones (interval 1.8 s) + rushers (interval 12 s) + **rusherClusters** (interval 12 s, t=18) + tanks (interval 12 s); all adds **speedMult 1.20** |
+| 9 | 45 s | — | Drones (interval 1.5 s) + tanks (interval 10 s); adds **speedMult 1.25** + 1 miniboss at t=12 (matches drone speed) |
+| 10 | ∞ | Boss | Boss (**50 shots × 2 HP**, speedMult 2.0, laser, no phase-2 speed) + drone + rusher + rusherCluster companions |
 
 ## Auto-scaling beyond level 10
 
@@ -127,7 +129,8 @@ helpers above. For a 1-based `level`:
 
 - drone interval `di = max(0.3, 1.2 / spawnFreqForLevel(level))`
 - Normal levels: drones (`di`) + tanks (`di × 4`); even levels add rushers (`di × 2`)
-  + rusherClusters (`di × 2.5`); odd levels add 1 miniboss at t=15 (speedMult 0.5)
+  + rusherClusters (`di × 2.5`); odd levels add 1 miniboss at t=15 (matches drone speed
+  via `minibossSpeedMult(speedMultForLevel(level))`)
 - All mobs use `speedMultForLevel(level)`; health from the per-type helpers
 - Boss levels exist **only at 15 and 20**; from level 21 on there are no more bosses
 - Level 21+: drones are a flat 4 shots (1200 HP); difficulty rises via speed + density
@@ -136,8 +139,8 @@ helpers above. For a 1-based `level`:
 
 Mirrors level 10: laser attack, companion waves of drones + rushers + rusherClusters.
 
-- **Boss:** 60 shots → 15 000 HP (healthMult 10.0), speedMult 2.5, laser enabled;
-  phase 2 (below 50 % HP) ×1.5 speed
+- **Boss:** 60 shots × **4 HP** → 60 000 HP (healthMult 40.0), speedMult 2.5, laser
+  enabled; phase 2 (below 50 % HP) ×1.5 speed
 - Companions use `droneHealthMult(15)` / `rusherHealthMult(15)` / `clusterHealthMult(15)`
   at `speedMultForLevel(15)`
 
@@ -146,16 +149,19 @@ the level long before this elapses.
 
 ### Level 20 boss (special case)
 
-Dual-boss encounter — no companions. Both bosses fire lasers; the second spawns 2.5 s
-after the first to stagger their laser cycles.
+Dual-boss encounter **with companions** (same cadence as level 10: drone interval 6 s,
+rusher 18 s, rusherCluster 14 s, at `speedMultForLevel(20)`). Both bosses fire lasers;
+the second spawns 2.5 s after the first to stagger their laser cycles.
 
 - **Boss count:** 2 (t=3 s and t=5.5 s)
-- **Each boss:** 60 shots → 18 000 HP (healthMult 12.0), speedMult 2.5; phase 2 ×1.5
+- **Each boss:** 60 shots × **3 HP** → 54 000 HP (healthMult 36.0), speedMult 2.5;
+  phase 2 ×1.5; fires its laser **50 % more often** (`laserRateMult: 1.5` → interval
+  5 s → ~3.33 s)
 
 ## Speed cap
 
-The spawner clamps every mob's effective speed to `MOB_SPEED_CAP` (418 px/s = 95 % of
-the 440 px/s player max) via the `speedCap` parameter on `BaseEnemy`. Minibosses and
-bosses pass `speedCap = Infinity` (minibosses are intrinsically slow; bosses use
-authored speeds). Drone and rusher constructors also carry a secondary 484 px/s hard
-cap, which the 418 px/s mob cap sits below.
+The spawner clamps every enemy's effective speed to `MOB_SPEED_CAP` (407 px/s = 92.5 % of
+the 440 px/s player max) via the `speedCap` parameter on `BaseEnemy`. Only bosses pass
+`speedCap = Infinity` (they use authored speeds); minibosses are now subject to the cap.
+Drone and rusher constructors also carry a secondary 484 px/s hard cap, which the
+407 px/s enemy cap sits below.

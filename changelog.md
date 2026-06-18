@@ -1,6 +1,17 @@
 # Changelog
 
-## 5.14
+## 6.1
+- **Boss & level tuning** (`src/levels/level-config.js`, `src/entities/enemies/boss.js`, `src/systems/spawner.js`):
+  - **Level 5 boss:** companion adds now spawn twice as often (drone interval 8→4 s, rusher 12→6 s).
+  - **Level 10 boss:** 2× health.
+  - **Level 15 boss:** 4× health.
+  - **Level 20 boss:** each of the two bosses has 3× health and fires its laser 50 % more often (new `laserRateMult` option on the Boss; threaded through the spawner). The level now also spawns companion adds (drone/rusher/cluster) at the same cadence as level 10.
+  - **Levels 6–9:** add (drone/tank/rusher/cluster/miniboss) speed increased via explicit `speedMult` (L6 ×1.10, L7 ×1.15, L8 ×1.20, L9 ×1.25).
+  - **Minibosses:** no longer deliberately slow — they now keep pace with the level's drones via the new `minibossSpeedMult()` helper (was a flat `speedMult: 0.5`), and are now subject to the absolute speed cap.
+- **Levels 11–19 rebalance:** spawn frequency now grows more gently (`spawnFreqForLevel` divisor 9→12, so spawns double by ~L23 instead of L20) while enemy speed ramps faster (`speedMultForLevel` +7.5 %/level → +10 %/level).
+- **Absolute enemy speed cap** lowered to 92.5 % of the player's maxed speed (`MOB_SPEED_CAP` = 440 × 0.925 = 407 px/s, was 418). The cap now applies to every enemy except bosses (minibosses included).
+
+## 6.0
 - **Reworked the entire enemy scaling system** (`src/levels/level-config.js`, `src/systems/spawner.js`). Enemy health is now derived from a single model: assuming the player follows the recommended build (every pick into laser damage / fire-rate, alternating, damage first), each level's drone HP is set to a target *shots-to-kill* × the player's *damage-per-shot at that level* (which ramps 50→300 as picks accrue, maxed by L16). Drone shots-to-kill: L1 1.0, L2 1.15, L3 1.25, L4 1.35, L6 1.5, L7 1.75, L8 2.0, L9 2.0, L11 2.2, L12 2.4, L13 2.6, L14 2.8, L16 3.0, L17 3.25, L18 3.5, L19 3.75, L21+ flat 4.0. Bosses: L5 25 shots, L10 50, L15 60, L20 60 each. Rushers are half a drone's shots; clusters = a drone; tanks ×3; minibosses ×8.
 - **Speed:** mobs now move at base speed through level 10 and only speed up from level 11 (+7.5 %/level, `1.075^(level−10)`), capped at 418 px/s (95 % of player max, `MOB_SPEED_CAP`). Removed the old compounding `1.1^(level−5)` spawner boost and the tiered per-level speed caps; speed is now fully defined by the level config's `speedMult`, with the spawner only enforcing the mob cap (minibosses/bosses uncapped).
 - **Spawn rate:** cadence is flat through level 11 (baseline 1.20 s drone interval) then rises so spawns are twice as frequent by level 20 (`freq = 2^((level−11)/9)`), continuing past 20 with the drone interval floored at 0.30 s. Tank/rusher/cluster intervals are multiples of the drone interval so the whole mix tightens together.

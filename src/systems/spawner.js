@@ -84,11 +84,10 @@ export class Spawner {
     const factory = FACTORY[entry.type];
     if (!factory) return null;
     const spawnPos = this._randomCirclePosition();
-    // Speed is fully defined by the level config's per-level speedMult. Regular
-    // mobs are capped at 95 % of the player's max speed (MOB_SPEED_CAP = 418 px/s);
-    // minibosses/bosses manage their own pace and are uncapped here.
-    const speedCap =
-      (entry.type === 'miniboss' || entry.type === 'boss') ? Infinity : MOB_SPEED_CAP;
+    // Speed is fully defined by the level config's per-level speedMult. Every
+    // enemy except the boss is held to the absolute MOB_SPEED_CAP (92.5 % of the
+    // player's max speed); bosses use authored speeds and manage their own pace.
+    const speedCap = entry.type === 'boss' ? Infinity : MOB_SPEED_CAP;
     return factory({
       wx: spawnPos.x,
       wy: spawnPos.y,
@@ -97,6 +96,7 @@ export class Spawner {
       speedCap,
       enableLaser:        entry.enableLaser        ?? false,
       enablePhase2Speed:  entry.enablePhase2Speed  ?? true,
+      laserRateMult:      entry.laserRateMult       ?? 1,
     });
   }
 

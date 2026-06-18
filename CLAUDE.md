@@ -10,6 +10,8 @@ The following files document live game systems. **Keep them up to date whenever 
 | `level-config.md` | Any change to `src/levels/level-config.js` (new levels, modified durations, enemy mixes, spawn helpers, auto-scale logic, or new enemy types) |
 | `supabase.md` | Any change to `src/utils/supabase.js` (table schema, column additions, query logic, RLS policies) or to how/where scores are submitted. If the table schema changes, add a row to the **Schema migrations** table in `supabase.md` with the migration SQL. |
 | `changelog.md` | **Every code change, no exceptions.** Add a new `## <version>` section at the top describing what changed. Do this in the same edit as the version bump — do not defer it. |
+| `level-config.md` | Every code change must be reflected in this file!
+| `enemy_scaling` | Every code change must be reflected in this file!
 
 Update the relevant `.md` file in the same commit/change as the code edit — do not defer it.
 

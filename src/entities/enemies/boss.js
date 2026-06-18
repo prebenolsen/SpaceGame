@@ -15,7 +15,9 @@ export class Boss extends BaseEnemy {
 
     this._phase2SpeedEnabled = opts.enablePhase2Speed ?? true;
     this._laserEnabled    = opts.enableLaser ?? false;
-    this._laserTimer      = LASER_INTERVAL;
+    // laserRateMult > 1 fires more often (shorter interval); default 1.
+    this._laserInterval   = LASER_INTERVAL / (opts.laserRateMult ?? 1);
+    this._laserTimer      = this._laserInterval;
     this._laserState      = 'idle'; // 'idle' | 'warmup' | 'preFire' | 'firing'
     this._laserPhaseTimer = 0;
     this._laserDamaged    = false;  // one hit per firing phase
@@ -82,7 +84,7 @@ export class Boss extends BaseEnemy {
       this._laserPhaseTimer -= dt;
       if (this._laserPhaseTimer <= 0) {
         this._laserState = 'idle';
-        this._laserTimer = LASER_INTERVAL;
+        this._laserTimer = this._laserInterval;
       }
     }
   }
