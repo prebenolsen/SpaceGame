@@ -1,5 +1,8 @@
 # Changelog
 
+## 6.4
+- **Godmode level range extended to 1–30** (`src/core/game.js`, `src/ui/level-select.js`): the godmode level picker now offers levels 1 through 30 instead of 1 through 21. Levels beyond the defined set already auto-scale (endless boss assault from level 25), so the higher starting levels are fully playable.
+
 ## 6.3
 - **Speed cap now ramps late-game** (`src/levels/level-config.js`, `src/systems/spawner.js`): the enemy speed cap stays at 92.5 % of the player's max speed through level 20, then climbs +1 %/level across levels 21–24, holding at 96.5 % from level 24 on (`mobSpeedCapForLevel`). The spawner reads the cap per level instead of a fixed constant.
 - **Endless boss assault from level 25** (`src/levels/level-config.js`, `src/systems/spawner.js`): levels 25+ are now boss-gated. They field laser bosses of the same type as the level-15 boss, each with the HP of **ten drones** and moving at that level's drone speed (capped like the mobs). Level 25 has **one** boss (spawns 10 s in); every level after adds one more (**2 on 26, 3 on 27**, …), each spawning 4 s after the previous. Companion drone/tank/rusher/cluster waves spawn throughout. Bosses can now opt into the mob speed cap via a new `capSpeed` entry flag.

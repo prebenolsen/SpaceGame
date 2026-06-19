@@ -14,7 +14,7 @@ export class LevelSelectScreen {
   // maxClearedLevel — highest level the player has beaten
   // nextLevel       — the next unplayed campaign level (maxClearedLevel + 1)
   // levelHighScores — { [level]: pts } map of per-level bests
-  // godmodeMode     — if true, shows all 21 levels with gold godmode styling
+  // godmodeMode     — if true, shows levels 1-30 with gold godmode styling
   show(maxClearedLevel, nextLevel, levelHighScores, onSelectLevel, onBack, godmodeMode = false) {
     this._maxClearedLevel = maxClearedLevel;
     this._nextLevel = nextLevel;
@@ -65,7 +65,7 @@ export class LevelSelectScreen {
       screenW / 2, 70,
     );
 
-    const totalLevels = this._godmodeMode ? 21 : this._nextLevel; // show 1..totalLevels
+    const totalLevels = this._godmodeMode ? 30 : this._nextLevel; // show 1..totalLevels
     const cols = Math.min(4, totalLevels);
     const pad = 24;
     const gapX = 10;

@@ -353,7 +353,7 @@ export class Game {
   _showGodmodeLevelSelect() {
     this._scene = SCENE.LEVEL_SELECT;
     this._levelSelect.show(
-      21, 22, {}, // godmode: all 21 levels available, no high scores
+      30, 31, {}, // godmode: levels 1-30 available, no high scores
       (level) => this._onGodmodeLevelSelected(level),
       () => this._showLanding(),
       true, // godmodeMode
