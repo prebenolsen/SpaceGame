@@ -56,11 +56,22 @@ const RUSHER_BASE_HP = 12;
 const BOSS_BASE_HP   = 1500;
 
 const PLAYER_MAX_SPEED = 440;                    // maxed moveSpeed: 200 × (1 + 6×0.2)
-export const MOB_SPEED_CAP = PLAYER_MAX_SPEED * 0.925; // 407 px/s — absolute enemy speed ceiling (92.5 % of player max)
+export const MOB_SPEED_CAP = PLAYER_MAX_SPEED * 0.925; // 407 px/s — base enemy speed ceiling (92.5 % of player max)
+
+// Enemy speed cap as a fraction of the player's max speed. Flat 92.5 % through
+// level 20, then +1 %/level across levels 21-24, holding at 96.5 % from L24 on.
+export function mobSpeedCapPct(level) {
+  if (level <= 20) return 0.925;
+  return Math.min(0.965, 0.925 + 0.01 * (level - 20));
+}
+export function mobSpeedCapForLevel(level) {
+  return PLAYER_MAX_SPEED * mobSpeedCapPct(level);
+}
 
 // Base move speeds (px/s) used to keep enemy types in sync (see entity classes).
 const DRONE_BASE_SPEED    = 80;
 const MINIBOSS_BASE_SPEED = 55;
+const BOSS_BASE_SPEED     = 45;
 
 const BOSS_LEVELS = new Set([5, 10, 15, 20]);    // the only boss levels; none beyond 20
 
@@ -109,6 +120,13 @@ function rusherHealthMult(level) { return 0.5 * droneShots(level) * laserDamageA
 function clusterHealthMult(level) { return droneHealthMult(level); }
 function tankHealthMult(level)     { return 3 * droneHealthMult(level) * DRONE_BASE_HP / 150; }
 function minibossHealthMult(level) { return 8 * droneHealthMult(level) * DRONE_BASE_HP / 600; }
+
+// Level 25+ laser bosses: HP of ten drones, expressed over the boss base HP.
+function lateBossHealthMult(level) { return 10 * droneHealthMult(level) * DRONE_BASE_HP / BOSS_BASE_HP; }
+// …and they move at the same effective speed as that level's drones. The boss
+// base speed (45) is slower than a drone's (80), so the multiplier scales up to
+// match; the spawner still clamps the result to mobSpeedCapForLevel.
+function lateBossSpeedMult(level)  { return speedMultForLevel(level) * DRONE_BASE_SPEED / BOSS_BASE_SPEED; }
 
 // Mob speed: base speed through level 10, then +10 % per level from level 11.
 // (Bumped from +7.5 %: levels 11-19 trade slightly thinner spawn density for
@@ -295,6 +313,37 @@ export function getLevelConfig(levelIndex) {
         ...wave('drone',         BOSS_FILL, { startTime: 5,  interval: 6,  healthMult: droneHealthMult(20),   speedMult }),
         ...wave('rusher',        BOSS_FILL, { startTime: 8,  interval: 18, healthMult: rusherHealthMult(20),  speedMult }),
         ...wave('rusherCluster', BOSS_FILL, { startTime: 12, interval: 14, healthMult: clusterHealthMult(20), speedMult }),
+      ],
+    };
+  }
+
+  // ── Levels 25+ — escalating laser-boss assault ──────────────────────────
+  // From level 25 on, the level is gated by laser bosses (same type as the
+  // level-15 boss). Each carries ten drones' worth of HP and moves at the
+  // level's drone speed. Level 25 has one boss (spawns 10 s in); every level
+  // after adds one more (2 on 26, 3 on 27, …), each 4 s after the previous.
+  // Companion mobs spawn alongside for the full fight.
+  if (level >= 25) {
+    const numBosses = level - 24;
+    const bosses = [];
+    for (let i = 0; i < numBosses; i++) {
+      bosses.push(...once('boss', 10 + i * 4, {
+        healthMult: lateBossHealthMult(level),
+        speedMult: lateBossSpeedMult(level),
+        capSpeed: true,
+        enableLaser: true,
+        enablePhase2Speed: false,
+      }));
+    }
+    return {
+      duration: null,
+      isBoss: true,
+      waves: [
+        ...bosses,
+        ...wave('drone',         BOSS_FILL, { startTime: 0,  interval: di,       healthMult: droneHealthMult(level),   speedMult }),
+        ...wave('tank',          BOSS_FILL, { startTime: 12, interval: di * 4,   healthMult: tankHealthMult(level),    speedMult }),
+        ...wave('rusher',        BOSS_FILL, { startTime: 5,  interval: di * 2,   healthMult: rusherHealthMult(level),  speedMult }),
+        ...wave('rusherCluster', BOSS_FILL, { startTime: 8,  interval: di * 2.5, healthMult: clusterHealthMult(level), speedMult }),
       ],
     };
   }

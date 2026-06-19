@@ -4,7 +4,7 @@ import { Tank } from '../entities/enemies/tank.js';
 import { Miniboss } from '../entities/enemies/miniboss.js';
 import { Boss } from '../entities/enemies/boss.js';
 import { createRusherCluster } from '../entities/enemies/rusher-cluster.js';
-import { MOB_SPEED_CAP } from '../levels/level-config.js';
+import { mobSpeedCapForLevel } from '../levels/level-config.js';
 
 const FACTORY = {
   drone:         (opts) => new Drone(opts),
@@ -15,17 +15,17 @@ const FACTORY = {
   boss:          (opts) => new Boss(opts),
 };
 
-// North (270°) and South (90°) each get a 15° exclusion zone on both sides.
-// Allowed ranges: [0°,75°) + [105°,255°) + [285°,360°) = 300° total.
+// North (270°) and South (90°) each get a 10° exclusion zone on both sides.
+// Allowed ranges: [0°,80°) + [100°,260°) + [280°,360°) = 320° total.
 function randomSpawnAngle() {
-  const r = Math.random() * 300;
+  const r = Math.random() * 320;
   let deg;
-  if (r < 75) {
+  if (r < 80) {
     deg = r;
-  } else if (r < 225) {
-    deg = r + 30; // skip south exclusion [75°,105°]
+  } else if (r < 240) {
+    deg = r + 20; // skip south exclusion [80°,100°]
   } else {
-    deg = r + 60; // skip south [75°-105°] and north [255°-285°]
+    deg = r + 40; // skip south [80°-100°] and north [260°-280°]
   }
   return deg * (Math.PI / 180);
 }
@@ -85,9 +85,14 @@ export class Spawner {
     if (!factory) return null;
     const spawnPos = this._randomCirclePosition();
     // Speed is fully defined by the level config's per-level speedMult. Every
-    // enemy except the boss is held to the absolute MOB_SPEED_CAP (92.5 % of the
-    // player's max speed); bosses use authored speeds and manage their own pace.
-    const speedCap = entry.type === 'boss' ? Infinity : MOB_SPEED_CAP;
+    // enemy except the boss is held to the per-level mob speed cap (92.5 % of the
+    // player's max speed, ramping to 96.5 % across levels 21-24). Bosses use
+    // authored speeds and manage their own pace, unless the entry opts into the
+    // mob cap (capSpeed) so it matches the level's enemies.
+    const levelCap = mobSpeedCapForLevel(this._levelNumber);
+    const speedCap = entry.type === 'boss'
+      ? (entry.capSpeed ? levelCap : Infinity)
+      : levelCap;
     return factory({
       wx: spawnPos.x,
       wy: spawnPos.y,

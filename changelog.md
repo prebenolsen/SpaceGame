@@ -1,5 +1,12 @@
 # Changelog
 
+## 6.3
+- **Speed cap now ramps late-game** (`src/levels/level-config.js`, `src/systems/spawner.js`): the enemy speed cap stays at 92.5 % of the player's max speed through level 20, then climbs +1 %/level across levels 21–24, holding at 96.5 % from level 24 on (`mobSpeedCapForLevel`). The spawner reads the cap per level instead of a fixed constant.
+- **Endless boss assault from level 25** (`src/levels/level-config.js`, `src/systems/spawner.js`): levels 25+ are now boss-gated. They field laser bosses of the same type as the level-15 boss, each with the HP of **ten drones** and moving at that level's drone speed (capped like the mobs). Level 25 has **one** boss (spawns 10 s in); every level after adds one more (**2 on 26, 3 on 27**, …), each spawning 4 s after the previous. Companion drone/tank/rusher/cluster waves spawn throughout. Bosses can now opt into the mob speed cap via a new `capSpeed` entry flag.
+
+## 6.2
+- **Narrower spawn exclusion zones** (`src/systems/spawner.js`): the no-spawn wedges around due north (270°) and due south (90°) shrank from 15° to 10° on each side. Enemies can now appear closer to top and bottom of the screen, but still never spawn directly north or south. Allowed arc grew from 300° to 320°.
+
 ## 6.1
 - **Boss & level tuning** (`src/levels/level-config.js`, `src/entities/enemies/boss.js`, `src/systems/spawner.js`):
   - **Level 5 boss:** companion adds now spawn twice as often (drone interval 8→4 s, rusher 12→6 s).

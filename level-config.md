@@ -94,10 +94,12 @@ per-level numbers** — this section only summarises the mechanics.
   `clusterHealthMult` (= a drone), `tankHealthMult` (×3), `minibossHealthMult` (×8),
   `bossHealthMult`.
 - **Speed:** `speedMultForLevel(level)` = 1.0 through level 10, then `1.10^(level−10)`
-  (+10 %/level). Mobs are capped at `MOB_SPEED_CAP = 407 px/s` (92.5 % of the 440 px/s
-  player max) in the spawner; the cap applies to every enemy except bosses (minibosses
-  included). Minibosses use `minibossSpeedMult()` to match drone speed; bosses are
-  uncapped (authored speeds).
+  (+10 %/level). Mobs are capped at `mobSpeedCapForLevel(level)` — 92.5 % of the 440 px/s
+  player max (407 px/s) through level 20, ramping +1 %/level over L21–24 up to 96.5 %
+  (424.6 px/s) and holding there. The cap applies to every enemy except bosses
+  (minibosses included). Minibosses use `minibossSpeedMult()` to match drone speed;
+  bosses are uncapped (authored speeds) — except the level-25+ laser bosses, which opt
+  into the mob cap via the `capSpeed` entry flag.
 - **Spawn rate:** `spawnFreqForLevel(level)` = 1.0 through level 11, then
   `2^((level−11)/12)` so spawns double from L11 to ~L23 (gentler than before;
   continuing past). The drone interval is `1.2 / freq` (floored at 0.30 s);
@@ -132,7 +134,7 @@ helpers above. For a 1-based `level`:
   + rusherClusters (`di × 2.5`); odd levels add 1 miniboss at t=15 (matches drone speed
   via `minibossSpeedMult(speedMultForLevel(level))`)
 - All mobs use `speedMultForLevel(level)`; health from the per-type helpers
-- Boss levels exist **only at 15 and 20**; from level 21 on there are no more bosses
+- Boss levels: **15**, **20**, and **every level from 25 on** (see below)
 - Level 21+: drones are a flat 4 shots (1200 HP); difficulty rises via speed + density
 
 ### Level 15 boss (special case)
@@ -158,10 +160,29 @@ the second spawns 2.5 s after the first to stagger their laser cycles.
   phase 2 ×1.5; fires its laser **50 % more often** (`laserRateMult: 1.5` → interval
   5 s → ~3.33 s)
 
+### Levels 25+ (endless boss assault)
+
+From level 25 every level is boss-gated (`isBoss: true`, no timer — clear all bosses
+to advance). The bosses are the same type as the level-15 boss (laser enabled) but
+tuned for the endless game:
+
+- **Boss count:** `level − 24` — **1 on L25, 2 on L26, 3 on L27**, … each one more
+  than the last
+- **Spawn timing:** first at **t = 10 s**, then **+4 s** per boss (10 s, 14 s, 18 s, …)
+- **Each boss:** HP of **ten drones** (`lateBossHealthMult` = `10 × droneHP / 1500`;
+  8.0 → 12 000 HP at L25), speed matched to the level's drones (`lateBossSpeedMult`,
+  `capSpeed: true` so it honors `mobSpeedCapForLevel`), laser enabled, phase-2 speed
+  **off** (stays in lockstep with the mobs)
+- **Companions:** full drone (`di`) + tank (`di × 4`) + rusher (`di × 2`) +
+  rusherCluster (`di × 2.5`) waves for the whole fight (`BOSS_FILL` duration)
+
 ## Speed cap
 
-The spawner clamps every enemy's effective speed to `MOB_SPEED_CAP` (407 px/s = 92.5 % of
-the 440 px/s player max) via the `speedCap` parameter on `BaseEnemy`. Only bosses pass
-`speedCap = Infinity` (they use authored speeds); minibosses are now subject to the cap.
-Drone and rusher constructors also carry a secondary 484 px/s hard cap, which the
-407 px/s enemy cap sits below.
+The spawner clamps every enemy's effective speed to `mobSpeedCapForLevel(level)` via the
+`speedCap` parameter on `BaseEnemy`. The cap is **92.5 %** of the 440 px/s player max
+(407 px/s) through level 20, then ramps **+1 %/level over L21–24** to **96.5 %**
+(424.6 px/s) and holds there. Most bosses pass `speedCap = Infinity` (they use authored
+speeds); the level-25+ laser bosses instead opt into the per-level cap via the `capSpeed`
+entry flag, so they match the level's mobs. Minibosses are subject to the cap. Drone and
+rusher constructors also carry a secondary 484 px/s hard cap, which the enemy cap sits
+below.
