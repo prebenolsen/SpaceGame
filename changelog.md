@@ -1,5 +1,9 @@
 # Changelog
 
+## 6.6
+- **Levels 25+ are no longer boss levels** (`src/levels/level-config.js`): they still field the escalating laser-boss assault (one boss on 25, two on 26, three on 27, …, plus companion mobs), but now run as **regular 60-second timed levels** (`duration: 60`, `isBoss: false`) instead of `null`-timer "kill the boss to advance" levels. The HUD timer advances the level. Boss levels remain only at 5, 10, 15, and 20.
+- **Speed cap lowered 1 %** (`src/levels/level-config.js`): the enemy speed cap is now a flat **92.5 %** of the player's max speed across all levels. Previously it stepped up +1 % to a 93.5 % end cap from level 21; that late-game cap was lowered by 1 % back to the 92.5 % base (`mobSpeedCapPct` returns 0.925 for every level).
+
 ## 6.5
 - **Speed cap end point lowered to 93.5 %** (`src/levels/level-config.js`, `src/systems/spawner.js`): the enemy speed cap now stays at 92.5 % of the player's max speed through level 20, then takes a single +1 % step to **93.5 %** (`440 × 0.935 = 411.4 px/s`) at level 21 and holds there as the end cap for all later levels. Previously it ramped +1 %/level across levels 21–24 up to 96.5 %.
 

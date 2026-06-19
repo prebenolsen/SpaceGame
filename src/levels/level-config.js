@@ -58,12 +58,11 @@ const BOSS_BASE_HP   = 1500;
 const PLAYER_MAX_SPEED = 440;                    // maxed moveSpeed: 200 × (1 + 6×0.2)
 export const MOB_SPEED_CAP = PLAYER_MAX_SPEED * 0.925; // 407 px/s — base enemy speed ceiling (92.5 % of player max)
 
-// Enemy speed cap as a fraction of the player's max speed. Flat 92.5 % through
-// level 20, then a single +1 % step to 93.5 % at level 21, holding there for all
-// later levels (93.5 % is the end cap).
+// Enemy speed cap as a fraction of the player's max speed: a flat 92.5 % across
+// all levels. (Previously stepped up +1 % to a 93.5 % end cap from level 21;
+// that late-game cap was lowered by 1 % back down to the 92.5 % base.)
 export function mobSpeedCapPct(level) {
-  if (level <= 20) return 0.925;
-  return 0.935;
+  return 0.925;
 }
 export function mobSpeedCapForLevel(level) {
   return PLAYER_MAX_SPEED * mobSpeedCapPct(level);
@@ -319,11 +318,12 @@ export function getLevelConfig(levelIndex) {
   }
 
   // ── Levels 25+ — escalating laser-boss assault ──────────────────────────
-  // From level 25 on, the level is gated by laser bosses (same type as the
+  // From level 25 on, the level fields laser bosses (same type as the
   // level-15 boss). Each carries ten drones' worth of HP and moves at the
   // level's drone speed. Level 25 has one boss (spawns 10 s in); every level
   // after adds one more (2 on 26, 3 on 27, …), each 4 s after the previous.
-  // Companion mobs spawn alongside for the full fight.
+  // Companion mobs spawn alongside. These are NOT boss levels: they run as
+  // regular 60 s timed levels (the timer advances them, not killing a boss).
   if (level >= 25) {
     const numBosses = level - 24;
     const bosses = [];
@@ -337,8 +337,8 @@ export function getLevelConfig(levelIndex) {
       }));
     }
     return {
-      duration: null,
-      isBoss: true,
+      duration: 60,
+      isBoss: false,
       waves: [
         ...bosses,
         ...wave('drone',         BOSS_FILL, { startTime: 0,  interval: di,       healthMult: droneHealthMult(level),   speedMult }),

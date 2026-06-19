@@ -85,8 +85,8 @@ export class Spawner {
     if (!factory) return null;
     const spawnPos = this._randomCirclePosition();
     // Speed is fully defined by the level config's per-level speedMult. Every
-    // enemy except the boss is held to the per-level mob speed cap (92.5 % of the
-    // player's max speed, stepping to a 93.5 % end cap from level 21 on). Bosses use
+    // enemy except the boss is held to the per-level mob speed cap (a flat 92.5 %
+    // of the player's max speed across all levels). Bosses use
     // authored speeds and manage their own pace, unless the entry opts into the
     // mob cap (capSpeed) so it matches the level's enemies.
     const levelCap = mobSpeedCapForLevel(this._levelNumber);
