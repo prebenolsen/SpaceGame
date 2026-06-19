@@ -95,8 +95,8 @@ per-level numbers** — this section only summarises the mechanics.
   `bossHealthMult`.
 - **Speed:** `speedMultForLevel(level)` = 1.0 through level 10, then `1.10^(level−10)`
   (+10 %/level). Mobs are capped at `mobSpeedCapForLevel(level)` — 92.5 % of the 440 px/s
-  player max (407 px/s) through level 20, ramping +1 %/level over L21–24 up to 96.5 %
-  (424.6 px/s) and holding there. The cap applies to every enemy except bosses
+  player max (407 px/s) through level 20, stepping to a 93.5 % end cap (411.4 px/s)
+  at level 21 and holding there. The cap applies to every enemy except bosses
   (minibosses included). Minibosses use `minibossSpeedMult()` to match drone speed;
   bosses are uncapped (authored speeds) — except the level-25+ laser bosses, which opt
   into the mob cap via the `capSpeed` entry flag.
@@ -180,8 +180,8 @@ tuned for the endless game:
 
 The spawner clamps every enemy's effective speed to `mobSpeedCapForLevel(level)` via the
 `speedCap` parameter on `BaseEnemy`. The cap is **92.5 %** of the 440 px/s player max
-(407 px/s) through level 20, then ramps **+1 %/level over L21–24** to **96.5 %**
-(424.6 px/s) and holds there. Most bosses pass `speedCap = Infinity` (they use authored
+(407 px/s) through level 20, then steps **+1 % to a 93.5 % end cap** (411.4 px/s)
+at level 21 and holds there. Most bosses pass `speedCap = Infinity` (they use authored
 speeds); the level-25+ laser bosses instead opt into the per-level cap via the `capSpeed`
 entry flag, so they match the level's mobs. Minibosses are subject to the cap. Drone and
 rusher constructors also carry a secondary 484 px/s hard cap, which the enemy cap sits

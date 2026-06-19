@@ -59,10 +59,11 @@ const PLAYER_MAX_SPEED = 440;                    // maxed moveSpeed: 200 × (1 +
 export const MOB_SPEED_CAP = PLAYER_MAX_SPEED * 0.925; // 407 px/s — base enemy speed ceiling (92.5 % of player max)
 
 // Enemy speed cap as a fraction of the player's max speed. Flat 92.5 % through
-// level 20, then +1 %/level across levels 21-24, holding at 96.5 % from L24 on.
+// level 20, then a single +1 % step to 93.5 % at level 21, holding there for all
+// later levels (93.5 % is the end cap).
 export function mobSpeedCapPct(level) {
   if (level <= 20) return 0.925;
-  return Math.min(0.965, 0.925 + 0.01 * (level - 20));
+  return 0.935;
 }
 export function mobSpeedCapForLevel(level) {
   return PLAYER_MAX_SPEED * mobSpeedCapPct(level);

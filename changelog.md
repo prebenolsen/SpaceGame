@@ -1,5 +1,8 @@
 # Changelog
 
+## 6.5
+- **Speed cap end point lowered to 93.5 %** (`src/levels/level-config.js`, `src/systems/spawner.js`): the enemy speed cap now stays at 92.5 % of the player's max speed through level 20, then takes a single +1 % step to **93.5 %** (`440 × 0.935 = 411.4 px/s`) at level 21 and holds there as the end cap for all later levels. Previously it ramped +1 %/level across levels 21–24 up to 96.5 %.
+
 ## 6.4
 - **Godmode level range extended to 1–30** (`src/core/game.js`, `src/ui/level-select.js`): the godmode level picker now offers levels 1 through 30 instead of 1 through 21. Levels beyond the defined set already auto-scale (endless boss assault from level 25), so the higher starting levels are fully playable.
 
