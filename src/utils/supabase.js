@@ -1,7 +1,7 @@
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from '../config.js';
 import { VERSION } from '../version.js';
 
-const TABLE = 'highscores';
+const TABLE = 'spacegame_highscores';
 
 function ready() {
   return !!(SUPABASE_URL && SUPABASE_ANON_KEY);

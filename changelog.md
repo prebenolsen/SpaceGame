@@ -1,5 +1,8 @@
 # Changelog
 
+## 6.7
+- **Supabase tables now use the `spacegame_` prefix** (`src/utils/supabase.js`, `supabase.md`): the highscores table was renamed `highscores` → `spacegame_highscores` and the query constant `TABLE` updated to match. Setup docs, the verification step, and a new v6.7 schema-migration row (with the `RENAME TO` SQL) reflect the change. Documented that RLS is enabled by default on all tables, so the `insert scores` / `read scores` anon policies remain required for the scoreboard to read and submissions to write.
+
 ## 6.6
 - **Levels 25+ are no longer boss levels** (`src/levels/level-config.js`): they still field the escalating laser-boss assault (one boss on 25, two on 26, three on 27, …, plus companion mobs), but now run as **regular 60-second timed levels** (`duration: 60`, `isBoss: false`) instead of `null`-timer "kill the boss to advance" levels. The HUD timer advances the level. Boss levels remain only at 5, 10, 15, and 20.
 - **Speed cap lowered 1 %** (`src/levels/level-config.js`): the enemy speed cap is now a flat **92.5 %** of the player's max speed across all levels. Previously it stepped up +1 % to a 93.5 % end cap from level 21; that late-game cap was lowered by 1 % back to the 92.5 % base (`mobSpeedCapPct` returns 0.925 for every level).
