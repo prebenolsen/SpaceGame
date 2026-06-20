@@ -1,5 +1,8 @@
 # Changelog
 
+## 6.8
+- **Fixed blank/black screen after Supabase project migration** (`.github/workflows/deploy.yml`): the deploy step that injects `src/config.js` now strips all whitespace (including CR/LF) from the `SUPABASE_URL` and `SUPABASE_ANON_KEY` secrets before writing them. A trailing newline pasted into a GitHub secret was being embedded *inside* the JS string literal (`export const SUPABASE_URL = "https://….supabase.co\n";`), which is a syntax error — that broke `config.js`, and since the whole game is one ES-module graph rooted at it, nothing loaded and the page rendered black. Trimming the values makes the deploy resilient to how secrets are pasted.
+
 ## 6.7
 - **Supabase tables now use the `spacegame_` prefix** (`src/utils/supabase.js`, `supabase.md`): the highscores table was renamed `highscores` → `spacegame_highscores` and the query constant `TABLE` updated to match. Setup docs, the verification step, and a new v6.7 schema-migration row (with the `RENAME TO` SQL) reflect the change. Documented that RLS is enabled by default on all tables, so the `insert scores` / `read scores` anon policies remain required for the scoreboard to read and submissions to write.
 

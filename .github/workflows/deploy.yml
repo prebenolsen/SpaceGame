@@ -30,8 +30,13 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
+          # Strip any stray CR/LF/whitespace from the secrets — a trailing
+          # newline pasted into a secret would otherwise land inside the JS
+          # string literal, producing a syntax error that blanks the whole app.
+          URL=$(printf '%s' "$SUPABASE_URL" | tr -d '[:space:]')
+          KEY=$(printf '%s' "$SUPABASE_ANON_KEY" | tr -d '[:space:]')
           printf 'export const SUPABASE_URL = "%s";\nexport const SUPABASE_ANON_KEY = "%s";\n' \
-            "$SUPABASE_URL" "$SUPABASE_ANON_KEY" > src/config.js
+            "$URL" "$KEY" > src/config.js
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
