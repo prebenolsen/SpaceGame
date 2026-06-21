@@ -52,26 +52,30 @@ drone **40**, rusher **12**, tank **150**, miniboss **600**, boss **1500**.
 | 3  | 1.25 | 75  | 93.75 | 2.344  | 80    | 3.0 |
 | 4  | 1.35 | 100 | 135   | 3.375  | 80    | 2.5 |
 | 5  | 1.40 | 100 | 140   | 3.500  | 80    | 8.0 (companion) |
-| 6  | 1.50 | 125 | 187.5 | 4.688  | 80    | 2.5 |
-| 7  | 1.75 | 150 | 262.5 | 6.563  | 80    | 2.0 |
-| 8  | 2.00 | 150 | 300   | 7.500  | 80    | 1.8 |
-| 9  | 2.00 | 175 | 350   | 8.750  | 80    | 1.5 |
-| 10 | 2.00 | 175 | 350   | 8.750  | 80    | 6.0 (companion) |
-| 11 | 2.20 | 200 | 440   | 11.000 | 88.0  | 1.20 |
-| 12 | 2.40 | 225 | 540   | 13.500 | 96.8  | 1.13 |
-| 13 | 2.60 | 225 | 585   | 14.625 | 106.5 | 1.07 |
-| 14 | 2.80 | 250 | 700   | 17.500 | 117.1 | 1.01 |
-| 15 | 3.00 | 250 | 750   | 18.750 | 128.8 | 6.0 (companion) |
-| 16 | 3.00 | 300 | 900   | 22.500 | 141.7 | 0.90 |
-| 17 | 3.25 | 300 | 975   | 24.375 | 155.9 | 0.85 |
-| 18 | 3.50 | 300 | 1050  | 26.250 | 171.5 | 0.80 |
-| 19 | 3.75 | 300 | 1125  | 28.125 | 188.6 | 0.76 |
-| 20 | 4.00 | 300 | 1200 | 30.000 | 207.5 | 6.0 (companion) |
-| 21+ | 4.00 | 300 | 1200 | 30.000 | 228.2 → cap | 0.67 → floor 0.30 |
+| 6  | 1.50 | 125 | 187.5 | 4.688  | 140   | 2.5 |
+| 7  | 1.75 | 150 | 262.5 | 6.563  | 154   | 2.0 |
+| 8  | 2.00 | 150 | 300   | 7.500  | 169.4 | 1.8 |
+| 9  | 2.00 | 175 | 350   | 8.750  | 186.3 | 1.5 |
+| 10 | 2.00 | 175 | 350   | 8.750  | 80 (companion) | 6.0 (companion) |
+| 11 | 2.20 | 200 | 440   | 11.000 | 200   | 1.20 |
+| 12 | 2.40 | 225 | 540   | 13.500 | 215   | 1.13 |
+| 13 | 2.60 | 225 | 585   | 14.625 | 231.1 | 1.07 |
+| 14 | 2.80 | 250 | 700   | 17.500 | 248.5 | 1.01 |
+| 15 | 3.00 | 250 | 750   | 18.750 | 267.1 | 6.0 (companion) |
+| 16 | 3.00 | 300 | 900   | 22.500 | 287.1 | 0.90 |
+| 17 | 3.25 | 300 | 975   | 24.375 | 308.7 | 0.85 |
+| 18 | 3.50 | 300 | 1050  | 26.250 | 331.8 | 0.80 |
+| 19 | 3.75 | 300 | 1125  | 28.125 | 356.7 | 0.76 |
+| 20 | 4.00 | 300 | 1200 | 30.000 | 383.4 | 6.0 (companion) |
+| 21+ | 4.00 | 300 | 1200 | 30.000 | **407 (cap)** | 0.67 → floor 0.30 |
 
-From level 21 on, drones are a flat **4 shots / 1200 HP**. Speed keeps climbing
-(see below) and cadence keeps tightening, so endless levels harden via *speed and
-density*, not HP.
+Drone speed is **hand-authored** now (not a uniform `speedMult`): base 80 through
+level 5, a jump to 140 on level 6 then +10 %/level through level 9, base again on
+the level-10 boss level, then 200 at level 11 and +7.5 %/level — hitting the
+**407 px/s** mob cap at **level 21**.
+
+From level 21 on, drones are a flat **4 shots / 1200 HP**, pinned at the speed
+cap, so endless levels harden via *density* (tightening cadence), not HP or speed.
 
 ## Bosses
 
@@ -82,12 +86,14 @@ where disabled.
 | Lvl | Shots | dmg | Boss HP | healthMult | Speed (px/s) | Notes |
 |----:|------:|----:|--------:|-----------:|-------------:|-------|
 | 5  | 25 | 100 | 2 500  | 1.667 | 54 (×1.2)  | drone + rusher companions (adds spawn 2× as often) |
-| 10 | 50 | 175 | **17 500** (×2) | 11.667 | 90 (×2.0)  | laser; phase-2 speed off |
-| 15 | 60 | 250 | **60 000** (×4) | 40.000 | 112.5 (×2.5) | laser; drone/rusher/cluster companions |
+| 10 | 50 | 175 | **26 250** (×2×1.5) | 17.500 | 210  | laser; phase-2 speed off; +50 % HP |
+| 15 | 60 | 250 | **75 000** (×4×1.25) | 50.000 | 275 | laser; drone/rusher/cluster companions; +25 % HP |
 | 20 | 60 | 300 | **54 000** (×3) | 36.000 | 112.5 (×2.5) | **two** laser bosses, offset 2.5 s; laser fires 50 % more often (`laserRateMult 1.5`); drone/rusher/cluster companions (L10 cadence) |
 
-The L10/L15/L20 boss HP multipliers (×2/×4/×3) are applied on top of the
-shots-derived `bossHealthMult` in the level config.
+The L10/L15/L20 boss HP multipliers (×3/×5/×3) are applied on top of the
+shots-derived `bossHealthMult` in the level config. The L10 (×2 then +50 %) and
+L15 (×4 then +25 %) bosses also use **authored absolute speeds** (210 / 275 px/s,
+written as `210 / BOSS_BASE_SPEED` etc.) rather than a round multiplier.
 
 ### Levels 25+ — endless laser-boss assault
 
@@ -101,7 +107,7 @@ differently:
   previous (10 s, 14 s, 18 s, …).
 - **HP:** ten drones' worth — `healthMult = 10 × droneHP / 1500` (`lateBossHealthMult`).
   At L25 that's `10 × 1200 / 1500 = 8.0` (12 000 HP).
-- **Speed:** matched to the level's drones — `speedMult = speedMultForLevel × 80/45`
+- **Speed:** matched to the level's drones — `speedMult = droneSpeedForLevel / 45`
   (`lateBossSpeedMult`), and unlike other bosses these **honor the mob speed cap**
   (`capSpeed` flag → `mobSpeedCapForLevel`). Phase-2 speed boost is disabled so the
   boss stays in lockstep with the mobs.
@@ -137,19 +143,29 @@ field rusher + cluster waves; odd levels field a single miniboss instead.
 
 ## Speed rule
 
-- **Levels 1–10:** mobs move at **base speed** (speedMult 1.0) — *except* the
-  handcrafted levels 6–9, whose adds get an explicit boost (L6 ×1.10, L7 ×1.15,
-  L8 ×1.20, L9 ×1.25).
-- **Levels 11+:** speed grows **+10 % per level** — `speedMult = 1.10^(level − 10)`
-  (bumped from +7.5 % to compensate for slightly thinner spawn density on L11–19).
+Mob speed is **authored as absolute px/s** per type (`droneSpeedForLevel` /
+`rusherSpeedForLevel`), then converted to a per-type `speedMult` over each entity's
+base speed. Drones and rushers carry **independent** curves:
+
+| Band | Drone | Rusher |
+|------|-------|--------|
+| **Levels 1–5** | base 80 | base 110 |
+| **Level 6** | 140 | 150 |
+| **Levels 7–9** | +10 %/level (154 → 169.4 → 186.3) | +10 %/level (165 → 181.5 → 199.7) |
+| **Level 10** | base 80 (boss companions) | base 110 (boss companions) |
+| **Level 11** | hard-set 200 | hard-set 215 |
+| **Levels 12+** | +7.5 %/level until cap | +7.5 %/level until cap |
+
 - **Cap:** effective speed is capped at a flat **92.5 %** of the player's max speed
-  (`mobSpeedCapForLevel` — `440 × 0.925 = 407 px/s`) across all levels
-  (`mobSpeedCapPct` returns 0.925 for every level). The cap applies to **every
-  enemy except bosses** (minibosses included).
-- Minibosses now keep pace with the level's drones via `minibossSpeedMult()` (was a
-  flat speedMult 0.5). Bosses use authored speeds (table above) and are uncapped —
-  **except** the level-25+ laser bosses, which opt into the mob cap (`capSpeed`) so
-  they match the level's enemies.
+  (`mobSpeedCapForLevel` — `440 × 0.925 = 407 px/s`) across all levels. Drones reach
+  it at **level 21**, rushers at **level 20**. The cap applies to **every enemy
+  except bosses** (minibosses included).
+- **Roster sync:** clusters ride the **rusher** curve (`clusterSpeedMult`); tanks
+  keep their deliberate **½-drone** pace (`tankSpeedMult = droneSpeedMult`, base 40);
+  minibosses **match the drones** (`minibossSpeedMult`).
+- Bosses use authored speeds (table above) and are uncapped — **except** the
+  level-25+ laser bosses, which opt into the mob cap (`capSpeed`) and match the
+  level's drone speed (`lateBossSpeedMult = droneSpeedForLevel / BOSS_BASE_SPEED`).
 
 ## Spawn-rate rule
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## 6.9
+- **Reworked early/mid enemy speed curve** (`src/levels/level-config.js`, `enemy_scaling.md`, `level-config.md`): mob speed is now authored as **absolute px/s** per type instead of one uniform multiplier. Levels 1–5 are unchanged (drone 80 / rusher 110). From level 6 the early band is hand-authored — **drones 140, rushers 150**, then **+10 %/level** through level 9 (drone 186.3 / rusher 199.7). Level 10's companions stay at base speed (boss level). Level 11 **hard-resets to drone 200 / rusher 215**, then both grow **+7.5 %/level** until they hit the mob speed cap (407 px/s) — drones cap at L21, rushers at L20. New helpers `droneSpeedForLevel`/`rusherSpeedForLevel` and per-type `*SpeedMult(level)` replace `speedMultForLevel`; clusters ride the rusher curve, tanks keep their half-drone pace, minibosses match the drones, and the L25+ laser boss now matches the drone speed via the same source.
+- **Tougher mid bosses** (`src/levels/level-config.js`): level-10 boss speed **90 → 210** with **+50 % health** (`bossHealthMult(10) × 2 × 1.5` ⇒ 26 250 HP); level-15 boss speed **112.5 → 275** with **+25 % health** (`bossHealthMult(15) × 4 × 1.25` ⇒ 75 000 HP).
+
 ## 6.8
 - **Fixed blank/black screen after Supabase project migration** (`.github/workflows/deploy.yml`): the deploy step that injects `src/config.js` now strips all whitespace (including CR/LF) from the `SUPABASE_URL` and `SUPABASE_ANON_KEY` secrets before writing them. A trailing newline pasted into a GitHub secret was being embedded *inside* the JS string literal (`export const SUPABASE_URL = "https://….supabase.co\n";`), which is a syntax error — that broke `config.js`, and since the whole game is one ES-module graph rooted at it, nothing loaded and the page rendered black. Trimming the values makes the deploy resilient to how secrets are pasted.
 
