@@ -1,5 +1,8 @@
 # Changelog
 
+## 6.10
+- **Tougher level-5 boss** (`src/levels/level-config.js`, `enemy_scaling.md`, `level-config.md`): the first boss's health is **doubled, 2500 → 5000 HP** (`bossHealthMult(5) × 2`). Effective shots-to-kill rises from 25 to **50** against the assumed entering-L5 damage (100/shot); time-to-kill at the modeled L5 DPS (200) goes 12.5 s → 25 s. Speed unchanged.
+
 ## 6.9
 - **Reworked early/mid enemy speed curve** (`src/levels/level-config.js`, `enemy_scaling.md`, `level-config.md`): mob speed is now authored as **absolute px/s** per type instead of one uniform multiplier. Levels 1–5 are unchanged (drone 80 / rusher 110). From level 6 the early band is hand-authored — **drones 140, rushers 150**, then **+10 %/level** through level 9 (drone 186.3 / rusher 199.7). Level 10's companions stay at base speed (boss level). Level 11 **hard-resets to drone 200 / rusher 215**, then both grow **+7.5 %/level** until they hit the mob speed cap (407 px/s) — drones cap at L21, rushers at L20. New helpers `droneSpeedForLevel`/`rusherSpeedForLevel` and per-type `*SpeedMult(level)` replace `speedMultForLevel`; clusters ride the rusher curve, tanks keep their half-drone pace, minibosses match the drones, and the L25+ laser boss now matches the drone speed via the same source.
 - **Tougher mid bosses** (`src/levels/level-config.js`): level-10 boss speed **90 → 210** with **+50 % health** (`bossHealthMult(10) × 2 × 1.5` ⇒ 26 250 HP); level-15 boss speed **112.5 → 275** with **+25 % health** (`bossHealthMult(15) × 4 × 1.25` ⇒ 75 000 HP).

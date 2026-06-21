@@ -122,7 +122,7 @@ companions stay at base speed (boss level). See `enemy_scaling.md` for exact HP 
 | 2 | 25 s | — | Drones (interval 4 s) + rushers from t=5 (interval 15 s) |
 | 3 | 40 s | — | Drones (interval 3 s) + rushers (interval 8 s) |
 | 4 | 40 s | — | Drones (interval 2.5 s) + rushers (interval 5.5 s) + tanks (interval 20 s) |
-| 5 | ∞ | Boss | Boss (**25 shots**, speedMult 1.2) + drone (interval **4 s**) + rusher (interval **6 s**) companions — adds spawn twice as often |
+| 5 | ∞ | Boss | Boss (**50 shots** ⇒ 5000 HP, `bossHealthMult(5) × 2`, speedMult 1.2) + drone (interval **4 s**) + rusher (interval **6 s**) companions — adds spawn twice as often |
 | 6 | 45 s | — | Drones (interval 2.5 s, **140 px/s**) + **rusherClusters** (interval 5.5 s, **150 px/s**) + tanks (interval 20 s, 70 px/s) |
 | 7 | 45 s | — | Drones (interval 2 s, **154 px/s**) + tanks (interval 14 s) + 1 miniboss at t=10 (matches drone speed) |
 | 8 | 45 s | — | Drones (interval 1.8 s, **169.4 px/s**) + rushers (interval 12 s, **181.5 px/s**) + **rusherClusters** (interval 12 s, t=18) + tanks (interval 12 s) |

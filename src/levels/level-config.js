@@ -217,12 +217,12 @@ export const LEVELS = [
     ],
   },
 
-  // ── Level 5 — Boss (25 shots) ────────────────────────────────────────────────
+  // ── Level 5 — Boss (50 shots: bossHealthMult(5) × 2 ⇒ 5000 HP) ───────────────
   {
     duration: null,
     isBoss: true,
     waves: [
-      ...once('boss', 3, { healthMult: bossHealthMult(5), speedMult: 1.2 }),
+      ...once('boss', 3, { healthMult: bossHealthMult(5) * 2, speedMult: 1.2 }),
       // Adds spawn twice as often as before (drone interval 8→4, rusher 12→6).
       ...wave('drone',  BOSS_FILL, { startTime: 10, interval: 4, healthMult: droneHealthMult(5) }),
       ...wave('rusher', BOSS_FILL, { startTime: 0,  interval: 6, healthMult: rusherHealthMult(5) }),
