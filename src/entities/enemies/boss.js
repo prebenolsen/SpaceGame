@@ -14,6 +14,7 @@ export class Boss extends BaseEnemy {
     this._phase = 1;
 
     this._phase2SpeedEnabled = opts.enablePhase2Speed ?? true;
+    this._phase2SpeedMult    = opts.phase2SpeedMult ?? 1.5;
     this._laserEnabled    = opts.enableLaser ?? false;
     // laserRateMult > 1 fires more often (shorter interval); default 1.
     this._laserInterval   = LASER_INTERVAL / (opts.laserRateMult ?? 1);
@@ -38,7 +39,7 @@ export class Boss extends BaseEnemy {
   update(dt, camera) {
     if (this._phase2SpeedEnabled && this.hp <= this.maxHp * 0.5 && this._phase === 1) {
       this._phase = 2;
-      this.speed *= 1.5;
+      this.speed *= this._phase2SpeedMult;
     }
 
     if (this._laserEnabled) {

@@ -148,8 +148,8 @@ helpers above. For a 1-based `level`:
 
 Mirrors level 10: laser attack, companion waves of drones + rushers + rusherClusters.
 
-- **Boss:** 60 shots × **4 HP × 1.25** → 75 000 HP (healthMult 50.0), **275 px/s**
-  (`275 / BOSS_BASE_SPEED`), laser enabled; phase 2 (below 50 % HP) ×1.5 speed; +25 % HP
+- **Boss:** 60 shots × **4 HP** → 60 000 HP (healthMult 40.0), **275 px/s**
+  (`275 / BOSS_BASE_SPEED`), laser enabled; phase 2 (below 50 % HP) ×1.3 speed (`phase2SpeedMult: 1.3`)
 - Companions use `droneHealthMult(15)` / `rusherHealthMult(15)` / `clusterHealthMult(15)`
   at their per-type speedMults (drone 267.1 / rusher 287.1 px/s)
 

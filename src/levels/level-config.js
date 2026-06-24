@@ -314,7 +314,7 @@ export function getLevelConfig(levelIndex) {
       duration: null,
       isBoss: true,
       waves: [
-        ...once('boss', 3, { healthMult: bossHealthMult(15) * 4 * 1.25, speedMult: 275 / BOSS_BASE_SPEED, enableLaser: true }),
+        ...once('boss', 3, { healthMult: bossHealthMult(15) * 4, speedMult: 275 / BOSS_BASE_SPEED, enableLaser: true, phase2SpeedMult: 1.3 }),
         ...wave('drone',         BOSS_FILL, { startTime: 5,  interval: 6,  healthMult: droneHealthMult(15),   speedMult: droneSM }),
         ...wave('rusher',        BOSS_FILL, { startTime: 8,  interval: 18, healthMult: rusherHealthMult(15),  speedMult: rusherSM }),
         ...wave('rusherCluster', BOSS_FILL, { startTime: 12, interval: 14, healthMult: clusterHealthMult(15), speedMult: clusterSM }),

@@ -1,5 +1,8 @@
 # Changelog
 
+## 6.10 additionals
+- **Level-15 boss tuning** (`src/levels/level-config.js`, `src/entities/enemies/boss.js`, `enemy_scaling.md`, `level-config.md`): the boss's health is lowered **75 000 → 60 000 HP** (`bossHealthMult(15) × 4`, dropping the previous `× 1.25` modifier). Its phase-2 speed boost (triggered at half HP) is reduced **1.5× → 1.3×**. The phase-2 multiplier is now per-boss configurable via a new `phase2SpeedMult` spawn option (default 1.5, unchanged for all other bosses); the level-15 boss passes `phase2SpeedMult: 1.3`.
+
 ## 6.10
 - **Tougher level-5 boss** (`src/levels/level-config.js`, `enemy_scaling.md`, `level-config.md`): the first boss's health is **doubled, 2500 → 5000 HP** (`bossHealthMult(5) × 2`). Effective shots-to-kill rises from 25 to **50** against the assumed entering-L5 damage (100/shot); time-to-kill at the modeled L5 DPS (200) goes 12.5 s → 25 s. Speed unchanged.
 

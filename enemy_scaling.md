@@ -80,19 +80,19 @@ cap, so endless levels harden via *density* (tightening cadence), not HP or spee
 ## Bosses
 
 `healthMult = bossHP / 1500`. Boss speed is **authored** (bosses are not "mobs",
-so the +7.5 %/level rule does not apply); phase-2 adds ×1.5 below 50 % HP except
-where disabled.
+so the +7.5 %/level rule does not apply); phase-2 adds ×1.5 below 50 % HP by
+default (the level-15 boss uses ×1.3 via `phase2SpeedMult`) except where disabled.
 
 | Lvl | Shots | dmg | Boss HP | healthMult | Speed (px/s) | Notes |
 |----:|------:|----:|--------:|-----------:|-------------:|-------|
 | 5  | 50 | 100 | **5 000** (×2) | 3.333 | 54 (×1.2)  | drone + rusher companions (adds spawn 2× as often); HP doubled (`bossHealthMult(5) × 2`) |
 | 10 | 50 | 175 | **26 250** (×2×1.5) | 17.500 | 210  | laser; phase-2 speed off; +50 % HP |
-| 15 | 60 | 250 | **75 000** (×4×1.25) | 50.000 | 275 | laser; drone/rusher/cluster companions; +25 % HP |
+| 15 | 60 | 250 | **60 000** (×4) | 40.000 | 275 | laser; drone/rusher/cluster companions; phase-2 speed ×1.3 |
 | 20 | 60 | 300 | **54 000** (×3) | 36.000 | 112.5 (×2.5) | **two** laser bosses, offset 2.5 s; laser fires 50 % more often (`laserRateMult 1.5`); drone/rusher/cluster companions (L10 cadence) |
 
-The L5/L10/L15/L20 boss HP multipliers (×2/×3/×5/×3) are applied on top of the
+The L5/L10/L15/L20 boss HP multipliers (×2/×3/×4/×3) are applied on top of the
 shots-derived `bossHealthMult` in the level config. The L10 (×2 then +50 %) and
-L15 (×4 then +25 %) bosses also use **authored absolute speeds** (210 / 275 px/s,
+L15 (×4) bosses also use **authored absolute speeds** (210 / 275 px/s,
 written as `210 / BOSS_BASE_SPEED` etc.) rather than a round multiplier.
 
 ### Levels 25+ — endless laser-boss assault
